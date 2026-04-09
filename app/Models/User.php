@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -46,4 +47,34 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    // Добавь 'role' в $fillable
+
+    /**
+     * Проверка на супер-админа
+     */
+    public function isGod(): bool
+    {
+        return $this->role === 'GOD';
+    }
+
+    /**
+     * Сайты, к которым у пользователя есть доступ
+     */
+    public function sites(): BelongsToMany
+    {
+        return $this->belongsToMany(Site::class, 'site_user')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
+
+    /**
+     * Все индивидуальные права пользователя на виджеты
+     */
+    public function widgetPermissions(): HasMany
+    {
+        return $this->hasMany(WidgetPermission::class);
+    }
+
 }
