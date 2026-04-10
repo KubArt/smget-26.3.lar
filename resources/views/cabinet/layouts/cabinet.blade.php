@@ -44,8 +44,29 @@
 <script src="{{ asset('assets/js/oneui.app.min.js') }}"></script>
 
 @include('cabinet.layouts.partials.messages')
+<script>
+    // Глобальные функции
+    // 1. Делаем функцию глобальной, чтобы onclick её видел
+    window.copyToClipboard = function(elementSelector) {
+        let text = $(elementSelector).text().trim();
 
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => {
+                One.helpers('jq-notify', {type: 'info', icon: 'fa fa-copy', message: 'Код скопирован!'});
+            });
+        } else {
+            // Резервный метод для протоколов без SSL (http)
+            let textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            One.helpers('jq-notify', {type: 'info', icon: 'fa fa-copy', message: 'Код скопирован!'});
+        }
+    };
+</script>
+@stack('js')
 
-@yield('js')
 </body>
 </html>

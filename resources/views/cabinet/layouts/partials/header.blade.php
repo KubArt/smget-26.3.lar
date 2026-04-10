@@ -10,27 +10,47 @@
             <div class="dropdown d-inline-block ms-2">
                 <button type="button" class="btn btn-sm btn-alt-secondary" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-fw fa-bell"></i>
-                    <span class="badge rounded-pill bg-success ms-1">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    <span class="badge rounded-pill bg-success ms-1">{{ $headerNotifications->count() }}</span>
                 </button>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0 border-0 fs-sm" aria-labelledby="page-header-notifications-dropdown">
                     <div class="p-2 bg-body-light border-bottom text-center rounded-top">
                         <h5 class="dropdown-header text-uppercase">Уведомления</h5>
                     </div>
                     <ul class="nav-items mb-0">
-                        @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
+                        @forelse($headerNotifications as $notification)
                             <li>
+                                {{-- Ссылка теперь ведет на контроллер прочтения --}}
                                 <a class="text-dark d-flex py-2" href="{{ route('cabinet.messages.show', $notification->id) }}">
                                     <div class="flex-shrink-0 me-2 ms-3">
-                                        <i class="fa fa-fw fa-info-circle text-info"></i>
+                                        @php
+                                            $type = $notification->data['type'] ?? 'info';
+                                            $iconColor = match($type) {
+                                                'success' => 'text-success',
+                                                'danger' => 'text-danger',
+                                                'warning' => 'text-warning',
+                                                default => 'text-info',
+                                            };
+                                        @endphp
+                                        <i class="{{ $notification->data['icon'] ?? 'fa fa-info-circle' }} {{ $iconColor }}"></i>
                                     </div>
                                     <div class="flex-grow-1 pe-2">
                                         <div class="fw-semibold">{{ $notification->data['title'] }}</div>
-                                        <span class="fw-medium text-muted">{{ $notification->created_at->diffForHumans() }}</span>
+                                        <div class="text-muted fs-xs">
+                                            @if($notification->notifiable_type === 'App\Models\Site')
+                                                <span class="badge bg-secondary-light text-secondary">
+                                <i class="fa fa-globe me-1"></i> {{ $notification->notifiable->domain }}
+                            </span>
+                                            @endif
+                                            {{ $notification->created_at->diffForHumans() }}
+                                        </div>
                                     </div>
                                 </a>
                             </li>
                         @empty
-                            <li class="p-3 text-center text-muted">Новых сообщений нет</li>
+                            <li class="p-4 text-center">
+                                <i class="fa fa-check-circle fa-2x text-light mb-2"></i>
+                                <p class="mb-0 text-muted fs-sm">Новых уведомлений нет</p>
+                            </li>
                         @endforelse
                     </ul>
                     <div class="p-2 border-top text-center">

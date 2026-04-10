@@ -36,7 +36,13 @@
                                 {{ $data['title'] ?? 'Без заголовка' }}
                             </a>
                         </td>
-                        <td class="fs-sm">{{ $data['sender'] ?? 'Система' }}</td>
+                        <td class="fs-sm">
+                            @if($notification->notifiable_type === 'App\Models\Site')
+                                <span class="text-primary"><i class="fa fa-globe me-1"></i> {{ $notification->notifiable->domain }}</span>
+                            @else
+                                {{ $notification->data['sender'] ?? 'Система' }}
+                            @endif
+                        </td>
                         <td class="d-none d-sm-table-cell">
                             @switch($data['type'] ?? '')
                                 @case('danger')

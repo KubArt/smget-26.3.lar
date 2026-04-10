@@ -5,13 +5,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
 
 class Site extends Model
 {
-    use SoftDeletes;
+    use Notifiable, SoftDeletes;
+    protected $fillable = ['name', 'domain', 'email', 'api_key', 'is_active', 'is_verified', 'verified_at'];
 
-    protected $fillable = ['name', 'domain', 'api_key', 'is_active'];
+    protected $casts = [
+        'is_active' => 'boolean',
+        'is_verified' => 'boolean',
+        'verified_at' => 'datetime',
+    ];
 
     // Автоматическая генерация UUID при создании сайта
     protected static function boot()
