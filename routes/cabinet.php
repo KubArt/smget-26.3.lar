@@ -12,6 +12,7 @@ Route::prefix('messages')->name('messages.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Cabinet\MessageController::class, 'index'])->name('index');
     Route::get('/{id}', [\App\Http\Controllers\Cabinet\MessageController::class, 'show'])->name('show');
     Route::post('/{id}/read', [\App\Http\Controllers\Cabinet\MessageController::class, 'markAsRead'])->name('read');
+    Route::post('/{id}/delete', [\App\Http\Controllers\Cabinet\MessageController::class, 'destroy'])->name('destroy');
 });
 
 

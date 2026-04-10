@@ -12,7 +12,11 @@ class SiteController extends BaseCabinetController
 
     public function index()
     {
-        $sites = auth()->user()->sites()->latest()->paginate(10);
+        $sites = auth()->user()->sites()->withCount(['notifications as unread_count' => function($query) {
+            $query->whereDoesntHave('readStates', function($q) {
+                $q->where('user_id', auth()->id());
+            });
+        }])->get();
         return view('cabinet.sites.index', compact('sites'));
     }
     public function show(Site $site)
@@ -143,13 +147,15 @@ class SiteController extends BaseCabinetController
 
     public function notifications(Site $site)
     {
-        // Проверка прав доступа (как мы делали ранее)
-        if (!$site->users->contains(auth()->id())) {
-            abort(403);
-        }
-        $notifications = $site->notifications()->latest()->paginate(20);
-        // Помечаем как прочитанные только уведомления этого сайта
-        // $site->unreadNotifications->markAsRead();
+        $this->authorizeAccess($site);
+
+        $notifications = $site->notifications()
+            // Проверяем, существует ли запись о прочтении этим пользователем
+            ->withExists(['readStates as is_read_by_me' => function($query) {
+                $query->where('user_id', auth()->id());
+            }])
+            ->latest()
+            ->paginate(20);
 
         return view('cabinet.sites.notifications', compact('site', 'notifications'));
     }

@@ -60,6 +60,11 @@
                     </div>
 
                     <div class="block-content block-content-full bg-body-light text-end">
+                        <form id="delete-form" action="{{ route('cabinet.messages.destroy', $notification->id) }}" method="POST" style="display: none;">
+                            @csrf
+                            @method('DELETE')
+                        </form>
+
                         <button type="button" class="btn btn-sm btn-alt-danger" onclick="confirmDelete()">
                             <i class="fa fa-trash-alt me-1"></i> Удалить
                         </button>
@@ -70,7 +75,7 @@
             <div class="col-xl-4">
                 <div class="block block-rounded">
                     <div class="block-header block-header-default">
-                        <h3 class="block-title">Ожидают прочтения</h3>
+                        <h3 class="block-title">Последние сообщения</h3>
                         <div class="block-options">
                             <span class="badge bg-danger">{{ $unreadList->count() }}</span>
                         </div>
@@ -110,3 +115,25 @@
         </div>
     </div>
 @endsection
+
+@push('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete() {
+            Swal.fire({
+                title: 'Вы уверены?',
+                text: "Сообщение будет безвозвратно удалено из системы!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Да, удалить!',
+                cancelButtonText: 'Отмена'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form').submit();
+                }
+            })
+        }
+    </script>
+@endpush

@@ -40,7 +40,9 @@
                                 <a href="{{ route('cabinet.sites.notifications', $site) }}" class="btn btn-sm btn-alt-secondary">
                                     <i class="fa fa-bell me-1"></i>
                                     @if($site->unreadNotifications->count() > 0)
-                                        <span class="badge rounded-pill bg-danger">{{ $site->unreadNotifications->count() }}</span>
+                                        <span class="badge rounded-pill bg-danger">
+                                            {{ $site->unread_count }}
+                                        </span>
                                     @else
                                         0
                                     @endif
@@ -60,7 +62,6 @@
                     @endforeach
                     </tbody>
                 </table>
-                {{ $sites->links() }}
             </div>
         </div>
     </div>

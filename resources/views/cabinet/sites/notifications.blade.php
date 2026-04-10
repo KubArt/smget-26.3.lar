@@ -27,18 +27,29 @@
                     </thead>
                     <tbody>
                     @forelse($notifications as $notification)
-                        <tr>
+                        <tr style="cursor: pointer; {{ $notification->is_read_by_me ? 'background-color: rgba(6, 101, 208, 0.02);' : '' }}"
+                            onclick="window.location='{{ route('cabinet.messages.show', $notification->id) }}'">
+
                             <td class="text-center">
-                                <i class="{{ $notification->data['icon'] ?? 'fa fa-info-circle' }}"></i>
+                                {{-- Динамический цвет иконки в зависимости от типа --}}
+                                @php
+                                    $iconType = $notification->data['type'] ?? 'info';
+                                    $iconClass = match($iconType) {
+                                        'success' => 'text-success',
+                                        'danger' => 'text-danger',
+                                        'warning' => 'text-warning',
+                                        default => 'text-info',
+                                    };
+                                @endphp
+                                <i class="{{ $notification->data['icon'] ?? 'fa fa-info-circle' }} {{ $iconClass }}"></i>
                             </td>
-                            <td class="fw-semibold fs-sm">
-                                {{-- Ссылка на просмотр конкретного сообщения --}}
+                            <td class="{{ $notification->is_read_by_me != true ? 'fw-semibold' : '' }} fs-sm">
                                 <a href="{{ route('cabinet.messages.show', $notification->id) }}">
                                     {{ $notification->data['title'] }}
                                 </a>
-                                @if($notification->unread())
-                                    <span class="badge rounded-pill bg-danger ms-1">Новое</span>
-                                @endif
+                                <div class="text-muted fs-xs mt-1">
+                                    {{ \Illuminate\Support\Str::limit(strip_tags($data['message'] ?? ''), 80) }}
+                                </div>
                             </td>
                             <td class="d-none d-sm-table-cell fs-sm">
                                 {{ $notification->created_at->format('d.m.Y H:i') }}
@@ -48,9 +59,12 @@
                                     {{ $notification->data['type'] ?? 'system' }}
                                 </span>
                             </td>
-                        </tr>
-                    @empty
-                    @endforelse
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">История уведомлений пуста</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
 
