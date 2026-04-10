@@ -10,9 +10,10 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
-        then: function () {
+        using: function () {
+        Route::middleware('web')->group(base_path('routes/web.php'));
         // Роуты кабинета клиента
-        Route::middleware('web')
+        Route::middleware(['web', 'auth', 'cabinet'])
             ->prefix('cabinet')
             ->name('cabinet.')
             ->group(base_path('routes/cabinet.php'));
@@ -27,6 +28,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'cabinet' => \App\Http\Middleware\CabinetMiddleware::class,
+        ]);
+    })
+
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
