@@ -58,11 +58,62 @@
                     <div class="block-content">
                         <table class="table table-borderless table-sm fs-sm">
                             <tbody>
-                            <tr><td>Статус:</td><td class="text-end">@if($site->is_active) <span class="text-success">Активен</span> @else <span class="text-danger">Пауза</span> @endif</td></tr>
-                            <tr><td>Email:</td><td class="text-end">{{ $site->email }}</td></tr>
-                            <tr><td>Добавлен:</td><td class="text-end">{{ $site->created_at->format('d.m.Y') }}</td></tr>
+                            <tr>
+                                <td>Статус:</td>
+                                <td class="text-end">
+                                    @if($site->is_active) <span class="text-success">Активен</span> @else <span class="text-danger">Пауза</span> @endif
+                                </td>
+                            </tr>
+
+                            {{-- Блок тарифа --}}
+                            <tr class="border-top">
+                                <td class="pt-2">Тариф:</td>
+                                <td class="text-end pt-2">
+                                    @if($site->activeSubscription)
+                                        <span class="fw-bold text-primary">{{ $site->activeSubscription->plan->name }}</span>
+                                    @else
+                                        <span class="text-muted">Не оплачен</span>
+                                    @endif
+                                </td>
+                            </tr>
+
+                            @if($site->activeSubscription)
+                                <tr>
+                                    <td>Истекает:</td>
+                                    <td class="text-end text-danger fw-medium">
+                                        {{ $site->activeSubscription->expires_at->format('d.m.Y') }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" class="text-center pt-2">
+                                        <a class="btn btn-sm btn-alt-primary w-100" href="{{ route('cabinet.billing.plans.index') }}">
+                                            Продлить или сменить
+                                        </a>
+                                    </td>
+                                </tr>
+                            @else
+                                <tr>
+                                    <td colspan="2" class="text-center pt-2">
+                                        <a class="btn btn-sm btn-primary w-100" href="{{ route('cabinet.billing.plans.index') }}">
+                                            <i class="fa fa-shopping-cart me-1"></i> Купить тариф
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endif
+
+                            <tr class="border-top">
+                                <td class="pt-2">Добавлен:</td>
+                                <td class="text-end pt-2">{{ $site->created_at->format('d.m.Y') }}</td>
+                            </tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    {{-- Ссылка на описание тарифов --}}
+                    <div class="block-content block-content-full bg-body-light fs-xs text-center">
+                        <a href="{{ route('cabinet.billing.plans.index') }}" class="fw-medium">
+                            <i class="fa fa-info-circle me-1"></i> Подробнее о возможностях тарифов
+                        </a>
                     </div>
                 </div>
             </div>

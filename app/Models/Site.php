@@ -1,6 +1,8 @@
 <?php
 namespace App\Models;
 
+use App\Models\Billing\Plan;
+use App\Models\Billing\Subscription;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,6 +47,29 @@ class Site extends Model
     {
         return $this->users()->wherePivot('role', 'owner')->first();
     }
+
+
+    // Тарифы и подписки для сайтов
+    // Все подписки сайта (история)
+    public function subscriptions()
+    {
+        return $this->hasMany(\App\Models\Billing\Subscription::class, 'site_id');
+    }
+    // Текущая активная подписка (одна)
+    public function activeSubscription()
+    {
+        return $this->hasOne(\App\Models\Billing\Subscription::class)
+            ->where('expires_at', '>', now())
+            ->latestOfMany(); // Используем встроенный метод Laravel для последней записи
+    }
+
+    // Удобный аксессор для получения самого плана
+    public function getPlanAttribute()
+    {
+        return $this->activeSubscription?->plan;
+    }
+
+
 
     /**
      * Виджеты (модули), установленные на этом сайте

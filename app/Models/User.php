@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Billing\Transaction;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -100,9 +101,9 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * Сайты, к которым у пользователя есть доступ
      */
-    public function sites(): BelongsToMany
+    public function sites()
     {
-        return $this->belongsToMany(Site::class, 'site_user')
+        return $this->belongsToMany(\App\Models\Site::class, 'site_user', 'user_id', 'site_id')
             ->withPivot('role')
             ->withTimestamps();
     }
@@ -119,4 +120,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(UserProfile::class);
     }
+
+    // Добавляем поле баланса виртуально или через миграцию table->integer('balance')->default(0)):
+    public function transactions() {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function getBalanceAttribute() {
+        return $this->transactions()->sum('amount');
+    }
+
 }

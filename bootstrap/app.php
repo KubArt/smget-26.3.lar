@@ -33,6 +33,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'cabinet' => \App\Http\Middleware\CabinetMiddleware::class,
         ]);
     })
+    // проверка активногго тарифа в мидлваре
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'subscription' => \App\Http\Middleware\CheckActiveSubscription::class,
+        ]);
+    })
 
     ->withExceptions(function (Exceptions $exceptions): void {
         //

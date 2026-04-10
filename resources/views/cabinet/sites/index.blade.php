@@ -17,6 +17,7 @@
                     <tr>
                         <th>Название</th>
                         <th>Домен</th>
+                        <th>Тариф</th>
                         <th class="d-none d-sm-table-cell">Статус</th>
                         <th class="text-center">События</th>
                         <th class="text-center">Действия</th>
@@ -29,6 +30,18 @@
                                 <a href="{{ route('cabinet.sites.show', $site->id) }}">{{ $site->name }}</a>
                             </td>
                             <td>{{ $site->domain }}</td>
+                            <td>
+                                @if($site->activeSubscription)
+                                    <span class="badge bg-primary-light text-primary">
+                                        {{ $site->activeSubscription->plan->name }}
+                                    </span>
+                                    <div class="fs-xs text-muted">до {{ $site->activeSubscription->expires_at->format('d.m.Y') }}</div>
+                                @else
+                                    <a href="{{ route('cabinet.billing.plans.index') }}" class="badge bg-flat-light text-flat">
+                                        <i class="fa fa-plus-circle me-1"></i> Активировать
+                                    </a>
+                                @endif
+                            </td>
                             <td class="d-none d-sm-table-cell">
                                 @if($site->is_verified)
                                     <span class="badge bg-success">Подтвержден</span>

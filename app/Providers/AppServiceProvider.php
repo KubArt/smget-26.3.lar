@@ -57,5 +57,13 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('headerNotifications', $allNotifications);
             }
         });
+
+        // Выводим баланс пользователя в шапке каинета
+        view()->composer('cabinet.layouts.partials.header', function ($view) {
+            if (auth()->check()) {
+                // Мы просто обращаемся к атрибуту, который создали в модели User
+                $view->with('userBalance', auth()->user()->balance);
+            }
+        });
     }
 }

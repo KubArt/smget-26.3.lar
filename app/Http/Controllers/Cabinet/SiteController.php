@@ -12,17 +12,25 @@ class SiteController extends BaseCabinetController
 
     public function index()
     {
-        $sites = auth()->user()->sites()->withCount(['notifications as unread_count' => function($query) {
-            $query->whereDoesntHave('readStates', function($q) {
-                $q->where('user_id', auth()->id());
-            });
-        }])->get();
+        // Подгружаем активную подписку и сам тариф (plan)
+        $sites = auth()->user()->sites()
+            ->with(['activeSubscription.plan'])
+            ->withCount(['notifications as unread_count' => function($query) {
+                $query->whereDoesntHave('readStates', function($q) {
+                    $q->where('user_id', auth()->id());
+                });
+            }])->get();
+
         return view('cabinet.sites.index', compact('sites'));
     }
+
     public function show(Site $site)
     {
-        // Проверка доступа (через policy или ручную проверку пивота)
         $this->authorizeAccess($site);
+
+        // Подгружаем данные подписки для детальной страницы
+        $site->load(['activeSubscription.plan']);
+
         return view('cabinet.sites.show', compact('site'));
     }
 
