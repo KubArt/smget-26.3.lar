@@ -5,7 +5,9 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -24,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'phone',
         'password',
         'role',
     ];
@@ -37,6 +40,38 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'remember_token',
     ];
+
+    /**
+     * Аксессор и мутатор для телефона
+     */
+    protected function phone(): Attribute
+    {
+        return Attribute::make(
+        // Геттер: преобразует 79189678793 в +7 (918) 967-87-93
+            get: function ($value) {
+            if (!$value) return $value;
+
+            // Очищаем на случай, если в базе всё же затесался мусор
+            $value = preg_replace('/[^0-9]/', '', $value);
+
+            // Если номер соответствует формату (11 цифр)
+            if (strlen($value) == 11) {
+                return sprintf(
+                    '+%s (%s) %s-%s-%s',
+                    substr($value, 0, 1),
+                    substr($value, 1, 3),
+                    substr($value, 4, 3),
+                    substr($value, 7, 2),
+                    substr($value, 9, 2)
+                );
+            }
+
+            return $value;
+        },
+            // Сеттер: всегда сохраняет в базу только цифры
+            set: fn ($value) => preg_replace('/[^0-9]/', '', $value),
+        );
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -80,4 +115,8 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(WidgetPermission::class);
     }
 
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
 }

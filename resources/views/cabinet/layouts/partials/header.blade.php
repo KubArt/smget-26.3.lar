@@ -17,7 +17,7 @@
                         <h5 class="dropdown-header text-uppercase">Уведомления</h5>
                     </div>
                     <ul class="nav-items mb-0">
-                        @forelse(auth()->user()->unreadNotifications->take(3) as $notification)
+                        @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
                             <li>
                                 <a class="text-dark d-flex py-2" href="{{ route('cabinet.messages.show', $notification->id) }}">
                                     <div class="flex-shrink-0 me-2 ms-3">
@@ -48,7 +48,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-md dropdown-menu-end p-0 border-0" aria-labelledby="page-header-user-dropdown">
                     <div class="p-2">
-                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="#">
+                        <a class="dropdown-item d-flex align-items-center justify-content-between" href="{{ route('cabinet.profile.index') }}">
                             <span class="fs-sm fw-medium">Профиль</span>
                         </a>
                         <div role="separator" class="dropdown-divider m-0"></div>

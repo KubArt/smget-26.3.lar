@@ -38,9 +38,13 @@
     </footer>
 </div>
 
+<script src="{{ asset('assets/js/lib/jquery.min.js') }}"></script>
+<script src="{{ asset('assets/js/plugins/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
+
 <script src="{{ asset('assets/js/oneui.app.min.js') }}"></script>
 
-<script src="{{ asset('assets/js/lib/jquery.min.js') }}"></script>
+@include('cabinet.layouts.partials.messages')
+
 
 @yield('js')
 </body>
