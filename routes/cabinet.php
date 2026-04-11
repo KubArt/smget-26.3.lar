@@ -27,12 +27,26 @@ Route::prefix('profile')->name('profile.')->group(function () {
 
 // Работа с сайтами
     Route::resource('sites', \App\Http\Controllers\Cabinet\SiteController::class);
-    Route::post('sites/{site}/verify', [\App\Http\Controllers\Cabinet\SiteController::class, 'verify'])->name('sites.verify');
-// Верификация сайта
-    Route::post('sites/{site}/verify-ajax', [\App\Http\Controllers\Cabinet\SiteController::class, 'verifyAjax'])->name('sites.verify.ajax');
 
-    Route::get('sites/{site}/notifications', [\App\Http\Controllers\Cabinet\SiteController::class, 'notifications'])->name('sites.notifications');
+// Группа для управления виджетами конкретного сайта
+Route::prefix('sites/{site}')->name('sites.')->group(function () {
+    // Страница со списком установленных виджетов на сайте
+    Route::get('widgets', [\App\Http\Controllers\Cabinet\SiteWidgetController::class, 'index'])->name('widgets.index');
+    Route::resource('widgets', \App\Http\Controllers\Cabinet\SiteWidgetController::class);
+    Route::post('widgets/{widget}/toggle', [\App\Http\Controllers\Cabinet\SiteWidgetController::class, 'toggle'])->name('widgets.toggle');
+
+
+// Верификация сайта
+    Route::post('verify', [\App\Http\Controllers\Cabinet\SiteController::class, 'verify'])->name('verify');
+    Route::post('verify-ajax', [\App\Http\Controllers\Cabinet\SiteController::class, 'verifyAjax'])->name('verify.ajax');
+    Route::get('notifications', [\App\Http\Controllers\Cabinet\SiteController::class, 'notifications'])->name('notifications');
+});
+
     Route::get('notifications/{id}/read', [\App\Http\Controllers\Auth\EmailVerificationNotificationController::class, 'readAndRedirect'])->name('notifications.read');
+
+// Общий маркетплейс (все доступные типы виджетов)
+    Route::get('marketplace', [\App\Http\Controllers\Cabinet\SiteWidgetController::class, 'market'])->name('marketplace.index');
+
 
 // Для биллинга выделим отдельный префикс и группу. Это позволит удобно управлять доступами.
 
@@ -47,6 +61,12 @@ Route::prefix('billing')->name('billing.')->group(function () {
     Route::post('/check-balance', [\App\Http\Controllers\Billing\SubscriptionController::class, 'checkBalance'])->name('check-balance');
     Route::post('/subscribe', [\App\Http\Controllers\Billing\SubscriptionController::class, 'subscribe'])->name('subscribe');
 });
+
+
+
+
+
+
 
 /* TODO:
         Бонус: Логика "Бесплатного периода"

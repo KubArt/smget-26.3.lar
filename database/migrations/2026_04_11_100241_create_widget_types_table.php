@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('widget_types', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->string('slug')->unique(); // cookie-pops
+            $table->string('category');       // informational
+            $table->text('manifest');        // Весь конфиг из Manifest.php для быстрой сверки
+            $table->boolean('is_active')->default(true);
+            $table->boolean('is_free')->default(false);
             $table->timestamps();
         });
     }

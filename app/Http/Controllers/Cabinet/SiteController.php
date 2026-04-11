@@ -14,7 +14,7 @@ class SiteController extends BaseCabinetController
     {
         // Подгружаем активную подписку и сам тариф (plan)
         $sites = auth()->user()->sites()
-            ->with(['activeSubscription.plan'])
+            ->with(['activeSubscription.plan', 'widgets.widgetType']) // Подгружаем виджеты и их типы
             ->withCount(['notifications as unread_count' => function($query) {
                 $query->whereDoesntHave('readStates', function($q) {
                     $q->where('user_id', auth()->id());
@@ -23,6 +23,7 @@ class SiteController extends BaseCabinetController
 
         return view('cabinet.sites.index', compact('sites'));
     }
+
 
     public function show(Site $site)
     {

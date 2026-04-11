@@ -9,6 +9,7 @@ class Manifest
         return [
             'name' => 'Cookie Pops',
             'slug' => 'cookie-pops',
+            'is_free' => '1',
             'category' => 'informational',
             'description' => 'Уведомление об использовании Cookie на сайте',
             'version' => '2.0.0',

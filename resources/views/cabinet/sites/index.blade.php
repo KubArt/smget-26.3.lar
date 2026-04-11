@@ -17,6 +17,7 @@
                     <tr>
                         <th>Название</th>
                         <th>Домен</th>
+                        <th>Виджеты</th>
                         <th>Тариф</th>
                         <th class="d-none d-sm-table-cell">Статус</th>
                         <th class="text-center">События</th>
@@ -30,6 +31,17 @@
                                 <a href="{{ route('cabinet.sites.show', $site->id) }}">{{ $site->name }}</a>
                             </td>
                             <td>{{ $site->domain }}</td>
+                            <td class="text-center">
+                                <a href="{{ route('cabinet.sites.widgets.index', $site->id) }}"
+                                   class="btn btn-sm btn-alt-secondary d-inline-flex align-items-center"
+                                   data-bs-toggle="tooltip"
+                                   title="Управление виджетами">
+                                    <i class="fa fa-puzzle-piece me-1"></i>
+                                    <span class="badge rounded-pill bg-primary ms-1">
+                                        {{ $site->widgets->count() }}
+                                    </span>
+                                </a>
+                            </td>
                             <td>
                                 @if($site->activeSubscription)
                                     <span class="badge bg-primary-light text-primary">

@@ -48,6 +48,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
 
             <div class="col-xl-4">
@@ -116,6 +117,20 @@
                         </a>
                     </div>
                 </div>
+
+
+                <div class="block block-rounded">
+                    <div class="block-content block-content-full d-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="mb-1">Виджеты на сайте</h4>
+                            <p class="fs-sm text-muted mb-0">Управление всеми активными инструментами для {{ $site->domain }}</p>
+                        </div>
+                        <a href="{{ route('cabinet.sites.widgets.index', $site) }}" class="btn btn-alt-primary">
+                            Управлять виджетами ({{ $site->widgets()->count() }})
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

@@ -2,18 +2,31 @@
 
 namespace App\Models;
 
+use App\Models\Widgets\WidgetType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Widget extends Model
 {
-    protected $fillable = ['site_id', 'type', 'name', 'settings', 'is_enabled'];
+    protected $fillable = [
+        'site_id',
+        'widget_type_id', // Добавлено
+        'type',
+        'name',
+        'settings',
+        'is_active' // Если переименовали в миграции
+    ];
 
     protected $casts = [
         'settings' => 'array', // Laravel сам сделает json_decode/encode
         'is_enabled' => 'boolean',
     ];
+
+    public function widgetType(): BelongsTo
+    {
+        return $this->belongsTo(WidgetType::class, 'widget_type_id');
+    }
 
     public function site(): BelongsTo
     {

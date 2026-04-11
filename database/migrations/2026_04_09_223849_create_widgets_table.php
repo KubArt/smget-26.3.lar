@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('type'); // wheel, popup, chat
             $table->string('name'); // Имя виджета
             $table->text('settings')->nullable(); // Все настройки визуалов и шансов
-            $table->boolean('is_enabled')->default(true);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
