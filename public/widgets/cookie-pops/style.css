@@ -1,4 +1,3 @@
-/* Контейнер-оболочка (для позиционирования) */
 .sp-skin-bottom-glass {
     position: fixed;
     left: 0;
@@ -7,38 +6,30 @@
     z-index: 999999;
     display: flex;
     justify-content: center;
-    padding: 24px; /* Отступ от краев экрана для эффекта парения */
+    padding: 24px;
     pointer-events: none;
 }
 
-/* Основная панель с эффектом матового стекла */
 .sp-glass-container {
-    pointer-events: auto;
+       pointer-events: auto;
+        background-color: var(--sm-bg-color, #fff);
+        border: 1px solid rgba(255, 255, 255, 0.4);
 
-    /* Эффект Glassmorphism */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    background-color: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+        /* Тень для объема на любом фоне */
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+        color: var(--sm-text-color, #1d1d1f);
+        padding: 16px 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 30px;
 
-    /* Тень для объема на любом фоне */
-    box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.08),
-        0 1px 2px rgba(0, 0, 0, 0.05);
+        width: 100%;
+        max-width: 1000px;
+        border-radius: 20px;
 
-    color: #1d1d1f;
-    padding: 16px 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 30px;
-
-    width: 100%;
-    max-width: 1000px;
-    border-radius: 20px;
-
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    animation: sp-glass-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        animation: sp-glass-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Текстовый блок */
@@ -74,7 +65,7 @@
 
 /* Основная кнопка */
 .sp-glass-btn {
-    background: var(--btn-color, #1d1d1f);
+    background: var(--sm-btn-color, #1d1d1f);
     color: #fff;
     border: none;
     padding: 12px 28px;

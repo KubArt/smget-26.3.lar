@@ -89,19 +89,22 @@
                             <div class="row mb-4">
                                 <div class="col-4 text-center">
                                     <label class="form-label small">Фон</label>
-                                    <input type="color" name="design[bg_color]" class="form-control form-control-color w-100" x-model="settings.design.bg_color">
+                                    <input type="color" name="design[bg_color]" class="form-control form-control-color w-100"
+                                           x-model="settings.design.bg_color" @change="updateColors(); updatePreview()">
                                 </div>
                                 <div class="col-4 text-center">
                                     <label class="form-label small">Текст</label>
-                                    <input type="color" name="design[text_color]" class="form-control form-control-color w-100" x-model="settings.design.text_color">
+                                    <input type="color" name="design[text_color]" class="form-control form-control-color w-100"
+                                           x-model="settings.design.text_color" @change="updateColors(); updatePreview()">
                                 </div>
                                 <div class="col-4 text-center">
                                     <label class="form-label small">Кнопка</label>
-                                    <input type="color" name="design[btn_color]" class="form-control form-control-color w-100" x-model="settings.design.btn_color">
+                                    <input type="color" name="design[btn_color]" class="form-control form-control-color w-100"
+                                           x-model="settings.design.btn_color" @change="updateColors(); updatePreview()">
                                 </div>
                             </div>
 
-                            <button type="button" class="btn btn-alt-primary" @click="saveConfig()">
+                            <button type="button" class="btn btn-alt-primary w-100" @click="saveConfig()">
                                 <i class="fa fa-save opacity-50 me-1"></i> Сохранить изменения
                             </button>
                         </form>
@@ -109,8 +112,7 @@
                 </div>
             </div>
 
-
-            <div class="col-md-7" x-data="{ previewMode: 'desktop' }">
+            <div class="col-md-7" x-data="{ previewMode: 'desktop' }" x-init="$watch('previewMode', () => $dispatch('preview-mode-changed', previewMode))">
                 <div class="block block-rounded sticky-top" style="top: 20px;">
                     <div class="block-header block-header-default">
                         <h3 class="block-title">Предпросмотр</h3>
@@ -126,27 +128,31 @@
                                         @click="previewMode = 'mobile'">
                                     <i class="fa fa-mobile-alt me-1"></i> Мобильный
                                 </button>
+                                <button type="button" class="btn btn-alt-secondary"
+                                        :class="previewMode === 'tablet' ? 'active' : ''"
+                                        @click="previewMode = 'tablet'">
+                                    <i class="fa fa-tablet-alt me-1"></i> Планшет
+                                </button>
                             </div>
                         </div>
                     </div>
                     <div class="block-content p-3 bg-body-dark">
-                        {{-- Имитация окна браузера --}}
-                        <div class="browser-mockup" :class="previewMode">
+                        <div class="browser-mockup" :class="previewMode" id="browser-mockup">
                             <div class="browser-header">
                                 <div class="d-flex gap-1">
-                                    <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                                    <span class="dot red"></span>
+                                    <span class="dot yellow"></span>
+                                    <span class="dot green"></span>
                                 </div>
                                 <div class="address-bar">
                                     <i class="fa fa-lock me-1 text-success"></i> your-website.com
                                 </div>
+                                <div class="browser-controls">
+                                    <span class="badge bg-secondary" x-text="previewMode === 'desktop' ? '1920px' : (previewMode === 'tablet' ? '768px' : '375px')"></span>
+                                </div>
                             </div>
-
-                            {{-- Область просмотра контента --}}
-                            <div class="browser-viewport">
-                                {{-- Точка монтирования Shadow DOM --}}
+                            <div class="browser-viewport" id="browser-viewport">
                                 <div id="preview-host"></div>
-
-                                {{-- Заглушка контента сайта --}}
                                 <div class="site-placeholder">
                                     <div class="hero-rect"></div>
                                     <div class="p-3">
@@ -161,17 +167,14 @@
                                 </div>
                             </div>
                         </div>
-
-                        {{-- Индикатор разрешения --}}
                         <div class="text-center mt-2">
-                            <small class="text-muted" x-text="previewMode === 'desktop' ? '100% x 500px' : '375px x 500px'"></small>
+                            <small class="text-muted" x-text="previewMode === 'desktop' ? '1920px × 500px' : (previewMode === 'tablet' ? '768px × 500px' : '375px × 500px')"></small>
                         </div>
                     </div>
                 </div>
             </div>
 
             <style>
-                /* Стили для имитации браузера */
                 .browser-mockup {
                     border: 1px solid #d1d1d1;
                     border-radius: 8px;
@@ -181,31 +184,47 @@
                     display: flex;
                     flex-direction: column;
                     margin: 0 auto;
-                    transition: width 0.3s ease, height 0.3s ease;
+                    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
                 }
 
-                /* Режимы ширины */
-                .browser-mockup.desktop { width: 100%; }
-                .browser-mockup.mobile { width: 375px; }
+                /* Режимы ширины с плавным переходом */
+                .browser-mockup.desktop {
+                    width: 100%;
+                    max-width: 100%;
+                }
+                .browser-mockup.tablet {
+                    width: 768px;
+                }
+                .browser-mockup.mobile {
+                    width: 375px;
+                }
 
                 .browser-header {
                     background: #f1f1f1;
                     padding: 8px 12px;
                     display: flex;
                     align-items: center;
+                    justify-content: space-between;
                     border-bottom: 1px solid #e1e1e1;
+                    flex-shrink: 0;
                 }
 
-                .browser-header .dot { height: 10px; width: 10px; border-radius: 50%; }
+                .browser-header .dot {
+                    height: 10px;
+                    width: 10px;
+                    border-radius: 50%;
+                    margin-right: 6px;
+                }
                 .dot.red { background: #ff5f56; }
                 .dot.yellow { background: #ffbd2e; }
                 .dot.green { background: #27c93f; }
 
                 .browser-header .address-bar {
                     background: #fff;
-                    margin: 0 auto;
-                    width: 60%;
+                    flex: 1;
+                    max-width: 400px;
+                    margin: 0 12px;
                     border-radius: 4px;
                     font-size: 11px;
                     padding: 3px 10px;
@@ -214,21 +233,45 @@
                     border: 1px solid #e1e1e1;
                 }
 
-                /* Самое важное: область, где живет виджет */
+                .browser-controls {
+                    min-width: 60px;
+                    text-align: right;
+                }
+
                 .browser-viewport {
                     position: relative;
                     flex-grow: 1;
                     background: #fff;
-                    overflow-y: auto; /* Позволяет прокручивать сайт-заглушку */
+                    overflow-y: auto;
                     overflow-x: hidden;
                 }
 
-                /* Заглушка контента сайта */
-                .site-placeholder { padding: 0; pointer-events: none; }
-                .hero-rect { height: 160px; background: #f0f2f5; margin-bottom: 10px; width: 100%; }
-                .line { height: 12px; background: #f0f2f5; border-radius: 6px; margin-bottom: 15px; width: 100%; }
+                .site-placeholder {
+                    padding: 0;
+                    pointer-events: none;
+                }
+                .hero-rect {
+                    height: 160px;
+                    background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
+                    margin-bottom: 10px;
+                    width: 100%;
+                }
+                .line {
+                    height: 12px;
+                    background: #f0f2f5;
+                    border-radius: 6px;
+                    margin-bottom: 15px;
+                    width: 100%;
+                    background: linear-gradient(90deg, #f0f2f5 0%, #e9ecef 50%, #f0f2f5 100%);
+                    background-size: 200% auto;
+                    animation: shimmer 1.5s infinite;
+                }
 
-                /* Чтобы Shadow DOM контент правильно позиционировался относительно viewport */
+                @keyframes shimmer {
+                    0% { background-position: -200% 0; }
+                    100% { background-position: 200% 0; }
+                }
+
                 #preview-host {
                     position: absolute;
                     top: 0;
@@ -236,13 +279,17 @@
                     width: 100%;
                     height: 100%;
                     z-index: 100;
-                    pointer-events: none; /* Чтобы можно было скроллить placeholder */
+                    pointer-events: none;
+                }
+
+                /* Адаптация для мобильных устройств */
+                @media (max-width: 768px) {
+                    .browser-mockup.tablet,
+                    .browser-mockup.mobile {
+                        width: calc(100% - 32px);
+                    }
                 }
             </style>
-
-
-        </div>
-    </div>
 
     @push('js')
         <script>
@@ -252,6 +299,10 @@
                     settings: config.settings,
                     skins: config.skins,
                     rawTemplate: '',
+                    rawCss: '',
+                    shadowRoot: null,
+                    widgetRoot: null,
+                    previewMode: 'desktop', // Добавляем режим превью
 
                     async init() {
                         // Инициализация структуры контента
@@ -260,24 +311,42 @@
                                 text: 'Мы используем cookies для улучшения работы сайта.',
                                 btn_accept_text: 'Принять',
                                 btn_leave_text: 'Покинуть сайт',
-                                show_leave_btn: true, // По умолчанию включена
+                                show_leave_btn: true,
                                 policy_text: 'Политика конфиденциальности',
                                 policy_url: '/privacy'
                             };
                         }
 
-                        // Проверка на наличие поля show_leave_btn при загрузке существующих настроек
                         if (this.settings.content.show_leave_btn === undefined) {
                             this.settings.content.show_leave_btn = true;
                         }
 
-                        if (!this.settings.template) this.settings.template = Object.keys(this.skins)[0];
+                        if (!this.settings.template) {
+                            this.settings.template = Object.keys(this.skins)[0];
+                        }
+
                         if (!this.settings.design) {
-                            this.settings.design = { bg_color: '#ffffff', text_color: '#2d3436', btn_color: '#0665d0' };
+                            this.settings.design = {
+                                bg_color: '#ffffff',
+                                text_color: '#2d3436',
+                                btn_color: '#0665d0'
+                            };
                         }
 
                         await this.loadSkin(this.settings.template);
-                        this.$watch('settings.design', () => this.updateColors());
+
+                        // Оптимизированные watchers - обновляем только то, что нужно
+                        this.$watch('settings.content.text', () => this.updateContent());
+                        this.$watch('settings.content.btn_accept_text', () => this.updateContent());
+                        this.$watch('settings.content.btn_leave_text', () => this.updateContent());
+                        this.$watch('settings.content.policy_text', () => this.updateContent());
+                        this.$watch('settings.content.policy_url', () => this.updateContent());
+                        this.$watch('settings.content.show_leave_btn', () => this.toggleLeaveButton());
+
+                        // Обновление цветов без перерисовки
+                        this.$watch('settings.design.bg_color', () => this.updateColors());
+                        this.$watch('settings.design.text_color', () => this.updateColors());
+                        this.$watch('settings.design.btn_color', () => this.updateColors());
                     },
 
                     async loadSkin(skinId) {
@@ -288,65 +357,217 @@
                                 fetch(`${baseUrl}/style.css`)
                             ]);
                             this.rawTemplate = await tplRes.text();
-                            this.setupShadowDOM(await cssRes.text(), skinId);
-                            this.updatePreview();
-                        } catch (e) { console.error(e); }
+                            this.rawCss = await cssRes.text();
+                            this.setupShadowDOM();
+                            this.updateContent(); // Обновляем только контент после загрузки
+                        } catch (e) {
+                            console.error('Error loading skin:', e);
+                        }
                     },
 
-                    setupShadowDOM(css, skinId) {
+                    setupShadowDOM() {
                         const container = document.getElementById('preview-host');
-                        let shadow = container.shadowRoot || container.attachShadow({mode: 'open'});
+                        if (!container) return;
+
+                        this.shadowRoot = container.shadowRoot || container.attachShadow({mode: 'open'});
 
                         // Модифицируем CSS для превью
-                        // 1. Убираем fixed позиционирование, заменяем на absolute
-                        // 2. Ограничиваем область видимости
-                        const previewStyles = css
-                            .replace(/position:\s*fixed/g, 'position: absolute')
-                            .replace(/width:\s*100vw/g, 'width: 100%');
+                        let modifiedCSS = this.rawCss;
+                        modifiedCSS = modifiedCSS.replace(/position:\s*fixed/g, 'position: absolute');
+                        modifiedCSS = modifiedCSS.replace(/position:fixed/g, 'position: absolute');
+                        modifiedCSS = modifiedCSS.replace(/100vh/g, '100%');
+                        modifiedCSS = modifiedCSS.replace(/100vw/g, '100%');
 
-                        shadow.innerHTML = `
-                            <style>
-                                :host {
-                                    all: initial; /* Сброс всех внешних стилей темы админки */
-                                    display: block;
-                                    position: absolute;
-                                    top: 0; left: 0; right: 0; bottom: 0;
-                                    width: 100%; height: 100%;
-                                    pointer-events: none; /* Чтобы можно было кликать сквозь пустые области */
-                                }
-                                #widget-root {
-                                    pointer-events: auto; /* Включаем клики обратно только для виджета */
-                                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                                }
-                                ${previewStyles}
+                        this.shadowRoot.innerHTML = `
+                                <style>
+                                    :host {
+                                        all: initial;
+                                        display: block;
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        bottom: 0;
+                                        width: 100%;
+                                        height: 100%;
+                                        pointer-events: none;
+                                    }
+                                    #widget-root {
+                                        pointer-events: auto;
+                                        width: 100%;
+                                        height: 100%;
+                                        position: relative;
+                                    }
+                                    .hidden-btn {
+                                        display: none !important;
+                                    }
 
-                                /* Фикс для кнопок, если они пропадают */
-                                .hidden-btn { display: none !important; }
-                            </style>
-                            <div id="widget-root" class="sp-skin-${skinId}"></div>
-                        `;
+                                    /* Базовые стили */
+                                    ${modifiedCSS}
+                                </style>
+                                <div id="widget-root"></div>
+                            `;
+
+                        this.widgetRoot = this.shadowRoot.getElementById('widget-root');
+
+                        // Добавляем эмуляцию медиа-запросов
+                        this.setupMediaQueryEmulation();
+
+                        this.updateColors();
                     },
 
-                    updatePreview() {
-                        const container = document.getElementById('preview-host');
-                        if (!container.shadowRoot) return;
-                        const root = container.shadowRoot.getElementById('widget-root');
+                    setupMediaQueryEmulation() {
+                        const viewport = document.getElementById('browser-viewport');
+                        if (!viewport) return;
 
+                        // Создаем элемент для эмуляции медиа-запросов
+                        const mediaStyles = document.createElement('style');
+                        mediaStyles.setAttribute('data-media-emulation', 'true');
+                        this.shadowRoot.appendChild(mediaStyles);
+
+                        // Функция обновления эмулируемых медиа-запросов
+                        const updateMediaStyles = () => {
+                            const width = viewport.clientWidth;
+
+                            let mobileStyles = '';
+                            let tabletStyles = '';
+
+                            if (width <= 480) {
+                                // Мобильные стили
+                                mobileStyles = `
+                                    /* Эмуляция @media (max-width: 480px) */
+                                    .sp-glass-container {
+                                        flex-direction: column !important;
+                                        padding: 16px !important;
+                                        text-align: center !important;
+                                        gap: 16px !important;
+                                    }
+                                    .sp-glass-actions {
+                                        width: 100% !important;
+                                        flex-direction: column !important;
+                                        gap: 8px !important;
+                                    }
+                                    .sp-glass-btn {
+                                        width: 100% !important;
+                                    }
+                                    .sp-glass-text {
+                                        font-size: 13px !important;
+                                    }
+
+                                    /* Для corner-popup */
+                                    .sp-corner-popup {
+                                        padding: 16px !important;
+                                        gap: 12px !important;
+                                    }
+                                    .sp-popup-footer {
+                                        flex-direction: column !important;
+                                    }
+                                    .sp-popup-btn-accept,
+                                    .sp-popup-btn-leave {
+                                        width: 100% !important;
+                                    }
+
+                                    /* Для floating-pill */
+                                    .sp-floating-pill {
+                                        flex-direction: column !important;
+                                        border-radius: 20px !important;
+                                        padding: 16px !important;
+                                        white-space: normal !important;
+                                    }
+                                    .sp-floating-actions {
+                                        width: 100% !important;
+                                        flex-direction: column !important;
+                                    }
+                                    .sp-floating-btn-accept {
+                                        width: 100% !important;
+                                    }
+                                `;
+                                                } else if (width <= 768) {
+                                                    // Планшетные стили
+                                                    tabletStyles = `
+                                    /* Эмуляция @media (max-width: 768px) */
+                                    .sp-glass-container {
+                                        flex-direction: column !important;
+                                        padding: 20px !important;
+                                        text-align: center !important;
+                                        gap: 20px !important;
+                                    }
+                                    .sp-glass-actions {
+                                        width: 100% !important;
+                                        flex-direction: column !important;
+                                        gap: 10px !important;
+                                    }
+                                    .sp-glass-btn {
+                                        width: 100% !important;
+                                    }
+
+                                    .sp-corner-popup {
+                                        max-width: none !important;
+                                        width: auto !important;
+                                    }
+
+                                    .sp-floating-pill {
+                                        gap: 16px !important;
+                                    }
+                                `;
+                            }
+
+                            mediaStyles.textContent = mobileStyles + tabletStyles;
+                        };
+
+                        // Запускаем при изменении размера
+                        updateMediaStyles();
+
+                        // Используем ResizeObserver для отслеживания
+                        const resizeObserver = new ResizeObserver(() => {
+                            updateMediaStyles();
+                        });
+                        resizeObserver.observe(viewport);
+
+                        // Сохраняем observer для очистки
+                        this.mediaObserver = resizeObserver;
+                    },
+
+                    // Обновляем только контент (текст, ссылки, кнопки)
+                    updateContent() {
+                        if (!this.widgetRoot) return;
+
+                        // Получаем HTML шаблон
                         let html = this.rawTemplate;
 
-                        // 1. Заменяем текстовые переменные
-                        Object.keys(this.settings.content).forEach(key => {
-                            const value = this.settings.content[key];
-                            if (typeof value === 'string') {
-                                html = html.replace(new RegExp(`{${key}}`, 'g'), value || '');
-                            }
+                        // Заменяем переменные
+                        const placeholders = {
+                            '{text}': this.settings.content.text || '',
+                            '{policy_text}': this.settings.content.policy_text || '',
+                            '{policy_url}': this.settings.content.policy_url || '#',
+                            '{btn_accept_text}': this.settings.content.btn_accept_text || 'Принимаю',
+                            '{btn_leave_text}': this.settings.content.btn_leave_text || 'Покинуть сайт'
+                        };
+
+                        Object.keys(placeholders).forEach(key => {
+                            html = html.replaceAll(new RegExp(key.replace(/[{}]/g, '\\$&'), 'g'), placeholders[key]);
                         });
 
-                        root.innerHTML = html;
+                        // Сохраняем состояние кнопки "Уйти" перед обновлением
+                        const wasHidden = this.widgetRoot.querySelector('#sp-leave')?.classList.contains('hidden-btn');
 
-                        // 2. Логика скрытия кнопки "Покинуть" в DOM превью
-                        // Ищем кнопку по ID (id="sp-leave" был в вашем шаблоне) или по классу
-                        const leaveBtn = root.querySelector('#sp-leave') || root.querySelector('.sp-side-btn-leave') || root.querySelector('.sp-overlay-btn-leave');
+                        this.widgetRoot.innerHTML = html;
+
+                        // Восстанавливаем состояние кнопки "Уйти"
+                        const leaveBtn = this.widgetRoot.querySelector('#sp-leave');
+                        if (leaveBtn) {
+                            if (!this.settings.content.show_leave_btn || wasHidden) {
+                                leaveBtn.classList.add('hidden-btn');
+                            } else {
+                                leaveBtn.classList.remove('hidden-btn');
+                            }
+                        }
+                    },
+
+                    // Переключаем только кнопку "Уйти" без перерисовки всего виджета
+                    toggleLeaveButton() {
+                        if (!this.widgetRoot) return;
+                        const leaveBtn = this.widgetRoot.querySelector('#sp-leave');
                         if (leaveBtn) {
                             if (!this.settings.content.show_leave_btn) {
                                 leaveBtn.classList.add('hidden-btn');
@@ -354,16 +575,63 @@
                                 leaveBtn.classList.remove('hidden-btn');
                             }
                         }
-
-                        this.updateColors();
                     },
 
-                    // Добавьте это в ваш x-data внутри конфигурации виджета
+                    // Обновляем только CSS переменные без перерисовки DOM
+                    updateColors() {
+                        if (!this.shadowRoot) return;
+
+                        // Удаляем старый style с переменными
+                        const oldStyle = this.shadowRoot.querySelector('style[data-preview-vars]');
+                        if (oldStyle) oldStyle.remove();
+
+                        // Добавляем новые переменные
+                        const style = document.createElement('style');
+                        style.setAttribute('data-preview-vars', 'true');
+
+                        const bgColor = this.settings.design?.bg_color || '#ffffff';
+                        const textColor = this.settings.design?.text_color || '#2d3436';
+                        const btnColor = this.settings.design?.btn_color || '#0665d0';
+
+                        const btnRgb = this.hexToRgb(btnColor);
+                        const textRgb = this.hexToRgb(textColor);
+
+                        style.textContent = `
+                :host {
+                    --sm-bg-color: ${bgColor};
+                    --sm-text-color: ${textColor};
+                    --sm-btn-color: ${btnColor};
+                    --sm-btn-color-rgb: ${btnRgb.r}, ${btnRgb.g}, ${btnRgb.b};
+                    --sm-text-color-rgb: ${textRgb.r}, ${textRgb.g}, ${textRgb.b};
+                }
+            `;
+
+                        this.shadowRoot.appendChild(style);
+                    },
+
+                    hexToRgb(hex) {
+                        hex = hex.replace(/^#/, '');
+                        if (hex.length === 3) {
+                            hex = hex.split('').map(c => c + c).join('');
+                        }
+                        const intVal = parseInt(hex, 16);
+                        return {
+                            r: (intVal >> 16) & 255,
+                            g: (intVal >> 8) & 255,
+                            b: intVal & 255
+                        };
+                    },
+
+                    async applyTemplate(id) {
+                        if (this.settings.template === id) return; // Предотвращаем повторную загрузку
+                        this.settings.template = id;
+                        await this.loadSkin(id);
+                    },
+
                     saveConfig() {
                         const btn = event.currentTarget;
                         const originalContent = btn.innerHTML;
 
-                        // 1. Индикация загрузки (отключаем кнопку и меняем текст)
                         btn.disabled = true;
                         btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Сохранение...';
 
@@ -371,37 +639,30 @@
                             settings: this.settings
                         })
                             .then(response => {
-                                // 2. Успех: вызываем ваш стандартный хелпер
                                 if (response.data.status === 'success') {
-                                    showNotification(response.data.message, 'success', 'fa fa-check me-1');
+                                    if (typeof showNotification === 'function') {
+                                        showNotification(response.data.message, 'success', 'fa fa-check me-1');
+                                    } else {
+                                        alert(response.data.message);
+                                    }
                                 }
                             })
                             .catch(error => {
-                                // 3. Ошибка: обрабатываем текст ошибки из Laravel или выводим дефолт
                                 let errorMessage = 'Ошибка при сохранении';
                                 if (error.response && error.response.data.message) {
                                     errorMessage = error.response.data.message;
                                 }
-
-                                showNotification(errorMessage, 'danger', 'fa fa-times me-1');
+                                if (typeof showNotification === 'function') {
+                                    showNotification(errorMessage, 'danger', 'fa fa-times me-1');
+                                } else {
+                                    alert(errorMessage);
+                                }
                                 console.error('Save Error:', error);
                             })
                             .finally(() => {
-                                // 4. Завершение: возвращаем кнопку в исходное состояние
                                 btn.disabled = false;
                                 btn.innerHTML = originalContent;
                             });
-                    },
-
-                    // Остальные методы...
-                    applyTemplate(id) { this.settings.template = id; this.loadSkin(id); },
-                    updateColors() {
-                        const container = document.getElementById('preview-host');
-                        if (container && this.settings.design) {
-                            Object.keys(this.settings.design).forEach(key => {
-                                container.style.setProperty(`--${key.replace('_', '-')}`, this.settings.design[key]);
-                            });
-                        }
                     }
                 }
             }

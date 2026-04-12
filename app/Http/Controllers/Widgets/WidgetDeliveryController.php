@@ -53,7 +53,7 @@ class WidgetDeliveryController extends BaseCabinetController
      */
     private function getWidgetAssets(string $slug, string $skin): array
     {
-        $basePath = "widgets/{$slug}/skins";
+        $basePath = "widgets/{$slug}";
 
         return [
             'html' => $this->getAssetContent($basePath, $skin, 'template.html'),
@@ -68,8 +68,8 @@ class WidgetDeliveryController extends BaseCabinetController
      */
     private function getAssetContent(string $basePath, string $skin, string $fileName): string
     {
-        $skinFile = public_path("{$basePath}/{$skin}/{$fileName}");
-        $defaultFile = public_path("{$basePath}/default/{$fileName}");
+        $skinFile = public_path("{$basePath}/skins/{$skin}/{$fileName}");
+        $defaultFile = public_path("{$basePath}/{$fileName}");
 
         if (file_exists($skinFile)) {
             return file_get_contents($skinFile);

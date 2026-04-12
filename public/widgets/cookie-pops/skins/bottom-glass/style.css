@@ -1,4 +1,4 @@
-/* Контейнер-оболочка (для позиционирования) */
+/* Обертка с фиксированным позиционированием - внизу по центру */
 .sp-skin-bottom-glass {
     position: fixed;
     left: 0;
@@ -7,7 +7,7 @@
     z-index: 999999;
     display: flex;
     justify-content: center;
-    padding: 24px; /* Отступ от краев экрана для эффекта парения */
+    padding: 24px;
     pointer-events: none;
 }
 
@@ -18,15 +18,13 @@
     /* Эффект Glassmorphism */
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    background-color: rgba(255, 255, 255, 0.75);
+    background-color: var(--sm-bg-color, #fff);
     border: 1px solid rgba(255, 255, 255, 0.4);
 
     /* Тень для объема на любом фоне */
-    box-shadow:
-        0 10px 40px rgba(0, 0, 0, 0.08),
-        0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
 
-    color: #1d1d1f;
+    color: var(--sm-text-color, #1d1d1f);
     padding: 16px 32px;
     display: flex;
     justify-content: space-between;
@@ -47,6 +45,7 @@
     line-height: 1.5;
     max-width: 650px;
     font-weight: 450;
+    color: var(--sm-text-color, #1d1d1f);
 }
 
 /* Ссылка внутри текста */
@@ -55,7 +54,7 @@
     color: currentColor;
     text-decoration: none;
     font-weight: 600;
-    border-bottom: 1px solid rgba(0,0,0,0.2);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     transition: border-color 0.2s;
     margin-left: 5px;
 }
@@ -74,8 +73,8 @@
 
 /* Основная кнопка */
 .sp-glass-btn {
-    background: var(--btn-color, #1d1d1f);
-    color: #fff;
+    background: var(--sm-btn-color, #1d1d1f);
+    color: #ffffff;
     border: none;
     padding: 12px 28px;
     border-radius: 12px;
@@ -89,7 +88,7 @@
 .sp-glass-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    filter: brightness(1.2);
+    filter: brightness(1.08);
 }
 
 .sp-glass-btn:active {
@@ -100,7 +99,7 @@
 .sp-glass-btn-leave {
     background: transparent;
     border: none;
-    color: #1d1d1f;
+    color: var(--sm-text-color, #1d1d1f);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -112,10 +111,21 @@
     opacity: 1;
 }
 
-/* Анимация */
+/* Скрытие кнопки */
+.hidden-btn {
+    display: none !important;
+}
+
+/* Анимация появления */
 @keyframes sp-glass-fade-in {
-    from { transform: translateY(20px) scale(0.98); opacity: 0; }
-    to { transform: translateY(0) scale(1); opacity: 1; }
+    from {
+        transform: translateY(20px) scale(0.98);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
 }
 
 /* Адаптация для мобильных устройств */
@@ -126,7 +136,7 @@
 
     .sp-glass-container {
         flex-direction: column;
-        padding: 24px;
+        padding: 20px;
         text-align: center;
         gap: 20px;
     }
@@ -134,10 +144,14 @@
     .sp-glass-actions {
         width: 100%;
         flex-direction: column;
-        gap: 12px;
+        gap: 10px;
     }
 
     .sp-glass-btn {
         width: 100%;
+    }
+
+    .sp-glass-btn-leave {
+        padding: 8px;
     }
 }

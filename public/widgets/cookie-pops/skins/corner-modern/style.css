@@ -1,125 +1,169 @@
+/* Обертка с фиксированным позиционированием - правый нижний угол */
 .sp-skin-corner-modern {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 20px;
+    right: 20px;
     z-index: 999999;
-    max-width: 360px;
-    width: 100%;
+    width: 320px;
+    max-width: calc(100vw - 40px);
+    pointer-events: none;
 }
 
+/* Сам виджет - компактный popup */
 .sp-corner-modern {
-    background-color: var(--bg-color, #ffffff);
-    color: var(--text-color, #2d3436);
+    pointer-events: auto;
+    background-color: var(--sm-bg-color, #ffffff);
+    color: var(--sm-text-color, #2d3436);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.05);
-
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 16px;
-
-    animation: sp-slide-in 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    gap: 12px;
+    animation: sp-fade-in-up 0.3s ease-out;
 }
 
+/* Тело виджета с иконкой */
 .sp-modern-body {
     display: flex;
-    gap: 14px;
+    gap: 12px;
     align-items: flex-start;
 }
 
+/* Иконка cookie */
 .sp-modern-icon {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
-    color: var(--btn-color, #0665d0);
-    opacity: 0.9;
+    color: var(--sm-btn-color, #0665d0);
 }
 
+.sp-modern-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Контентная область */
 .sp-modern-content {
-    flex-grow: 1;
+    flex: 1;
+    min-width: 0;
 }
 
+/* Текст сообщения */
 .sp-modern-text {
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 13px;
+    line-height: 1.45;
     margin-bottom: 6px;
     font-weight: 450;
+    color: var(--sm-text-color, #2d3436);
 }
 
+/* Ссылка на политику */
 .sp-modern-policy {
     display: inline-block;
-    font-size: 12px;
-    color: var(--text-color);
-    opacity: 0.6;
+    font-size: 11px;
+    color: var(--sm-text-color, #2d3436);
+    opacity: 0.55;
     text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: all 0.2s;
+    border-bottom: 1px dashed transparent;
+    transition: all 0.2s ease;
 }
 
 .sp-modern-policy:hover {
-    opacity: 1;
-    border-bottom-color: var(--text-color);
+    opacity: 0.8;
+    border-bottom-color: var(--sm-text-color, #2d3436);
 }
 
+/* Контейнер кнопок */
 .sp-modern-actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     justify-content: flex-end;
     align-items: center;
+    margin-top: 4px;
 }
 
+/* Кнопка "Принять" */
 .sp-modern-btn-accept {
-    background-color: var(--btn-color, #0665d0);
+    background-color: var(--sm-btn-color, #0665d0);
     color: #ffffff;
     border: none;
-    padding: 10px 20px;
-    border-radius: 12px;
+    padding: 8px 18px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 12px;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 10px rgba(var(--btn-color-rgb, 0, 0, 0), 0.2);
+    white-space: nowrap;
 }
 
 .sp-modern-btn-accept:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.08);
     transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.sp-modern-btn-accept:active {
+    transform: translateY(0);
+}
+
+/* Кнопка "Уйти/Отказаться" */
 .sp-modern-btn-leave {
     background: transparent;
-    color: var(--text-color);
+    color: var(--sm-text-color, #2d3436);
     border: none;
-    opacity: 0.5;
-    padding: 10px;
+    opacity: 0.45;
+    padding: 8px 12px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
 }
 
 .sp-modern-btn-leave:hover {
-    opacity: 1;
+    opacity: 0.8;
 }
 
-/* Скрытие кнопки через JS */
-.hidden-btn { display: none !important; }
+/* Скрытие кнопки */
+.hidden-btn {
+    display: none !important;
+}
 
-@keyframes sp-slide-in {
-    from { transform: translateX(30px) scale(0.9); opacity: 0; }
-    to { transform: translateX(0) scale(1); opacity: 1; }
+/* Анимация появления */
+@keyframes sp-fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* Мобильная адаптация */
 @media (max-width: 480px) {
     .sp-skin-corner-modern {
-        bottom: 20px;
-        right: 20px;
-        left: 20px;
-        max-width: none;
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
         width: auto;
+    }
+
+    .sp-corner-modern {
+        width: 100%;
+    }
+
+    .sp-modern-actions {
+        justify-content: stretch;
+    }
+
+    .sp-modern-btn-accept,
+    .sp-modern-btn-leave {
+        flex: 1;
+        text-align: center;
     }
 }
