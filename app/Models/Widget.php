@@ -14,13 +14,20 @@ class Widget extends Model
         'widget_type_id', // Добавлено
         'type',
         'name',
+        'custom_name',
+        'privacy_config',
+        'target_paths',
+        'target_utm',
         'settings',
         'is_active' // Если переименовали в миграции
     ];
 
     protected $casts = [
-        'settings' => 'array', // Laravel сам сделает json_decode/encode
-        'is_enabled' => 'boolean',
+        'settings' => 'array',
+        'privacy_config' => 'array',
+        'target_utm' => 'array',
+        'target_utm' => 'array',
+        'is_active' => 'boolean',
     ];
 
     public function widgetType(): BelongsTo

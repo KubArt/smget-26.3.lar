@@ -27,7 +27,7 @@ Route::prefix('profile')->name('profile.')->group(function () {
 
 // Работа с сайтами
     Route::resource('sites', \App\Http\Controllers\Cabinet\SiteController::class);
-
+/*
 // Группа для управления виджетами конкретного сайта
 Route::prefix('sites/{site}')->name('sites.')->group(function () {
     // Страница со списком установленных виджетов на сайте
@@ -41,6 +41,47 @@ Route::prefix('sites/{site}')->name('sites.')->group(function () {
     Route::post('verify-ajax', [\App\Http\Controllers\Cabinet\SiteController::class, 'verifyAjax'])->name('verify.ajax');
     Route::get('notifications', [\App\Http\Controllers\Cabinet\SiteController::class, 'notifications'])->name('notifications');
 });
+
+use App\Http\Controllers\Widgets\WidgetConfigurationController;
+
+Route::group(['prefix' => 'sites/{site}/widgets/{widget}', 'as' => 'widget.config.'], function () {
+    // Основная страница настроек (вкладки: Базовые, Таргетинг, Статистика)
+    Route::get('/settings', [WidgetConfigurationController::class, 'edit'])->name('settings');
+    // Сохранение настроек
+    Route::put('/update', [WidgetConfigurationController::class, 'update'])->name('update');
+    // Статистика (если захотим подгружать её аяксом или на отдельной вкладке)
+    Route::get('/stats', [WidgetConfigurationController::class, 'stats'])->name('stats');
+});
+//*/
+
+use App\Http\Controllers\Cabinet\SiteController;
+use App\Http\Controllers\Cabinet\SiteWidgetController;
+use App\Http\Controllers\Widgets\WidgetConfigurationController;
+
+// Группа управления сайтом
+Route::prefix('sites/{site}')->name('sites.')->group(function () {
+
+    // 1. Управление списком виджетов (подключение/отключение от сайта)
+    // Исключаем edit и update, так как они теперь в WidgetConfigurationController
+    Route::resource('widgets', SiteWidgetController::class)->except(['edit', 'update', 'show']);
+    // Быстрое переключение статуса (вкл/выкл) в таблице списка
+    Route::post('widgets/{widget}/toggle', [SiteWidgetController::class, 'toggle'])->name('widgets.toggle');
+
+    // 2. Глубокая конфигурация конкретного виджета
+    // Префикс уже включает sites/{site}, добавляем только хвост для виджета
+    Route::group(['prefix' => 'widgets/{widget}/config', 'as' => 'widgets.config.'], function () {
+        // Путь будет: sites/1/widgets/2/config/settings
+        Route::get('settings', [WidgetConfigurationController::class, 'edit'])->name('edit');
+        Route::put('update', [WidgetConfigurationController::class, 'update'])->name('update');
+        Route::get('stats', [WidgetConfigurationController::class, 'stats'])->name('stats');
+    });
+
+    // 3. Верификация и уведомления сайта
+    Route::post('verify', [SiteController::class, 'verify'])->name('verify');
+    Route::post('verify-ajax', [SiteController::class, 'verifyAjax'])->name('verify.ajax');
+    Route::get('notifications', [SiteController::class, 'notifications'])->name('notifications');
+});
+
 
     Route::get('notifications/{id}/read', [\App\Http\Controllers\Auth\EmailVerificationNotificationController::class, 'readAndRedirect'])->name('notifications.read');
 

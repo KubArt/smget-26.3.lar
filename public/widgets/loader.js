@@ -3,13 +3,34 @@
     const apiKey = self.getAttribute('data-key');
     if (!apiKey) return;
 
-    // Сбор данных о пути и источнике
+    // 1. Функция сбора и кэширования UTM
+    const getStoredUtm = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+        let utm = {};
+
+        utmKeys.forEach(key => {
+            const val = urlParams.get(key);
+            if (val) {
+                // Если метка есть в URL, сохраняем/обновляем в сессии
+                sessionStorage.setItem(`smget_${key}`, val);
+                utm[key] = val;
+            } else {
+                // Если в URL нет, пробуем достать из сессии
+                const stored = sessionStorage.getItem(`smget_${key}`);
+                if (stored) utm[key] = stored;
+            }
+        });
+        return utm;
+    };
+
+    const utmParams = getStoredUtm();
+
     const pageData = {
         key: apiKey,
-        url: window.location.href,
         path: window.location.pathname,
         referrer: document.referrer,
-        title: document.title
+        ...utmParams // Подмешиваем метки (из URL или из памяти)
     };
 
     const params = new URLSearchParams(pageData).toString();
@@ -19,7 +40,7 @@
         .then(data => {
             if (data.widgets && data.widgets.length > 0) {
                 window.SmGet = data;
-                window.SmGet.context = pageData; // Сохраняем контекст для ядра
+                window.SmGet.context = pageData;
 
                 const core = document.createElement('script');
                 core.src = 'http://smget-26.3.lar/widgets/widget-core.js';

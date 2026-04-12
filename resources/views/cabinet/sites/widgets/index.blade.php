@@ -38,7 +38,7 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group">
-                                        <a href="{{ route('cabinet.sites.widgets.edit', [$site, $widget]) }}"
+                                        <a href="{{ route('cabinet.sites.widgets.config.edit', [$site, $widget]) }}"
                                            class="btn btn-sm btn-alt-secondary" title="Настроить">
                                             <i class="fa fa-pencil-alt"></i>
                                         </a>
