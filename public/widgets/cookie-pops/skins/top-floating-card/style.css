@@ -1,0 +1,78 @@
+/* Контейнер позиционирования (на сайте - fixed, в превью - absolute) */
+.sp-skin-top-floating-card {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    width: auto;
+    max-width: 90vw;
+}
+
+.sp-top-floating-card {
+    background-color: var(--bg-color, #ffffff);
+    color: var(--text-color, #2d3436);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 12px 16px 12px 20px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+
+    animation: sp-floating-slide-down 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+.sp-floating-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sp-floating-icon {
+    font-size: 20px;
+}
+
+.sp-floating-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.sp-floating-text {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+.sp-floating-policy {
+    font-size: 12px;
+    color: var(--text-color);
+    opacity: 0.5;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.sp-floating-policy:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.sp-floating-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sp-floating-btn-accept {
+    background-color: var(--btn-color, #0665d0);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition

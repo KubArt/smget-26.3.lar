@@ -39,12 +39,16 @@
                                 <td class="text-end">
                                     <div class="btn-group">
 
+                                        <a href="{{ route('cabinet.sites.widgets.design', [$site, $widget]) }}" class="btn btn-sm btn-alt-primary" title="Настроить дизайн">
+                                            <i class="fa fa-paint-brush"></i> Дизайн
+                                        </a>
+
                                         <a href="{{ route('cabinet.sites.widgets.statistic', [$site, $widget]) }}"
                                            class="btn btn-sm btn-alt-secondary" title="Статистика">
                                             <i class="fa fa-fw fa-chart-line text-primary"></i>
                                         </a>
 
-                                        <a href="{{ route('cabinet.sites.widgets.config.edit', [$site, $widget]) }}"
+                                        <a href="{{ route('cabinet.sites.widgets.config', [$site, $widget]) }}"
                                            class="btn btn-sm btn-alt-secondary" title="Настроить">
                                             <i class="fa fa-pencil-alt"></i>
                                         </a>

@@ -1,5 +1,4 @@
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
         // Функция для вызова уведомления OneUI
         function showNotification(message, type = 'info', icon = 'fa fa-info-circle') {
             One.helpers('jq-notify', {
@@ -11,6 +10,7 @@
                 message: message
             });
         }
+    document.addEventListener('DOMContentLoaded', function () {
 
         {{-- Проверка на Success --}}
         @if(session('success'))

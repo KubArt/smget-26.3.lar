@@ -12,7 +12,79 @@ use Illuminate\Http\Request;
 
 class WidgetDeliveryController extends BaseCabinetController
 {
+
     public function getPayload(Request $request)
+    {
+        $site = Site::where('api_key', $request->get('key'))->where('is_verified', true)->first();
+
+        if (!$site) return response()->json(['error' => 'Invalid key'], 403);
+
+        $currentPath = $request->get('path', '/');
+        $currentUtm = array_filter($request->only(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']));
+
+        $activeWidgets = $site->widgets()
+            ->where('is_active', true)
+            ->get()
+            ->filter(function ($widget) use ($currentPath, $currentUtm) {
+                return $this->shouldShowWidget($widget, $currentPath, $currentUtm);
+            })
+            ->map(function ($widget) use ($request, $currentPath, $currentUtm) {
+                $this->logEvent($widget->id, 'view', $request, $currentPath, $currentUtm);
+
+                // Получаем настройки и выбранный скин
+                $settings = $widget->settings;
+                $slug = $widget->widgetType->slug; // например, 'cookie-pops'
+                $skin = $settings['template'] ?? 'default';
+
+                return [
+                    'id'       => $widget->id,
+                    'type'     => $slug,
+                    'settings' => $settings,
+                    // Собираем ассеты
+                    'assets'   => $this->getWidgetAssets($slug, $skin)
+                ];
+            });
+
+        return response()->json(['widgets' => $activeWidgets->values()]);
+    }
+
+    /**
+     * Сборка HTML/CSS/JS для конкретного скина с откатом к default
+     */
+    private function getWidgetAssets(string $slug, string $skin): array
+    {
+        $basePath = "widgets/{$slug}/skins";
+
+        return [
+            'html' => $this->getAssetContent($basePath, $skin, 'template.html'),
+            'css'  => $this->getAssetContent($basePath, $skin, 'style.css'),
+            'js'   => $this->getAssetContent($basePath, $skin, 'widget.js'),
+        ];
+    }
+
+    /**
+     * Вспомогательный метод: ищет файл в папке скина,
+     * если нет — берет из 'default', если и там нет — возвращает пустую строку.
+     */
+    private function getAssetContent(string $basePath, string $skin, string $fileName): string
+    {
+        $skinFile = public_path("{$basePath}/{$skin}/{$fileName}");
+        $defaultFile = public_path("{$basePath}/default/{$fileName}");
+
+        if (file_exists($skinFile)) {
+            return file_get_contents($skinFile);
+        }
+
+        if (file_exists($defaultFile)) {
+            return file_get_contents($defaultFile);
+        }
+
+        return '';
+    }
+
+    /*** */
+
+    public function OLD_getPayload(Request $request)
     {
         $site = Site::where('api_key', $request->get('key'))->where('is_verified', true)->first();
 

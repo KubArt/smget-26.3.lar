@@ -44,11 +44,32 @@ Route::prefix('sites/{site}')->name('sites.')->group(function () {
 
     // 2. Глубокая конфигурация конкретного виджета
     // Префикс уже включает sites/{site}, добавляем только хвост для виджета
+/*
     Route::group(['prefix' => 'widgets/{widget}/config', 'as' => 'widgets.config.'], function () {
         // Путь будет: sites/1/widgets/2/config/settings
         Route::get('settings', [WidgetConfigurationController::class, 'edit'])->name('edit');
         Route::put('update', [WidgetConfigurationController::class, 'update'])->name('update');
+
+
+    // Дизайн
+        Route::get('design', [WidgetConfigurationController::class, 'design'])->name('widget.design');
+        Route::post('design', [WidgetConfigurationController::class, 'designUpdate'])->name('widget.design.update');
+
     });
+//*/
+    Route::group(['prefix' => 'widgets/{widget}', 'as' => 'widgets.'], function() {
+        // Основные настройки (уже есть)
+        Route::get('config', [WidgetConfigurationController::class, 'edit'])->name('config');
+        Route::put('config', [WidgetConfigurationController::class, 'update'])->name('config.update');
+
+        // НОВОЕ: Дизайн
+        Route::get('design', [\App\Http\Controllers\Widgets\WidgetDesignController::class, 'design'])->name('design');
+        Route::post('design', [\App\Http\Controllers\Widgets\WidgetDesignController::class, 'designUpdate'])->name('design.update');
+    });
+
+
+
+
     Route::get('widgets/{widget}/statistics', [WidgetStatisticsController::class, 'getStatistic'])->name('widgets.statistic');
     // 3. Верификация и уведомления сайта
     Route::post('verify', [SiteController::class, 'verify'])->name('verify');

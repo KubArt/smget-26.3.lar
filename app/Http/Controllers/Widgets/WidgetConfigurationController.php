@@ -9,6 +9,7 @@ use App\Models\Site;
 use App\Models\Widget;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 class WidgetConfigurationController extends BaseCabinetController

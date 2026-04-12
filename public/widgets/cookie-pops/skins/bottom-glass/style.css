@@ -1,0 +1,143 @@
+/* Контейнер-оболочка (для позиционирования) */
+.sp-skin-bottom-glass {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999999;
+    display: flex;
+    justify-content: center;
+    padding: 24px; /* Отступ от краев экрана для эффекта парения */
+    pointer-events: none;
+}
+
+/* Основная панель с эффектом матового стекла */
+.sp-glass-container {
+    pointer-events: auto;
+
+    /* Эффект Glassmorphism */
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background-color: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+
+    /* Тень для объема на любом фоне */
+    box-shadow:
+        0 10px 40px rgba(0, 0, 0, 0.08),
+        0 1px 2px rgba(0, 0, 0, 0.05);
+
+    color: #1d1d1f;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+
+    width: 100%;
+    max-width: 1000px;
+    border-radius: 20px;
+
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    animation: sp-glass-fade-in 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Текстовый блок */
+.sp-glass-text {
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 650px;
+    font-weight: 450;
+}
+
+/* Ссылка внутри текста */
+.sp-glass-link {
+    font-size: 13px;
+    color: currentColor;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    transition: border-color 0.2s;
+    margin-left: 5px;
+}
+
+.sp-glass-link:hover {
+    border-bottom-color: currentColor;
+}
+
+/* Контейнер кнопок */
+.sp-glass-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+/* Основная кнопка */
+.sp-glass-btn {
+    background: var(--btn-color, #1d1d1f);
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sp-glass-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    filter: brightness(1.2);
+}
+
+.sp-glass-btn:active {
+    transform: translateY(0);
+}
+
+/* Кнопка "Уйти" (Вторичная) */
+.sp-glass-btn-leave {
+    background: transparent;
+    border: none;
+    color: #1d1d1f;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.sp-glass-btn-leave:hover {
+    opacity: 1;
+}
+
+/* Анимация */
+@keyframes sp-glass-fade-in {
+    from { transform: translateY(20px) scale(0.98); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .sp-skin-bottom-glass {
+        padding: 12px;
+    }
+
+    .sp-glass-container {
+        flex-direction: column;
+        padding: 24px;
+        text-align: center;
+        gap: 20px;
+    }
+
+    .sp-glass-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .sp-glass-btn {
+        width: 100%;
+    }
+}

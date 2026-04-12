@@ -1,0 +1,124 @@
+/* Позиционирование (в превью подменяется на absolute) */
+.sp-skin-floating-pill {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    pointer-events: none;
+}
+
+.sp-floating-pill {
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 8px 8px 24px;
+    background-color: var(--bg-color, #ffffff);
+    color: var(--text-color, #2d3436);
+    border-radius: 100px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    white-space: nowrap;
+
+    animation: sp-pill-fade-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sp-pill-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sp-pill-icon {
+    display: flex;
+    align-items: center;
+    color: var(--btn-color, #0665d0);
+    opacity: 0.8;
+}
+
+.sp-pill-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.sp-pill-text {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.sp-pill-link {
+    font-size: 11px;
+    color: var(--text-color);
+    opacity: 0.6;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.sp-pill-link:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.sp-pill-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sp-pill-btn-accept {
+    background-color: var(--btn-color, #0665d0);
+    color: #ffffff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 100px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.sp-pill-btn-accept:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}
+
+.sp-pill-btn-leave {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    opacity: 0.5;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.sp-pill-btn-leave:hover {
+    opacity: 1;
+}
+
+/* Скрытие через JS */
+.hidden-btn {
+    display: none !important;
+}
+
+@keyframes sp-pill-fade-in {
+    from { transform: translate(-50%, 20px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+    .sp-floating-pill {
+        flex-direction: column;
+        border-radius: 24px;
+        padding: 20px;
+        white-space: normal;
+        text-align: center;
+    }
+    .sp-pill-actions { width: 100%; flex-direction: column; }
+    .sp-pill-btn-accept { width: 100%; }
+}

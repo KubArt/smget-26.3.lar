@@ -31,9 +31,6 @@
                 <li class="nav-item">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-target">Таргетинг</button>
                 </li>
-                <li class="nav-item">
-                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-custom">Контент и оформление</button>
-                </li>
             </ul>
 
             <form action="{{ route('cabinet.sites.widgets.config.update', [$site, $widget]) }}" method="POST">
@@ -47,11 +44,6 @@
 
                     <div class="tab-pane" id="tab-target" role="tabpanel">
                         @include('cabinet.widgets.config.tabs.target')
-                    </div>
-
-                    <div class="tab-pane" id="tab-custom" role="tabpanel">
-                        <h4 class="fw-normal border-bottom pb-2 mb-4">Настройки внешнего вида</h4>
-                        @include('cabinet.widgets.forms.' . $widget->widgetType->slug)
                     </div>
                 </div>
 
