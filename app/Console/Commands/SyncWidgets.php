@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 
 class SyncWidgets extends Command
 {
+    // php artisan app:sync-widgets
     /**
      * The name and signature of the console command.
      *

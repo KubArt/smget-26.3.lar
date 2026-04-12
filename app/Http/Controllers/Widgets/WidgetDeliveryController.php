@@ -83,43 +83,6 @@ class WidgetDeliveryController extends BaseCabinetController
     }
 
     /*** */
-
-    public function OLD_getPayload(Request $request)
-    {
-        $site = Site::where('api_key', $request->get('key'))->where('is_verified', true)->first();
-
-        if (!$site) return response()->json(['error' => 'Invalid key'], 403);
-
-        $currentPath = $request->get('path', '/');
-        $currentUtm = $request->only(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']);
-        $currentUtm = array_filter($currentUtm); // Убираем пустые
-
-        $activeWidgets = $site->widgets()
-            ->where('is_active', true)
-            ->get()
-            ->filter(function ($widget) use ($currentPath, $currentUtm) {
-                return $this->shouldShowWidget($widget, $currentPath, $currentUtm);
-            })
-            ->map(function ($widget) use ($request, $currentPath, $currentUtm) {
-                // ФИКСИРУЕМ ПРОСМОТР (View) сразу при выдаче контента
-                $this->logEvent($widget->id, 'view', $request, $currentPath, $currentUtm);
-
-                return [
-                    'id'     => $widget->id,
-                    'type'   => $widget->widgetType->slug,
-                    'config' => $widget->settings,
-                    'assets' => [
-                        'js'  => asset("widgets/{$widget->widgetType->slug}/widget.js"),
-                        'css' => asset("widgets/{$widget->widgetType->slug}/style.css")
-                    ]
-                ];
-            });
-
-        return response()->json([
-            'widgets' => $activeWidgets->values()
-        ]);
-    }
-
     private function shouldShowWidget($widget, $path, $utm)
     {
         // 1. Сначала проверяем URL (Маски) - это первичный фильтр

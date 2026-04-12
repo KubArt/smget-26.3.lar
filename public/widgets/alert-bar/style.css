@@ -1,0 +1,107 @@
+/* Базовый контейнер */
+.sp-alert-bar {
+    background-color: var(--bg-color, #E63946);
+    color: var(--text-color, #FFFFFF);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+/* Верхнее положение - relative (в потоке) */
+.sp-alert-bar.sp-position-top {
+    position: relative;
+    top: 0;
+}
+
+/* Нижнее положение - fixed */
+.sp-alert-bar.sp-position-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+/* Остальные стили без изменений */
+.sp-alert-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.sp-alert-text {
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.sp-alert-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.sp-alert-btn {
+    background-color: var(--btn-color, #1D3557);
+    color: #ffffff;
+    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.sp-alert-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.sp-alert-close {
+    background: transparent;
+    border: none;
+    color: var(--text-color, #FFFFFF);
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0.7;
+    padding: 4px 8px;
+    transition: opacity 0.2s;
+    display: inline-block;
+}
+
+.sp-alert-close:hover {
+    opacity: 1;
+}
+
+.hidden-btn {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .sp-alert-container {
+        flex-direction: column;
+        padding: 12px 16px;
+        text-align: center;
+        gap: 12px;
+    }
+    .sp-alert-actions {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .sp-alert-text {
+        font-size: 13px;
+    }
+    .sp-alert-btn {
+        padding: 6px 16px;
+        font-size: 12px;
+    }
+}

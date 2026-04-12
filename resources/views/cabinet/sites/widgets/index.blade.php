@@ -33,7 +33,7 @@
                                                id="widget-switch-{{ $widget->id }}"
                                                data-id="{{ $widget->id }}"
                                                data-name="{{ $widget->widgetType->name }}"
-                                            {{ $widget->is_enabled ? 'checked' : '' }}>
+                                            {{ $widget->is_active ? 'checked' : '' }}>
                                     </div>
                                 </td>
                                 <td class="text-end">
