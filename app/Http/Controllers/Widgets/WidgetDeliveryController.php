@@ -3,13 +3,14 @@
 
 namespace App\Http\Controllers\Widgets;
 
+use App\Http\Controllers\Cabinet\BaseCabinetController;
 use App\Http\Controllers\Controller;
 use App\Models\Site;
 use App\Models\Widgets\WidgetStatistic;
 use Illuminate\Http\Request;
 
 
-class WidgetDeliveryController extends Controller
+class WidgetDeliveryController extends BaseCabinetController
 {
     public function getPayload(Request $request)
     {
