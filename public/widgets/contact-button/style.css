@@ -1,0 +1,172 @@
+/* 1. Базовый контейнер и позиционирование */
+.sp-contact-wrapper {
+    position: fixed;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    /* Переменные из JS */
+    --main-color: #007bff;
+    --icon-color: #ffffff;
+    --btn-opacity: 1;
+    --scale-factor: 1; /* Для размеров: small(0.8), medium(1), large(1.2) */
+}
+
+/* Сетки позиционирования */
+.sp-pos-bottom-right { bottom: 30px; right: 30px; }
+.sp-pos-bottom-left { bottom: 30px; left: 30px; align-items: flex-start; }
+.sp-pos-top-right { top: 30px; right: 30px; flex-direction: column-reverse; }
+.sp-pos-top-left { top: 30px; left: 30px; align-items: flex-start; flex-direction: column-reverse; }
+
+/* 2. Основная кнопка */
+.sp-contact-main {
+    width: calc(60px * var(--scale-factor));
+    height: calc(60px * var(--scale-factor));
+    border-radius: 50%;
+    background-color: var(--main-color);
+    color: var(--icon-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: var(--btn-opacity);
+    position: relative;
+    z-index: 2;
+}
+
+.sp-contact-main:hover {
+    opacity: 1 !important;
+    transform: scale(1.05);
+}
+
+.sp-contact-main svg {
+    width: 50%;
+    height: 50%;
+    transition: transform 0.4s ease;
+}
+
+/* 3. Анимации пульсации (Pulse Types) */
+
+/* ТИП: WAVE (Волна) */
+.sp-anim-wave::before,
+.sp-anim-wave::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--main-color);
+    opacity: 0.6;
+    z-index: -1;
+    animation: sp-wave-anim 2s infinite;
+}
+.sp-anim-wave::after { animation-delay: 0.5s; }
+
+@keyframes sp-wave-anim {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* ТИП: PULSE (Пульсация) */
+.sp-anim-pulse {
+    animation: sp-pulse-anim 1.5s infinite alternate ease-in-out;
+}
+@keyframes sp-pulse-anim {
+    0% { transform: scale(1); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    100% { transform: scale(1.1); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
+}
+
+/* ТИП: SHAKE (Тряска) */
+.sp-anim-shake {
+    animation: sp-shake-anim 4s infinite;
+}
+@keyframes sp-shake-anim {
+    0%, 90%, 100% { transform: rotate(0); }
+    92% { transform: rotate(10deg); }
+    94% { transform: rotate(-10deg); }
+    96% { transform: rotate(10deg); }
+    98% { transform: rotate(-10deg); }
+}
+
+/* ТИП: JELLY (Желе) */
+.sp-anim-jelly {
+    animation: sp-jelly-anim 2s infinite;
+}
+@keyframes sp-jelly-anim {
+    0%, 100% { transform: scale(1, 1); }
+    30% { transform: scale(1.25, 0.75); }
+    40% { transform: scale(0.75, 1.25); }
+    50% { transform: scale(1.15, 0.85); }
+    65% { transform: scale(0.95, 1.05); }
+    75% { transform: scale(1.05, 0.95); }
+}
+
+/* 4. Меню каналов */
+.sp-contact-menu {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+    margin-bottom: 15px; /* Для нижних позиций */
+    margin-top: 15px;    /* Для верхних позиций */
+    opacity: 0;
+    transform: translateY(20px) scale(0.8);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+}
+
+.sp-contact-wrapper.is-active .sp-contact-menu {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Элементы каналов */
+.sp-channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    text-decoration: none;
+    gap: 12px;
+    transition: transform 0.2s ease;
+}
+
+.sp-pos-bottom-left .sp-channel-item,
+.sp-pos-top-left .sp-channel-item { flex-direction: row-reverse; }
+
+.sp-channel-item:hover { transform: translateX(-5px); }
+.sp-pos-bottom-left .sp-channel-item:hover { transform: translateX(5px); }
+
+/* Подписи */
+.sp-channel-label {
+    background: #fff;
+    color: #333;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    white-space: nowrap;
+}
+
+/* Иконки каналов */
+.sp-channel-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    font-size: 20px;
+}
+
+/* Эффекты при наведении (Hover Effects) */
+.sp-hover-lift:hover { transform: translateY(-5px) scale(1.05); }
+.sp-hover-scale:hover { transform: scale(1.15); }
+.sp-hover-glow:hover { box-shadow: 0 0 20px var(--main-color); }
