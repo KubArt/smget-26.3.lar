@@ -1,17 +1,7 @@
-/**
- * Виджет "Cookie Pops" - полная копия оригинальной логики
- */
-window.SmWidget_cookie_pops = class extends SmWidget {
-    constructor(settings, id, assets) {
-        super(settings, id, assets);
-    }
+window.initWidget_cookie_pops = function(settings, widgetId, assets) {
+    const delay = (settings.delay || 0) * 1000;
 
-    mount() {
-        // ТОЧНАЯ КОПИЯ оригинальной функции initWidget_cookie_pops
-        const settings = this.settings;
-        const widgetId = this.id;
-        const assets = this.assets;
-
+    setTimeout(() => {
         // Проверяем, не был ли уже принят виджет
         if (localStorage.getItem(`sm_widget_${widgetId}_accepted`) === 'true') {
             return;
@@ -22,9 +12,9 @@ window.SmWidget_cookie_pops = class extends SmWidget {
             const style = document.createElement('style');
             // Добавляем RGB переменные для теней
             const btnColor = settings.design.btn_color || '#0665d0';
-            const rgb = this.hexToRgb(btnColor);
+            const rgb = hexToRgb(btnColor);
             const textColor = settings.design.text_color || '#2d3436';
-            const textRgb = this.hexToRgb(textColor);
+            const textRgb = hexToRgb(textColor);
 
             style.textContent = `
                 :root {
@@ -53,11 +43,11 @@ window.SmWidget_cookie_pops = class extends SmWidget {
         // Подставляем значения в HTML
         let html = assets.html;
         const placeholders = {
-            '{text}': settings.content?.text || '',
-            '{policy_text}': settings.content?.policy_text || '',
-            '{policy_url}': settings.content?.policy_url || '#',
-            '{btn_accept_text}': settings.content?.btn_accept_text || 'Принимаю',
-            '{btn_leave_text}': settings.content?.btn_leave_text || 'Покинуть сайт'
+            '{text}': settings.content.text || '',
+            '{policy_text}': settings.content.policy_text || '',
+            '{policy_url}': settings.content.policy_url || '#',
+            '{btn_accept_text}': settings.content.btn_accept_text || 'Принимаю',
+            '{btn_leave_text}': settings.content.btn_leave_text || 'Покинуть сайт'
         };
 
         Object.keys(placeholders).forEach(key => {
@@ -85,7 +75,6 @@ window.SmWidget_cookie_pops = class extends SmWidget {
 
         container.innerHTML = html;
         document.body.appendChild(container);
-        this.container = container;
 
         // Находим корневой элемент виджета (любой элемент с классом sp-skin-*)
         const widgetRoot = container.querySelector('[class^="sp-skin-"]');
@@ -112,7 +101,7 @@ window.SmWidget_cookie_pops = class extends SmWidget {
         // Обработчик для кнопки "Покинуть сайт"
         const leaveBtn = container.querySelector('#sp-leave');
         if (leaveBtn) {
-            if (settings.content?.show_leave_btn !== false) {
+            if (settings.content.show_leave_btn !== false) {
                 leaveBtn.onclick = (e) => {
                     e.preventDefault();
                     // Показываем confirm
@@ -137,18 +126,24 @@ window.SmWidget_cookie_pops = class extends SmWidget {
         if (window.SmGet && window.SmGet.trackEvent) {
             window.SmGet.trackEvent(widgetId, 'view');
         }
+
+    }, delay);
+};
+
+// Вспомогательная функция для конвертации HEX в RGB
+function hexToRgb(hex) {
+    // Удаляем # если есть
+    hex = hex.replace(/^#/, '');
+
+    // Поддерживаем 3-символьные HEX
+    if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
     }
 
-    hexToRgb(hex) {
-        hex = hex.replace(/^#/, '');
-        if (hex.length === 3) {
-            hex = hex.split('').map(c => c + c).join('');
-        }
-        const intVal = parseInt(hex, 16);
-        return {
-            r: (intVal >> 16) & 255,
-            g: (intVal >> 8) & 255,
-            b: intVal & 255
-        };
-    }
-};
+    const intVal = parseInt(hex, 16);
+    return {
+        r: (intVal >> 16) & 255,
+        g: (intVal >> 8) & 255,
+        b: intVal & 255
+    };
+}

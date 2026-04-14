@@ -1,0 +1,45 @@
+<div class="sp-lidup-overlay sp-{animation_in}" data-sp-overlay>
+    <div class="sp-lidup-popup sp-size-{size} sp-position-{position}">
+        <button class="sp-lidup-close" data-sp-close>✕</button>
+
+        <div class="sp-lidup-content sp-image-{image_position}">
+            {image_html}
+
+            <div class="sp-lidup-inner">
+                <h3 class="sp-lidup-title">{title}</h3>
+                <p class="sp-lidup-description">{description}</p>
+
+                <div class="sp-lidup-timer" style="display: {timer_display}">
+                    <div class="sp-timer-title">{timer_title}</div>
+                    <div class="sp-timer-boxes">
+                        <div class="sp-timer-box">
+                            <span class="sp-timer-days">00</span>
+                            <span class="sp-timer-label">{timer_days_text}</span>
+                        </div>
+                        <div class="sp-timer-sep">:</div>
+                        <div class="sp-timer-box">
+                            <span class="sp-timer-hours">00</span>
+                            <span class="sp-timer-label">{timer_hours_text}</span>
+                        </div>
+                        <div class="sp-timer-sep">:</div>
+                        <div class="sp-timer-box">
+                            <span class="sp-timer-minutes">00</span>
+                            <span class="sp-timer-label">{timer_minutes_text}</span>
+                        </div>
+                        <div class="sp-timer-sep">:</div>
+                        <div class="sp-timer-box">
+                            <span class="sp-timer-seconds">00</span>
+                            <span class="sp-timer-label">{timer_seconds_text}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="sp-lidup-form" data-sp-form>
+                    <div id="sp-form-fields"></div>
+                    <button type="submit" class="sp-lidup-submit">{btn_text}</button>
+                    <div class="sp-lidup-message" style="display: none;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

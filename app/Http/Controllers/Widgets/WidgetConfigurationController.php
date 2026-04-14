@@ -48,10 +48,9 @@ class WidgetConfigurationController extends BaseCabinetController
             'privacy_policy_type' => 'required|in:system,custom,none',
             'privacy_policy_url' => 'required_if:privacy_policy_type,custom|nullable|url',
 
-            'settings' => 'required|array',
-            'settings.text' => 'required|string',
-            'settings.button_text' => 'required|string',
-            'settings.delay' => 'required|integer|min:0',
+//            'settings' => 'required|array',
+            //'settings.delay' => 'required|integer|min:0',
+
             'target_paths.allow' => 'nullable|string',
             'target_paths.disallow' => 'nullable|string',
             'target_utm' => 'nullable|array',
@@ -87,7 +86,7 @@ class WidgetConfigurationController extends BaseCabinetController
                     'type' => $request->input('privacy_policy_type'),
                     'url' => $request->input('privacy_policy_url'),
                 ],
-                'settings' => $validated['settings'],
+                //'settings' => $validated['settings'],
                 'target_paths' => [
                     'allow' => $processPaths($request->input('target_paths.allow')),
                     'disallow' => $processPaths($request->input('target_paths.disallow')),

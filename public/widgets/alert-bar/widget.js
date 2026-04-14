@@ -1,238 +1,329 @@
-window.initWidget_alert_bar = function(settings, widgetId, assets) {
-    // 1. Проверка частоты показа и состояния закрытия
-    const storageKey = `sm_alert_${widgetId}_closed`;
-    const now = new Date().getTime();
-
-    // Проверяем, не закрыл ли пользователь виджет ранее
-    const closedData = localStorage.getItem(storageKey) || sessionStorage.getItem(storageKey);
-    if (closedData) {
-        if (settings.close_behavior === 'hide_forever') return;
-        if (settings.frequency === 'once_day') {
-            const lastClosed = parseInt(closedData);
-            if (now - lastClosed < 24 * 60 * 60 * 1000) return;
-        }
-        if (settings.frequency === 'once_session' && sessionStorage.getItem(storageKey)) return;
+/**
+ * Виджет "Alert Bar" (Информационная полоса)
+ * Адаптирован под базовый класс SmWidget
+ */
+window.SmWidget_alert_bar = class extends SmWidget {
+    constructor(settings, id, assets) {
+        super(settings, id, assets);
+        this.storageKey = `sm_alert_${this.id}_closed`;
+        this.placeholder = null;
+        this.resizeObserver = null;
     }
 
-    let isWidgetRendered = false;
-    let placeholder = null; // Для placeholder при фиксации
+    /**
+     * Переопределяем init для проверки частоты показа
+     */
+    init() {
+        if (this.shouldHide()) return;
+        super.init(); // Вызывает логику задержки и скролла из SmWidget
+    }
 
-    // Функция отрисовки виджета
-    const renderAlert = () => {
-        if (isWidgetRendered) return;
-        isWidgetRendered = true;
+    /**
+     * Проверка, нужно ли скрыть виджет (на основе localStorage/sessionStorage)
+     */
+    shouldHide() {
+        const now = new Date().getTime();
+        const closedData = localStorage.getItem(this.storageKey) || sessionStorage.getItem(this.storageKey);
 
-        // 2. Инъекция стилей
-        if (assets.css) {
-            const style = document.createElement('style');
-            style.id = `sm-style-${widgetId}`;
-            let css = assets.css;
+        if (closedData) {
+            const closeBehavior = this.settings.close_behavior || 'hide_forever';
+            const frequency = this.settings.frequency || 'once_session';
 
-            if (settings.design) {
-                css += `
-                    :root {
-                        --bg-color: ${settings.design.bg_color || '#E63946'};
-                        --text-color: ${settings.design.text_color || '#FFFFFF'};
-                        --btn-color: ${settings.design.btn_color || '#1D3557'};
-                    }
-                `;
+            if (closeBehavior === 'hide_forever') return true;
+            if (frequency === 'once_day') {
+                if (now - parseInt(closedData) < 24 * 60 * 60 * 1000) return true;
             }
-            style.textContent = css;
+            if (frequency === 'once_session' && sessionStorage.getItem(this.storageKey)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Основной метод отрисовки виджета
+     */
+    mount() {
+        const design = this.settings.design || {};
+        const content = this.settings.content || {};
+
+        // 1. Инжекция стилей с CSS переменными
+        const styleId = `sp-style-${this.id}`;
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+
+            const bgColor = design.bg_color || '#E63946';
+            const textColor = design.text_color || '#FFFFFF';
+            const btnColor = design.btn_color || '#1D3557';
+
+            style.textContent = `
+                :root {
+                    --bg-color: ${bgColor};
+                    --text-color: ${textColor};
+                    --btn-color: ${btnColor};
+                }
+                ${this.assets.css}
+            `;
             document.head.appendChild(style);
         }
 
-        // 3. Подготовка HTML
-        let html = assets.html;
-        const placeholders = {
-            '{text}': settings.text || '',
-            '{link}': settings.link || '#',
-            '{btn_text}': settings.btn_text || 'Подробнее',
-            '{position}': settings.position || 'top'
-        };
+        // 2. Подготовка HTML с заменой плейсхолдеров
+        let html = this.assets.html
+            .replace(/\{text\}/g, this.escapeHtml(this.settings.text || ''))
+            .replace(/\{link\}/g, this.settings.link || '#')
+            .replace(/\{btn_text\}/g, this.escapeHtml(this.settings.btn_text || 'Подробнее'))
+            .replace(/\{position\}/g, this.settings.position || 'top')
+            .replace(/\{widget_id\}/g, this.id);
 
-        Object.keys(placeholders).forEach(key => {
-            html = html.replaceAll(key, placeholders[key]);
-        });
+        // Обработка кнопки (скрываем если has_button === false)
+        const hasButton = this.settings.has_button !== false;
+        if (!hasButton) {
+            html = html.replace('{display_button}', 'hidden-btn');
+        } else {
+            html = html.replace('{display_button}', '');
+        }
 
-        // 4. Создание контейнера
-        const container = document.createElement('div');
-        container.id = `sm-widget-${widgetId}`;
-        container.innerHTML = html;
+        // 3. Создание контейнера в зависимости от позиции
+        const position = this.settings.position || 'top';
+        const fixedOnScroll = this.settings.fixed_on_scroll === true;
 
-        const widgetRoot = container.querySelector('.sp-alert-bar');
-
-        if (settings.position === 'bottom') {
-            // Нижнее положение - всегда fixed
-            container.style.cssText = `
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                z-index: 999998;
-                transform: translateY(100%);
-                transition: transform 0.4s ease-in-out;
-            `;
-            document.body.appendChild(container);
-            setTimeout(() => { container.style.transform = 'translateY(0)'; }, 100);
-
+        if (position === 'bottom') {
+            // Нижнее положение - всегда fixed с анимацией
+            this.createBottomAlert(html);
         } else {
             // Верхнее положение
-            if (settings.fixed_on_scroll) {
-                // Фиксированный режим: создаем placeholder
-                placeholder = document.createElement('div');
-                placeholder.style.display = 'none';
-                document.body.insertBefore(placeholder, document.body.firstChild);
-
-                // Вставляем виджет как fixed
-                container.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    z-index: 999998;
-                    transform: translateY(-100%);
-                    transition: transform 0.4s ease-in-out;
-                `;
-                document.body.appendChild(container);
-                setTimeout(() => { container.style.transform = 'translateY(0)'; }, 100);
-
-                // Функция обновления placeholder
-                const updatePlaceholder = () => {
-                    if (!widgetRoot) return;
-                    const height = widgetRoot.offsetHeight;
-                    if (height > 0) {
-                        placeholder.style.display = 'block';
-                        placeholder.style.height = height + 'px';
-                        placeholder.style.width = '100%';
-                    }
-                };
-
-                // Обновляем при появлении и изменении размера
-                setTimeout(updatePlaceholder, 150);
-                const resizeObserver = new ResizeObserver(updatePlaceholder);
-                resizeObserver.observe(widgetRoot);
-
+            if (fixedOnScroll) {
+                this.createFixedTopAlert(html);
             } else {
-                // Обычный режим - в потоке документа
-                container.style.cssText = `
-                    position: relative;
-                    width: 100%;
-                    z-index: 999998;
-                `;
-                document.body.insertBefore(container, document.body.firstChild);
+                this.createStaticTopAlert(html);
             }
         }
 
-        // Активируем клики внутри
-        if (widgetRoot) widgetRoot.style.pointerEvents = 'auto';
+        // 4. Настройка событий после рендера
+        if (this.container) {
+            this.bindEvents();
+            this.handleAutoHide();
+            this.track('view');
+        }
+    }
 
-        // 5. Обработка событий
-        if (window.SmGet && window.SmGet.trackEvent) {
-            window.SmGet.trackEvent(widgetId, 'view');
+    /**
+     * Создание нижнего виджета (fixed, анимация снизу)
+     */
+    createBottomAlert(html) {
+        const container = document.createElement('div');
+        container.id = `sm-widget-${this.id}`;
+        container.innerHTML = html;
+        container.style.cssText = `
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 999998;
+            transform: translateY(100%);
+            transition: transform 0.4s ease-in-out;
+            pointer-events: none;
+        `;
+        document.body.appendChild(container);
+
+        this.container = container.firstElementChild;
+        if (this.container) {
+            this.container.style.pointerEvents = 'auto';
         }
 
-        // Клик по кнопке действия
-        const actionBtn = container.querySelector('#sp-action-btn');
-        if (actionBtn) {
-            actionBtn.onclick = (e) => {
+        // Анимация появления
+        setTimeout(() => {
+            container.style.transform = 'translateY(0)';
+        }, 100);
+    }
+
+    /**
+     * Создание верхнего фиксированного виджета (с placeholder)
+     */
+    createFixedTopAlert(html) {
+        // Создаем placeholder для сохранения места
+        this.placeholder = document.createElement('div');
+        this.placeholder.style.display = 'none';
+        document.body.insertBefore(this.placeholder, document.body.firstChild);
+
+        // Создаем контейнер
+        const container = document.createElement('div');
+        container.id = `sm-widget-${this.id}`;
+        container.innerHTML = html;
+        container.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999998;
+            transform: translateY(-100%);
+            transition: transform 0.4s ease-in-out;
+            pointer-events: none;
+        `;
+        document.body.appendChild(container);
+
+        this.container = container.firstElementChild;
+        if (this.container) {
+            this.container.style.pointerEvents = 'auto';
+        }
+
+        // Анимация появления
+        setTimeout(() => {
+            container.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Обновление высоты placeholder
+        const updatePlaceholder = () => {
+            if (!this.container) return;
+            const height = this.container.offsetHeight;
+            if (height > 0 && this.placeholder) {
+                this.placeholder.style.display = 'block';
+                this.placeholder.style.height = height + 'px';
+                this.placeholder.style.width = '100%';
+            }
+        };
+
+        setTimeout(updatePlaceholder, 150);
+        this.resizeObserver = new ResizeObserver(updatePlaceholder);
+        this.resizeObserver.observe(this.container);
+    }
+
+    /**
+     * Создание верхнего статического виджета (в потоке документа)
+     */
+    createStaticTopAlert(html) {
+        const container = document.createElement('div');
+        container.id = `sm-widget-${this.id}`;
+        container.innerHTML = html;
+        container.style.cssText = `
+            position: relative;
+            width: 100%;
+            z-index: 999998;
+            pointer-events: none;
+        `;
+        document.body.insertBefore(container, document.body.firstChild);
+
+        this.container = container.firstElementChild;
+        if (this.container) {
+            this.container.style.pointerEvents = 'auto';
+        }
+    }
+
+    /**
+     * Применение CSS переменных (если нужно переопределить)
+     */
+    applyDesign() {
+        const design = this.settings.design || {};
+        if (!this.container) return;
+
+        this.container.style.setProperty('--bg-color', design.bg_color || '#E63946');
+        this.container.style.setProperty('--text-color', design.text_color || '#FFFFFF');
+        this.container.style.setProperty('--btn-color', design.btn_color || '#1D3557');
+    }
+
+    /**
+     * Назначение обработчиков событий
+     */
+    bindEvents() {
+        // Кнопка действия (ссылка)
+        const actionBtn = this.container.querySelector('#sp-action-btn');
+        if (actionBtn && this.settings.has_button !== false) {
+            actionBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                if (window.SmGet && window.SmGet.trackEvent) {
-                    window.SmGet.trackEvent(widgetId, 'click');
+                this.track('click');
+
+                const url = this.settings.link;
+                if (url && url !== '#') {
+                    window.open(url, '_blank');
                 }
-                if (settings.link && settings.link !== '#') {
-                    window.open(settings.link, '_blank');
-                }
-            };
+            });
         }
 
-        // Закрытие
-        const closeBtn = container.querySelector('#sp-close');
+        // Кнопка закрытия
+        const closeBtn = this.container.querySelector('#sp-close');
         if (closeBtn) {
-            closeBtn.onclick = () => {
-                const timestamp = new Date().getTime();
-                if (settings.close_behavior === 'hide_forever') {
-                    localStorage.setItem(storageKey, timestamp.toString());
-                } else {
-                    sessionStorage.setItem(storageKey, timestamp.toString());
-                }
-
-                // Анимация ухода
-                if (settings.position === 'bottom') {
-                    container.style.transform = 'translateY(100%)';
-                    setTimeout(() => container.remove(), 400);
-                } else if (settings.position === 'top' && settings.fixed_on_scroll) {
-                    container.style.transform = 'translateY(-100%)';
-                    setTimeout(() => {
-                        container.remove();
-                        if (placeholder) placeholder.remove();
-                    }, 400);
-                } else {
-                    container.remove();
-                }
-            };
+            closeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.close();
+            });
         }
+    }
 
-        // 6. Авто-скрытие по таймеру
-        if (settings.auto_hide > 0) {
-            setTimeout(() => {
-                if (document.getElementById(container.id)) {
-                    if (settings.position === 'bottom') {
-                        container.style.transform = 'translateY(100%)';
-                        setTimeout(() => container.remove(), 400);
-                    } else if (settings.position === 'top' && settings.fixed_on_scroll) {
-                        container.style.transform = 'translateY(-100%)';
-                        setTimeout(() => {
-                            container.remove();
-                            if (placeholder) placeholder.remove();
-                        }, 400);
-                    } else {
-                        container.remove();
-                    }
-                }
-            }, settings.auto_hide * 1000);
-        }
-    };
+    /**
+     * Закрытие виджета с анимацией
+     */
+    close() {
+        const timestamp = new Date().getTime();
+        const closeBehavior = this.settings.close_behavior || 'hide_forever';
 
-    // 7. Логика запуска (Delay или Scroll)
-    const startLogic = () => {
-        if (settings.scroll_trigger > 0) {
-            let triggered = false;
-
-            const checkScroll = () => {
-                if (triggered) return;
-
-                const winHeight = window.innerHeight;
-                const docHeight = document.documentElement.scrollHeight - winHeight;
-                // Защита от деления на 0
-                if (docHeight <= 0) {
-                    renderAlert();
-                    triggered = true;
-                    return;
-                }
-
-                const scrollPercent = (window.scrollY / docHeight) * 100;
-
-                if (scrollPercent >= settings.scroll_trigger) {
-                    triggered = true;
-                    renderAlert();
-                    window.removeEventListener('scroll', checkScroll);
-                    window.removeEventListener('resize', checkScroll);
-                }
-            };
-
-            window.addEventListener('scroll', checkScroll);
-            window.addEventListener('resize', checkScroll);
-            // Проверяем сразу при загрузке
-            checkScroll();
+        if (closeBehavior === 'hide_forever') {
+            localStorage.setItem(this.storageKey, timestamp.toString());
         } else {
-            renderAlert();
+            sessionStorage.setItem(this.storageKey, timestamp.toString());
         }
-    };
 
-    // Запуск с учетом задержки
-    if (settings.delay > 0) {
-        setTimeout(startLogic, settings.delay * 1000);
-    } else {
-        startLogic();
+        this.track('close');
+
+        const position = this.settings.position || 'top';
+        const fixedOnScroll = this.settings.fixed_on_scroll === true;
+        const container = document.getElementById(`sm-widget-${this.id}`);
+
+        if (!container) {
+            if (this.container) this.container.remove();
+            if (this.placeholder) this.placeholder.remove();
+            return;
+        }
+
+        // Анимация ухода
+        if (position === 'bottom') {
+            container.style.transform = 'translateY(100%)';
+            setTimeout(() => {
+                container.remove();
+                if (this.placeholder) this.placeholder.remove();
+            }, 400);
+        } else if (position === 'top' && fixedOnScroll) {
+            container.style.transform = 'translateY(-100%)';
+            setTimeout(() => {
+                container.remove();
+                if (this.placeholder) this.placeholder.remove();
+                if (this.resizeObserver) this.resizeObserver.disconnect();
+            }, 400);
+        } else {
+            container.remove();
+            if (this.placeholder) this.placeholder.remove();
+        }
+    }
+
+    /**
+     * Автоматическое скрытие по таймеру
+     */
+    handleAutoHide() {
+        const autoHide = this.settings.auto_hide || 0;
+        if (autoHide > 0) {
+            setTimeout(() => {
+                const container = document.getElementById(`sm-widget-${this.id}`);
+                if (container) {
+                    this.close();
+                }
+            }, autoHide * 1000);
+        }
+    }
+
+    /**
+     * Переопределяем метод track для совместимости
+     */
+    track(eventName) {
+        if (window.SmGet && window.SmGet.trackEvent) {
+            window.SmGet.trackEvent(this.id, eventName);
+        }
+    }
+
+    /**
+     * Экранирование HTML
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 };

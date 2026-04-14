@@ -3,49 +3,48 @@
     const apiKey = self.getAttribute('data-key');
     if (!apiKey) return;
 
-    // 1. Функция сбора и кэширования UTM
-    const getStoredUtm = () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
-        let utm = {};
-
-        utmKeys.forEach(key => {
-            const val = urlParams.get(key);
-            if (val) {
-                // Если метка есть в URL, сохраняем/обновляем в сессии
-                sessionStorage.setItem(`smget_${key}`, val);
-                utm[key] = val;
-            } else {
-                // Если в URL нет, пробуем достать из сессии
-                const stored = sessionStorage.getItem(`smget_${key}`);
-                if (stored) utm[key] = stored;
-            }
-        });
-        return utm;
-    };
-
-    const utmParams = getStoredUtm();
+    // Реестр загруженных типов в текущем окне
+    window.SmLoadedTypes = window.SmLoadedTypes || new Set();
 
     const pageData = {
         key: apiKey,
         path: window.location.pathname,
         referrer: document.referrer,
-        ...utmParams // Подмешиваем метки (из URL или из памяти)
+        _t: new Date().getTime()
     };
 
     const params = new URLSearchParams(pageData).toString();
 
-    fetch(`http://smget-26.3.lar/v1/get-widgets?${params}`)
+    // Используем протокол текущей страницы
+    const protocol = window.location.protocol;
+    const apiUrl = `${protocol}//smget-26.3.lar/v1/get-widgets?${params}`;
+
+    fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
-            if (data.widgets && data.widgets.length > 0) {
-                window.SmGet = data;
-                window.SmGet.context = pageData;
+            if (!data.widgets) return;
+
+            window.SmGet = data;
+
+            const uniqueWidgets = data.widgets.filter(w => {
+                if (window.SmLoadedTypes.has(w.type)) {
+                    console.warn(`SMGET: Widget type [${w.type}] already loaded. Skipping.`);
+                    return false;
+                }
+                window.SmLoadedTypes.add(w.type);
+                return true;
+            });
+
+            if (uniqueWidgets.length > 0) {
+                window.SmGet.widgets = uniqueWidgets;
 
                 const core = document.createElement('script');
-                core.src = 'http://smget-26.3.lar/widgets/widget-core.js';
+                core.src = `${protocol}//smget-26.3.lar/widgets/widget-core.js`;
                 core.async = true;
                 document.head.appendChild(core);
             }
+        })
+        .catch(error => {
+            console.error('SMGET: Failed to load widgets:', error);
         });
 })();
