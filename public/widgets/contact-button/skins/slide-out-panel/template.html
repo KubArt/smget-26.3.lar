@@ -1,0 +1,51 @@
+<div class="sp-slideout sp-position-{position}">
+    <!-- Затемнение фона -->
+    <div class="sp-slideout-overlay" data-sp-overlay></div>
+
+    <!-- Выезжающая панель -->
+    <div class="sp-slideout-panel">
+        <div class="sp-slideout-header">
+            <div class="sp-slideout-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"/>
+                    <circle cx="8" cy="10" r="2" fill="white"/>
+                    <circle cx="12" cy="10" r="2" fill="white"/>
+                    <circle cx="16" cy="10" r="2" fill="white"/>
+                </svg>
+                <span>Свяжитесь с нами</span>
+            </div>
+            <button class="sp-slideout-close" data-sp-close>✕</button>
+        </div>
+
+        <div class="sp-slideout-content">
+            <div class="sp-slideout-description">Выберите удобный способ связи:</div>
+            <div class="sp-slideout-channels">
+                {channels_html}
+            </div>
+        </div>
+
+        <div class="sp-slideout-footer">
+            <span class="sp-slideout-footer-text">{main_tooltip}</span>
+        </div>
+    </div>
+
+    <!-- Кнопка-триггер -->
+    <button class="sp-slideout-trigger" data-sp-toggle>
+        <span class="sp-trigger-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z"/>
+                <circle cx="8" cy="10" r="2" fill="white"/>
+                <circle cx="12" cy="10" r="2" fill="white"/>
+                <circle cx="16" cy="10" r="2" fill="white"/>
+            </svg>
+        </span>
+        <span class="sp-trigger-close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
+            </svg>
+        </span>
+        <span class="sp-trigger-text">{main_tooltip}</span>
+    </button>
+
+    <div class="sp-slideout-tooltip">{main_tooltip}</div>
+</div>

@@ -1,14 +1,26 @@
-<div class="sp-contact-wrapper sp-pos-{position}">
-    <div class="sp-contact-menu" id="sp-menu">
+<div class="sp-contact-widget sp-position-{position}" data-widget-id="{widget_id}">
+    <!-- Меню каналов -->
+    <div class="sp-channels-menu" id="sp-channels-menu">
         {channels_html}
     </div>
 
-    <div class="sp-contact-main {pulse_class}" id="sp-main-btn">
+    <!-- Основная кнопка -->
+    <div class="sp-main-button" id="sp-main-button">
         <div class="sp-icon-open">
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.527 3.66 1.438 5.161L2 22l4.839-1.438C8.34 21.473 10.109 22 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="currentColor"/>
+                <circle cx="8" cy="10" r="2" fill="white"/>
+                <circle cx="12" cy="10" r="2" fill="white"/>
+                <circle cx="16" cy="10" r="2" fill="white"/>
             </svg>
         </div>
-        <div class="sp-icon-close">✕</div>
+        <div class="sp-icon-close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="currentColor"/>
+            </svg>
+        </div>
     </div>
+
+    <!-- Tooltip -->
+    <div class="sp-tooltip" id="sp-tooltip">{main_tooltip}</div>
 </div>

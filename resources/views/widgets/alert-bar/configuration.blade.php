@@ -447,10 +447,10 @@
 
                         // Добавляем принудительно стиль для hidden-btn
                         const hiddenBtnStyle = `
-        .hidden-btn {
-            display: none !important;
-        }
-    `;
+                                .hidden-btn {
+                                    display: none !important;
+                                }
+                            `;
 
                         this.shadowRoot.innerHTML = `
                                 <style>
@@ -504,28 +504,28 @@
 
                             if (width <= 480) {
                                 styles = `
-                        .sp-alert-container {
-                            flex-direction: column !important;
-                            padding: 12px 16px !important;
-                            gap: 12px !important;
-                            text-align: center !important;
-                        }
-                        .sp-alert-actions {
-                            width: 100% !important;
-                            justify-content: center !important;
-                        }
-                        .sp-alert-btn {
-                            width: auto !important;
-                            min-width: 120px !important;
-                        }
-                    `;
+                                    .sp-alert-container {
+                                        flex-direction: column !important;
+                                        padding: 12px 16px !important;
+                                        gap: 12px !important;
+                                        text-align: center !important;
+                                    }
+                                    .sp-alert-actions {
+                                        width: 100% !important;
+                                        justify-content: center !important;
+                                    }
+                                    .sp-alert-btn {
+                                        width: auto !important;
+                                        min-width: 120px !important;
+                                    }
+                                `;
                             } else if (width <= 768) {
                                 styles = `
-                        .sp-alert-container {
-                            padding: 10px 20px !important;
-                            gap: 16px !important;
-                        }
-                    `;
+                                    .sp-alert-container {
+                                        padding: 10px 20px !important;
+                                        gap: 16px !important;
+                                    }
+                                `;
                             }
                             mediaStyles.textContent = styles;
                         };

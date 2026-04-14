@@ -19,15 +19,16 @@ class Manifest
                 'position' => 'bottom-right',
                 'delay' => 2,
                 'is_active' => true,
+                'main_tooltip' => 'Свяжитесь с нами', // Новое поле
 
                 // Массив каналов (динамический)
                 'channels' => [
                     [
                         'id' => 'ch_1',
-                        'type' => 'whatsapp', // slug для иконки
-                        'label' => 'Написать в WhatsApp',
-                        'action_type' => 'link', // link или lead_form
-                        'action_value' => '79001234567',
+                        'type' => 'whatsapp',
+                        'label' => 'WhatsApp',
+                        'action_type' => 'link',
+                        'action_value' => '',
                         'bg_color' => '#25D366',
                         'icon_color' => '#ffffff',
                         'is_active' => true

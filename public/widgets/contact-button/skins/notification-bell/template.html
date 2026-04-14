@@ -1,0 +1,30 @@
+<div class="sp-notification-bell sp-position-{position}">
+    <div class="sp-notification-bell-panel">
+        <div class="sp-notification-bell-header">
+            <span class="sp-header-title">Свяжитесь с нами</span>
+            <button class="sp-header-close" data-sp-close>✕</button>
+        </div>
+        <div class="sp-notification-bell-content">
+            <div class="sp-notification-bell-channels">
+                {channels_html}
+            </div>
+        </div>
+        <div class="sp-notification-bell-footer">
+            <span class="sp-footer-text">{main_tooltip}</span>
+        </div>
+    </div>
+    <button class="sp-notification-bell-trigger" data-sp-toggle>
+        <span class="sp-trigger-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.93 6 11v5l-2 2v1h16v-1l-2-2z"/>
+            </svg>
+        </span>
+        <span class="sp-trigger-close">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"/>
+            </svg>
+        </span>
+        <span class="sp-trigger-badge">!</span>
+    </button>
+    <div class="sp-notification-bell-tooltip">{main_tooltip}</div>
+</div>

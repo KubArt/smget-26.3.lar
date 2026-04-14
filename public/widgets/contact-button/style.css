@@ -1,159 +1,128 @@
-/* 1. Базовый контейнер и позиционирование */
-.sp-contact-wrapper {
+/* Базовый контейнер */
+.sp-contact-widget {
     position: fixed;
     z-index: 999999;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    pointer-events: none;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    /* Переменные из JS */
-    --main-color: #007bff;
-    --icon-color: #ffffff;
-    --btn-opacity: 1;
-    --scale-factor: 1; /* Для размеров: small(0.8), medium(1), large(1.2) */
+    pointer-events: none;
 }
 
-/* Сетки позиционирования */
-.sp-pos-bottom-right { bottom: 30px; right: 30px; }
-.sp-pos-bottom-left { bottom: 30px; left: 30px; align-items: flex-start; }
-.sp-pos-top-right { top: 30px; right: 30px; flex-direction: column-reverse; }
-.sp-pos-top-left { top: 30px; left: 30px; align-items: flex-start; flex-direction: column-reverse; }
-
-/* 2. Основная кнопка */
-.sp-contact-main {
-    width: calc(60px * var(--scale-factor));
-    height: calc(60px * var(--scale-factor));
-    border-radius: 50%;
-    background-color: var(--main-color);
-    color: var(--icon-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    pointer-events: auto;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    opacity: var(--btn-opacity);
-    position: relative;
-    z-index: 2;
+/* Позиционирование */
+.sp-position-bottom-right {
+    bottom: 30px;
+    right: 30px;
+    align-items: flex-end;
 }
 
-.sp-contact-main:hover {
-    opacity: 1 !important;
-    transform: scale(1.05);
+.sp-position-bottom-left {
+    bottom: 30px;
+    left: 30px;
+    align-items: flex-start;
 }
 
-.sp-contact-main svg {
-    width: 50%;
-    height: 50%;
-    transition: transform 0.4s ease;
-}
-
-/* 3. Анимации пульсации (Pulse Types) */
-
-/* ТИП: WAVE (Волна) */
-.sp-anim-wave::before,
-.sp-anim-wave::after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    background: var(--main-color);
-    opacity: 0.6;
-    z-index: -1;
-    animation: sp-wave-anim 2s infinite;
-}
-.sp-anim-wave::after { animation-delay: 0.5s; }
-
-@keyframes sp-wave-anim {
-    0% { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(2.2); opacity: 0; }
-}
-
-/* ТИП: PULSE (Пульсация) */
-.sp-anim-pulse {
-    animation: sp-pulse-anim 1.5s infinite alternate ease-in-out;
-}
-@keyframes sp-pulse-anim {
-    0% { transform: scale(1); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-    100% { transform: scale(1.1); box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-}
-
-/* ТИП: SHAKE (Тряска) */
-.sp-anim-shake {
-    animation: sp-shake-anim 4s infinite;
-}
-@keyframes sp-shake-anim {
-    0%, 90%, 100% { transform: rotate(0); }
-    92% { transform: rotate(10deg); }
-    94% { transform: rotate(-10deg); }
-    96% { transform: rotate(10deg); }
-    98% { transform: rotate(-10deg); }
-}
-
-/* ТИП: JELLY (Желе) */
-.sp-anim-jelly {
-    animation: sp-jelly-anim 2s infinite;
-}
-@keyframes sp-jelly-anim {
-    0%, 100% { transform: scale(1, 1); }
-    30% { transform: scale(1.25, 0.75); }
-    40% { transform: scale(0.75, 1.25); }
-    50% { transform: scale(1.15, 0.85); }
-    65% { transform: scale(0.95, 1.05); }
-    75% { transform: scale(1.05, 0.95); }
-}
-
-/* 4. Меню каналов */
-.sp-contact-menu {
-    display: flex;
+.sp-position-top-right {
+    top: 30px;
+    right: 30px;
+    align-items: flex-end;
     flex-direction: column-reverse;
+}
+
+.sp-position-top-left {
+    top: 30px;
+    left: 30px;
+    align-items: flex-start;
+    flex-direction: column-reverse;
+}
+
+/* Меню каналов */
+.sp-channels-menu {
+    display: flex;
+    flex-direction: column;
     gap: 12px;
-    margin-bottom: 15px; /* Для нижних позиций */
-    margin-top: 15px;    /* Для верхних позиций */
+    margin-bottom: 15px;
     opacity: 0;
     transform: translateY(20px) scale(0.8);
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     pointer-events: none;
 }
 
-.sp-contact-wrapper.is-active .sp-contact-menu {
+.sp-contact-widget.sp-active .sp-channels-menu {
     opacity: 1;
     transform: translateY(0) scale(1);
     pointer-events: auto;
 }
 
-/* Элементы каналов */
-.sp-channel-item {
+.sp-position-top-right .sp-channels-menu,
+.sp-position-top-left .sp-channels-menu {
+    margin-bottom: 0;
+    margin-top: 15px;
+    transform: translateY(-20px) scale(0.8);
+}
+
+.sp-position-top-right.sp-active .sp-channels-menu,
+.sp-position-top-left.sp-active .sp-channels-menu {
+    transform: translateY(0) scale(1);
+}
+
+/* Элемент канала - выравнивание по основной кнопке */
+.sp-position-bottom-right .sp-channel-item,
+.sp-position-top-right .sp-channel-item {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+}
+
+.sp-position-bottom-left .sp-channel-item,
+.sp-position-top-left .sp-channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.sp-channel-item {
     text-decoration: none;
     gap: 12px;
     transition: transform 0.2s ease;
+    cursor: pointer;
 }
 
-.sp-pos-bottom-left .sp-channel-item,
-.sp-pos-top-left .sp-channel-item { flex-direction: row-reverse; }
+/* Смещение при наведении */
+.sp-position-bottom-right .sp-channel-item:hover,
+.sp-position-top-right .sp-channel-item:hover {
+    transform: translateX(-5px);
+}
 
-.sp-channel-item:hover { transform: translateX(-5px); }
-.sp-pos-bottom-left .sp-channel-item:hover { transform: translateX(5px); }
+.sp-position-bottom-left .sp-channel-item:hover,
+.sp-position-top-left .sp-channel-item:hover {
+    transform: translateX(5px);
+}
 
-/* Подписи */
+/* Лейбл канала */
+.sp-position-bottom-right .sp-channel-item,
+.sp-position-top-right .sp-channel-item {
+    flex-direction: row;
+}
+
+.sp-position-bottom-left .sp-channel-item,
+.sp-position-top-left .sp-channel-item {
+    flex-direction: row-reverse;
+}
+
 .sp-channel-label {
-    background: #fff;
+    background: white;
     color: #333;
-    padding: 6px 14px;
-    border-radius: 8px;
+    padding: 8px 16px;
+    border-radius: 12px;
     font-size: 14px;
     font-weight: 600;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
 }
 
-/* Иконки каналов */
+/* Иконка канала */
 .sp-channel-icon {
     width: 48px;
     height: 48px;
@@ -161,12 +130,410 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    font-size: 20px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    font-size: 24px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
 }
 
-/* Эффекты при наведении (Hover Effects) */
-.sp-hover-lift:hover { transform: translateY(-5px) scale(1.05); }
-.sp-hover-scale:hover { transform: scale(1.15); }
-.sp-hover-glow:hover { box-shadow: 0 0 20px var(--main-color); }
+/* Легкое увеличение иконки при наведении */
+.sp-channel-item:hover .sp-channel-icon {
+    transform: scale(1.05);
+}
+
+/* Основная кнопка */
+.sp-main-button {
+    width: calc(60px * var(--scale-factor, 1));
+    height: calc(60px * var(--scale-factor, 1));
+    border-radius: 50%;
+    background: var(--main-color, #3b82f6);
+    color: var(--icon-color, white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: var(--btn-opacity, 1);
+    position: relative;
+    z-index: 2;
+}
+
+.sp-main-button .sp-icon-close {
+    display: none;
+}
+
+.sp-active .sp-main-button .sp-icon-open {
+    display: none;
+}
+
+.sp-active .sp-main-button .sp-icon-close {
+    display: flex;
+}
+
+/* Tooltip */
+.sp-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.sp-position-bottom-right .sp-tooltip {
+    bottom: 70px;
+    right: 0;
+}
+
+.sp-position-bottom-left .sp-tooltip {
+    bottom: 70px;
+    left: 0;
+}
+
+.sp-position-top-right .sp-tooltip {
+    top: 70px;
+    right: 0;
+}
+
+.sp-position-top-left .sp-tooltip {
+    top: 70px;
+    left: 0;
+}
+
+.sp-main-button:hover + .sp-tooltip,
+.sp-tooltip:hover {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================ */
+/* АНИМАЦИИ ДЛЯ ОСНОВНОЙ КНОПКИ (9 видов)      */
+/* ============================================ */
+
+/* 1. WAVE - Волна (расходящиеся круги) */
+@keyframes sp-wave {
+    0% {
+        box-shadow: 0 0 0 0 var(--main-color);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(var(--main-color-rgb), 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(var(--main-color-rgb), 0);
+    }
+}
+.sp-animation-wave .sp-main-button {
+    animation: sp-wave 1.5s infinite;
+}
+
+/* 2. PULSE - Пульсация (изменение размера) */
+@keyframes sp-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+.sp-animation-pulse .sp-main-button {
+    animation: sp-pulse 1s ease-in-out infinite;
+}
+
+/* 3. SHAKE - Тряска (привлечение внимания) */
+@keyframes sp-shake {
+    0%, 100% { transform: rotate(0deg); }
+    10% { transform: rotate(15deg); }
+    20% { transform: rotate(-15deg); }
+    30% { transform: rotate(10deg); }
+    40% { transform: rotate(-10deg); }
+    50% { transform: rotate(5deg); }
+    60% { transform: rotate(-5deg); }
+}
+.sp-animation-shake .sp-main-button {
+    animation: sp-shake 3s ease-in-out infinite;
+}
+
+/* 4. RING - Звонок (поворот туда-сюда) */
+@keyframes sp-ring {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(30deg); }
+    50% { transform: rotate(-30deg); }
+    75% { transform: rotate(15deg); }
+    100% { transform: rotate(0deg); }
+}
+.sp-animation-ring .sp-main-button {
+    animation: sp-ring 2s ease-in-out infinite;
+    transform-origin: center;
+}
+
+/* 5. BOUNCE - Подпрыгивание */
+@keyframes sp-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+.sp-animation-bounce .sp-main-button {
+    animation: sp-bounce 1s ease-in-out infinite;
+}
+
+/* 6. GLOW - Пульсирующее свечение */
+@keyframes sp-glow {
+    0% {
+        box-shadow: 0 0 5px var(--main-color);
+    }
+    50% {
+        box-shadow: 0 0 25px var(--main-color), 0 0 10px var(--main-color);
+    }
+    100% {
+        box-shadow: 0 0 5px var(--main-color);
+    }
+}
+.sp-animation-glow .sp-main-button {
+    animation: sp-glow 1.5s ease-in-out infinite;
+}
+
+/* 7. SPIN - Вращение иконки */
+@keyframes sp-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.sp-animation-spin .sp-main-button .sp-icon-open svg {
+    animation: sp-spin 2s linear infinite;
+}
+
+/* 8. HEARTBEAT - Сердцебиение */
+@keyframes sp-heartbeat {
+    0% {
+        transform: scale(1);
+    }
+    25% {
+        transform: scale(1.15);
+    }
+    40% {
+        transform: scale(1);
+    }
+    60% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+.sp-animation-heartbeat .sp-main-button {
+    animation: sp-heartbeat 1.2s ease-in-out infinite;
+}
+
+/* 9. FLASH - Вспышка (быстрое изменение цвета) */
+@keyframes sp-flash {
+    0%, 100% {
+        opacity: var(--btn-opacity, 1);
+    }
+    50% {
+        opacity: 0.5;
+        filter: brightness(1.3);
+    }
+}
+.sp-animation-flash .sp-main-button {
+    animation: sp-flash 1s ease-in-out infinite;
+}
+
+/* 10. SWING - Раскачивание */
+@keyframes sp-swing {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(20deg);
+    }
+    75% {
+        transform: rotate(-20deg);
+    }
+}
+.sp-animation-swing .sp-main-button {
+    animation: sp-swing 2s ease-in-out infinite;
+    transform-origin: top center;
+}
+
+/* 11. WOBBLE - Шаткий эффект */
+@keyframes sp-wobble {
+    0%, 100% {
+        transform: translateX(0%);
+    }
+    15% {
+        transform: translateX(-8px);
+    }
+    30% {
+        transform: translateX(6px);
+    }
+    45% {
+        transform: translateX(-4px);
+    }
+    60% {
+        transform: translateX(2px);
+    }
+    75% {
+        transform: translateX(-1px);
+    }
+}
+.sp-animation-wobble .sp-main-button {
+    animation: sp-wobble 1.5s ease-in-out infinite;
+}
+
+/* 12. FADE - Плавное появление/исчезновение */
+@keyframes sp-fade {
+    0%, 100% {
+        opacity: var(--btn-opacity, 1);
+    }
+    50% {
+        opacity: calc(var(--btn-opacity, 1) * 0.5);
+    }
+}
+.sp-animation-fade .sp-main-button {
+    animation: sp-fade 2s ease-in-out infinite;
+}
+
+/* 13. ROTATE - Легкий поворот */
+@keyframes sp-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.sp-animation-rotate .sp-main-button {
+    animation: sp-rotate 3s linear infinite;
+}
+
+/* ============================================ */
+/* HOVER ЭФФЕКТЫ ДЛЯ ОСНОВНОЙ КНОПКИ           */
+/* ============================================ */
+
+/* Lift - Приподнимание */
+.sp-hover-lift .sp-main-button:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Scale - Увеличение */
+.sp-hover-scale .sp-main-button:hover {
+    transform: scale(1.15);
+}
+
+/* Glow - Свечение */
+.sp-hover-glow .sp-main-button:hover {
+    box-shadow: 0 0 20px var(--main-color);
+}
+
+/* Rotate - Поворот при наведении */
+.sp-hover-rotate .sp-main-button:hover {
+    transform: rotate(15deg);
+}
+
+/* Pulse - Пульсация при наведении */
+.sp-hover-pulse .sp-main-button:hover {
+    animation: sp-pulse 0.5s ease-in-out;
+}
+
+/* Shake - Тряска при наведении */
+.sp-hover-shake .sp-main-button:hover {
+    animation: sp-shake 0.5s ease-in-out;
+}
+
+/* ============================================ */
+/* РАЗМЕРЫ КНОПКИ                              */
+/* ============================================ */
+
+.sp-size-small {
+    --scale-factor: 0.8;
+}
+
+.sp-size-medium {
+    --scale-factor: 1;
+}
+
+.sp-size-large {
+    --scale-factor: 1.2;
+}
+
+/* Скрытая кнопка */
+.hidden-btn {
+    display: none !important;
+}
+
+/* ============================================ */
+/* МОБИЛЬНАЯ АДАПТАЦИЯ                         */
+/* ============================================ */
+
+@media (max-width: 768px) {
+    .sp-channel-label {
+        display: none;
+    }
+
+    .sp-channel-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+
+    .sp-position-bottom-right,
+    .sp-position-bottom-left {
+        bottom: 20px;
+        right: 20px;
+        left: auto;
+    }
+
+    .sp-position-bottom-left {
+        left: 20px;
+        right: auto;
+    }
+
+    /* Уменьшаем амплитуду анимаций на мобильных */
+    @keyframes sp-wave {
+        0% {
+            box-shadow: 0 0 0 0 var(--main-color);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(var(--main-color-rgb), 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(var(--main-color-rgb), 0);
+        }
+    }
+
+    @keyframes sp-bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    @keyframes sp-ring {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(15deg); }
+        50% { transform: rotate(-15deg); }
+        75% { transform: rotate(8deg); }
+        100% { transform: rotate(0deg); }
+    }
+}

@@ -1,0 +1,482 @@
+/* ============================================ */
+/* СКИН NOTIFICATION BELL - ПОЛНОСТЬЮ САМОСТОЯТЕЛЬНЫЙ */
+/* ============================================ */
+
+/* ----- 1. ОСНОВНОЙ КОНТЕЙНЕР ----- */
+.sp-notification-bell {
+    position: fixed;
+    bottom: 30px;
+    z-index: 999999;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    pointer-events: none;
+}
+
+/* Позиции */
+.sp-notification-bell.sp-position-right {
+    right: 30px;
+}
+
+.sp-notification-bell.sp-position-left {
+    left: 30px;
+}
+
+/* ----- 2. ВЫПАДАЮЩАЯ ПАНЕЛЬ ----- */
+.sp-notification-bell-panel {
+    position: absolute;
+    bottom: 70px;
+    width: 320px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.sp-notification-bell.sp-position-right .sp-notification-bell-panel {
+    right: 0;
+    transform-origin: bottom right;
+}
+
+.sp-notification-bell.sp-position-left .sp-notification-bell-panel {
+    left: 0;
+    transform-origin: bottom left;
+}
+
+.sp-notification-bell.sp-active .sp-notification-bell-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* ----- 3. ЗАГОЛОВОК ПАНЕЛИ ----- */
+.sp-notification-bell-header {
+    background: var(--main-color, #3b82f6);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sp-header-title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.sp-header-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.sp-header-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* ----- 4. КОНТЕНТ ПАНЕЛИ ----- */
+.sp-notification-bell-content {
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* ----- 5. ЭЛЕМЕНТЫ КАНАЛОВ ----- */
+.sp-notification-bell-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sp-notification-bell .sp-channel-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sp-notification-bell .sp-channel-item:hover {
+    background: #f5f5f5;
+    transform: translateX(5px);
+}
+
+.sp-notification-bell.sp-position-left .sp-channel-item:hover {
+    transform: translateX(-5px);
+}
+
+/* Иконка */
+.sp-notification-bell .sp-channel-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.sp-notification-bell .sp-channel-item:hover .sp-channel-icon {
+    transform: scale(1.05);
+}
+
+/* Лейбл */
+.sp-notification-bell .sp-channel-label {
+    flex: 1;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ----- 6. ФУТЕР ПАНЕЛИ ----- */
+.sp-notification-bell-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.sp-footer-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    display: block;
+}
+
+/* ----- 7. КНОПКА-ТРИГГЕР (КОЛОКОЛЬЧИК) ----- */
+.sp-notification-bell-trigger {
+    width: calc(56px * var(--scale-factor, 1));
+    height: calc(56px * var(--scale-factor, 1));
+    border-radius: 50%;
+    background: var(--main-color, #3b82f6);
+    color: var(--icon-color, #ffffff);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: var(--btn-opacity, 1);
+}
+
+/* Бейдж уведомления */
+.sp-trigger-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4444;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: nb-bell-shake 0.5s ease-in-out infinite;
+}
+
+/* Переключение иконок */
+.sp-notification-bell-trigger .sp-trigger-close {
+    display: none;
+}
+.sp-notification-bell.sp-active .sp-notification-bell-trigger .sp-trigger-icon {
+    display: none;
+}
+.sp-notification-bell.sp-active .sp-notification-bell-trigger .sp-trigger-close {
+    display: block;
+}
+
+/* Анимация бейджа */
+@keyframes nb-bell-shake {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    75% { transform: rotate(-15deg); }
+}
+
+/* ----- 8. TOOLTIP ----- */
+.sp-notification-bell-tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.sp-notification-bell.sp-position-right .sp-notification-bell-tooltip {
+    bottom: 70px;
+    right: 0;
+}
+.sp-notification-bell.sp-position-left .sp-notification-bell-tooltip {
+    bottom: 70px;
+    left: 0;
+}
+
+.sp-notification-bell-trigger:hover + .sp-notification-bell-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ----- 9. АНИМАЦИИ ----- */
+/* Wave */
+@keyframes nb-wave {
+    0% { box-shadow: 0 0 0 0 var(--main-color, #3b82f6); }
+    70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+.sp-notification-bell.sp-animation-wave .sp-notification-bell-trigger {
+    animation: nb-wave 1.5s infinite;
+}
+
+/* Pulse */
+@keyframes nb-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+.sp-notification-bell.sp-animation-pulse .sp-notification-bell-trigger {
+    animation: nb-pulse 1s ease-in-out infinite;
+}
+
+/* Shake */
+@keyframes nb-shake {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(12deg); }
+    40% { transform: rotate(-12deg); }
+    60% { transform: rotate(6deg); }
+    80% { transform: rotate(-6deg); }
+}
+.sp-notification-bell.sp-animation-shake .sp-notification-bell-trigger {
+    animation: nb-shake 3s ease-in-out infinite;
+}
+
+/* Ring */
+@keyframes nb-ring {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(25deg); }
+    50% { transform: rotate(-25deg); }
+    75% { transform: rotate(10deg); }
+}
+.sp-notification-bell.sp-animation-ring .sp-notification-bell-trigger {
+    animation: nb-ring 2s ease-in-out infinite;
+}
+
+/* Bounce */
+@keyframes nb-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+.sp-notification-bell.sp-animation-bounce .sp-notification-bell-trigger {
+    animation: nb-bounce 1s ease-in-out infinite;
+}
+
+/* Glow */
+@keyframes nb-glow {
+    0%, 100% { box-shadow: 0 0 5px var(--main-color, #3b82f6); }
+    50% { box-shadow: 0 0 20px var(--main-color, #3b82f6); }
+}
+.sp-notification-bell.sp-animation-glow .sp-notification-bell-trigger {
+    animation: nb-glow 1.5s ease-in-out infinite;
+}
+
+/* Spin */
+@keyframes nb-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.sp-notification-bell.sp-animation-spin .sp-notification-bell-trigger .sp-trigger-icon svg {
+    animation: nb-spin 2s linear infinite;
+}
+
+/* Heartbeat */
+@keyframes nb-heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.12); }
+    40% { transform: scale(1); }
+    60% { transform: scale(1.06); }
+}
+.sp-notification-bell.sp-animation-heartbeat .sp-notification-bell-trigger {
+    animation: nb-heartbeat 1.2s ease-in-out infinite;
+}
+
+/* Flash */
+@keyframes nb-flash {
+    0%, 100% { opacity: var(--btn-opacity, 1); }
+    50% { opacity: 0.6; filter: brightness(1.2); }
+}
+.sp-notification-bell.sp-animation-flash .sp-notification-bell-trigger {
+    animation: nb-flash 1s ease-in-out infinite;
+}
+
+/* Swing */
+@keyframes nb-swing {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(18deg); }
+    75% { transform: rotate(-18deg); }
+}
+.sp-notification-bell.sp-animation-swing .sp-notification-bell-trigger {
+    animation: nb-swing 2s ease-in-out infinite;
+    transform-origin: top center;
+}
+
+/* Wobble */
+@keyframes nb-wobble {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(5px); }
+    45% { transform: translateX(-3px); }
+    60% { transform: translateX(2px); }
+    75% { transform: translateX(-1px); }
+}
+.sp-notification-bell.sp-animation-wobble .sp-notification-bell-trigger {
+    animation: nb-wobble 1.5s ease-in-out infinite;
+}
+
+/* Fade */
+@keyframes nb-fade {
+    0%, 100% { opacity: var(--btn-opacity, 1); }
+    50% { opacity: calc(var(--btn-opacity, 1) * 0.5); }
+}
+.sp-notification-bell.sp-animation-fade .sp-notification-bell-trigger {
+    animation: nb-fade 2s ease-in-out infinite;
+}
+
+/* Rotate */
+@keyframes nb-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.sp-notification-bell.sp-animation-rotate .sp-notification-bell-trigger {
+    animation: nb-rotate 3s linear infinite;
+}
+
+/* ----- 10. HOVER ЭФФЕКТЫ ----- */
+.sp-notification-bell.sp-hover-lift .sp-notification-bell-trigger:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+.sp-notification-bell.sp-hover-scale .sp-notification-bell-trigger:hover {
+    transform: scale(1.1);
+}
+.sp-notification-bell.sp-hover-glow .sp-notification-bell-trigger:hover {
+    box-shadow: 0 0 20px var(--main-color, #3b82f6);
+}
+.sp-notification-bell.sp-hover-rotate .sp-notification-bell-trigger:hover {
+    transform: rotate(15deg);
+}
+.sp-notification-bell.sp-hover-pulse .sp-notification-bell-trigger:hover {
+    animation: nb-pulse 0.5s ease-in-out;
+}
+.sp-notification-bell.sp-hover-shake .sp-notification-bell-trigger:hover {
+    animation: nb-shake 0.5s ease-in-out;
+}
+
+/* ----- 11. РАЗМЕРЫ ----- */
+.sp-notification-bell.sp-size-small .sp-notification-bell-trigger {
+    width: calc(48px * var(--scale-factor, 0.8));
+    height: calc(48px * var(--scale-factor, 0.8));
+}
+.sp-notification-bell.sp-size-small .sp-channel-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+}
+.sp-notification-bell.sp-size-small .sp-channel-label {
+    font-size: 12px;
+}
+.sp-notification-bell.sp-size-small .sp-notification-bell-panel {
+    width: 280px;
+}
+
+.sp-notification-bell.sp-size-large .sp-notification-bell-trigger {
+    width: calc(64px * var(--scale-factor, 1.2));
+    height: calc(64px * var(--scale-factor, 1.2));
+}
+.sp-notification-bell.sp-size-large .sp-channel-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 26px;
+}
+.sp-notification-bell.sp-size-large .sp-channel-label {
+    font-size: 16px;
+}
+.sp-notification-bell.sp-size-large .sp-notification-bell-panel {
+    width: 360px;
+}
+
+/* ----- 12. МОБИЛЬНАЯ АДАПТАЦИЯ ----- */
+@media (max-width: 768px) {
+    .sp-notification-bell {
+        bottom: 20px;
+    }
+    .sp-notification-bell.sp-position-right {
+        right: 20px;
+    }
+    .sp-notification-bell.sp-position-left {
+        left: 20px;
+    }
+
+    .sp-notification-bell-panel {
+        width: 300px;
+        bottom: 65px;
+    }
+
+    .sp-notification-bell-content {
+        padding: 12px;
+        max-height: 350px;
+    }
+
+    .sp-notification-bell .sp-channel-label {
+        font-size: 13px;
+    }
+
+    .sp-notification-bell .sp-channel-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .sp-trigger-badge {
+        width: 18px;
+        height: 18px;
+        font-size: 10px;
+        top: -3px;
+        right: -3px;
+    }
+
+    .sp-header-title {
+        font-size: 14px;
+    }
+
+    .sp-footer-text {
+        font-size: 11px;
+    }
+}

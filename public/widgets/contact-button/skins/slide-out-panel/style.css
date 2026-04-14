@@ -1,0 +1,572 @@
+/* ============================================ */
+/* СКИН SLIDE OUT PANEL - ВЫЕЗЖАЮЩАЯ ПАНЕЛЬ     */
+/* ПОЛНОСТЬЮ САМОСТОЯТЕЛЬНЫЙ                    */
+/* ============================================ */
+
+/* ----- 1. ОСНОВНОЙ КОНТЕЙНЕР ----- */
+.sp-slideout {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 999999;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    pointer-events: none;
+}
+
+/* ----- 2. ЗАТЕМНЕНИЕ ФОНА ----- */
+.sp-slideout-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    pointer-events: none;
+}
+
+.sp-slideout.sp-active .sp-slideout-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* ----- 3. ВЫЕЗЖАЮЩАЯ ПАНЕЛЬ ----- */
+.sp-slideout-panel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 340px;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    pointer-events: none;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Панель справа */
+.sp-slideout.sp-position-right .sp-slideout-panel {
+    right: 0;
+    transform: translateX(100%);
+}
+
+/* Панель слева */
+.sp-slideout.sp-position-left .sp-slideout-panel {
+    left: 0;
+    transform: translateX(-100%);
+}
+
+/* Открытая панель */
+.sp-slideout.sp-active .sp-slideout-panel {
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+/* ----- 4. ЗАГОЛОВОК ПАНЕЛИ ----- */
+.sp-slideout-header {
+    padding: 24px 20px;
+    background: var(--main-color, #3b82f6);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.sp-slideout-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.sp-slideout-title svg {
+    width: 24px;
+    height: 24px;
+}
+
+.sp-slideout-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.sp-slideout-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* ----- 5. КОНТЕНТ ПАНЕЛИ ----- */
+.sp-slideout-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.sp-slideout-description {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* ----- 6. КАНАЛЫ В ПАНЕЛИ ----- */
+.sp-slideout-channels {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Элемент канала */
+.sp-slideout .sp-channel-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.sp-slideout .sp-channel-item:hover {
+    background: #f5f5f5;
+    transform: translateX(5px);
+}
+
+.sp-slideout.sp-position-left .sp-channel-item:hover {
+    transform: translateX(-5px);
+}
+
+/* Иконка канала */
+.sp-slideout .sp-channel-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.sp-slideout .sp-channel-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.sp-slideout .sp-channel-item:hover .sp-channel-icon {
+    transform: scale(1.05);
+}
+
+/* Лейбл канала */
+.sp-slideout .sp-channel-label {
+    flex: 1;
+    color: #333;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+/* ----- 7. ФУТЕР ПАНЕЛИ ----- */
+.sp-slideout-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+    flex-shrink: 0;
+}
+
+.sp-slideout-footer-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+    display: block;
+}
+
+/* ----- 8. КНОПКА-ТРИГГЕР ----- */
+.sp-slideout-trigger {
+    position: fixed;
+    bottom: 30px;
+    background: var(--main-color, #3b82f6);
+    color: var(--icon-color, #ffffff);
+    border: none;
+    border-radius: 30px;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 16px;
+    pointer-events: auto;
+    z-index: 10;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    opacity: var(--btn-opacity, 1);
+}
+
+/* Позиция кнопки */
+.sp-slideout.sp-position-right .sp-slideout-trigger {
+    right: 30px;
+}
+
+.sp-slideout.sp-position-left .sp-slideout-trigger {
+    left: 30px;
+}
+
+/* Переключение иконок */
+.sp-slideout-trigger .sp-trigger-close {
+    display: none;
+}
+
+.sp-slideout.sp-active .sp-slideout-trigger .sp-trigger-icon {
+    display: none;
+}
+
+.sp-slideout.sp-active .sp-slideout-trigger .sp-trigger-close {
+    display: block;
+}
+
+/* Текст на кнопке */
+.sp-trigger-text {
+    font-weight: 600;
+}
+
+/* SVG в триггере */
+.sp-slideout-trigger svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* ----- 9. TOOLTIP (закомментирован в HTML, но оставим стили) ----- */
+.sp-slideout-tooltip {
+    position: fixed;
+    bottom: 90px;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.2s ease;
+    z-index: 9;
+}
+
+.sp-slideout.sp-position-right .sp-slideout-tooltip {
+    right: 30px;
+}
+
+.sp-slideout.sp-position-left .sp-slideout-tooltip {
+    left: 30px;
+}
+
+.sp-slideout-trigger:hover + .sp-slideout-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ----- 10. АНИМАЦИИ ----- */
+/* Wave */
+@keyframes so-wave {
+    0% { box-shadow: 0 0 0 0 var(--main-color, #3b82f6); }
+    70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+.sp-slideout.sp-animation-wave .sp-slideout-trigger {
+    animation: so-wave 1.5s infinite;
+}
+
+/* Pulse */
+@keyframes so-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+.sp-slideout.sp-animation-pulse .sp-slideout-trigger {
+    animation: so-pulse 1s ease-in-out infinite;
+}
+
+/* Shake */
+@keyframes so-shake {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(10deg); }
+    40% { transform: rotate(-10deg); }
+    60% { transform: rotate(5deg); }
+    80% { transform: rotate(-5deg); }
+}
+.sp-slideout.sp-animation-shake .sp-slideout-trigger {
+    animation: so-shake 3s ease-in-out infinite;
+}
+
+/* Ring */
+@keyframes so-ring {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(20deg); }
+    50% { transform: rotate(-20deg); }
+    75% { transform: rotate(10deg); }
+}
+.sp-slideout.sp-animation-ring .sp-slideout-trigger {
+    animation: so-ring 2s ease-in-out infinite;
+}
+
+/* Bounce */
+@keyframes so-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+.sp-slideout.sp-animation-bounce .sp-slideout-trigger {
+    animation: so-bounce 1s ease-in-out infinite;
+}
+
+/* Glow */
+@keyframes so-glow {
+    0%, 100% { box-shadow: 0 0 5px var(--main-color, #3b82f6); }
+    50% { box-shadow: 0 0 20px var(--main-color, #3b82f6); }
+}
+.sp-slideout.sp-animation-glow .sp-slideout-trigger {
+    animation: so-glow 1.5s ease-in-out infinite;
+}
+
+/* Spin */
+@keyframes so-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.sp-slideout.sp-animation-spin .sp-slideout-trigger .sp-trigger-icon svg {
+    animation: so-spin 2s linear infinite;
+}
+
+/* Heartbeat */
+@keyframes so-heartbeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.1); }
+    40% { transform: scale(1); }
+    60% { transform: scale(1.05); }
+}
+.sp-slideout.sp-animation-heartbeat .sp-slideout-trigger {
+    animation: so-heartbeat 1.2s ease-in-out infinite;
+}
+
+/* Flash */
+@keyframes so-flash {
+    0%, 100% { opacity: var(--btn-opacity, 1); }
+    50% { opacity: 0.6; filter: brightness(1.2); }
+}
+.sp-slideout.sp-animation-flash .sp-slideout-trigger {
+    animation: so-flash 1s ease-in-out infinite;
+}
+
+/* Swing */
+@keyframes so-swing {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    75% { transform: rotate(-15deg); }
+}
+.sp-slideout.sp-animation-swing .sp-slideout-trigger {
+    animation: so-swing 2s ease-in-out infinite;
+    transform-origin: top center;
+}
+
+/* Wobble */
+@keyframes so-wobble {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(5px); }
+    45% { transform: translateX(-3px); }
+    60% { transform: translateX(2px); }
+    75% { transform: translateX(-1px); }
+}
+.sp-slideout.sp-animation-wobble .sp-slideout-trigger {
+    animation: so-wobble 1.5s ease-in-out infinite;
+}
+
+/* Fade */
+@keyframes so-fade {
+    0%, 100% { opacity: var(--btn-opacity, 1); }
+    50% { opacity: calc(var(--btn-opacity, 1) * 0.5); }
+}
+.sp-slideout.sp-animation-fade .sp-slideout-trigger {
+    animation: so-fade 2s ease-in-out infinite;
+}
+
+/* Rotate */
+@keyframes so-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.sp-slideout.sp-animation-rotate .sp-slideout-trigger {
+    animation: so-rotate 3s linear infinite;
+}
+
+/* ----- 11. HOVER ЭФФЕКТЫ ----- */
+.sp-slideout.sp-hover-lift .sp-slideout-trigger:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+.sp-slideout.sp-hover-scale .sp-slideout-trigger:hover {
+    transform: scale(1.05);
+}
+.sp-slideout.sp-hover-glow .sp-slideout-trigger:hover {
+    box-shadow: 0 0 20px var(--main-color, #3b82f6);
+}
+.sp-slideout.sp-hover-rotate .sp-slideout-trigger:hover {
+    transform: rotate(5deg);
+}
+.sp-slideout.sp-hover-pulse .sp-slideout-trigger:hover {
+    animation: so-pulse 0.5s ease-in-out;
+}
+.sp-slideout.sp-hover-shake .sp-slideout-trigger:hover {
+    animation: so-shake 0.5s ease-in-out;
+}
+
+/* ----- 12. РАЗМЕРЫ ----- */
+/* Размеры триггера */
+.sp-slideout.sp-size-small .sp-slideout-trigger {
+    padding: 8px 16px;
+    gap: 8px;
+    font-size: 14px;
+}
+.sp-slideout.sp-size-large .sp-slideout-trigger {
+    padding: 14px 28px;
+    gap: 14px;
+    font-size: 18px;
+}
+
+/* Размеры панели */
+.sp-slideout.sp-size-small .sp-slideout-panel {
+    width: 280px;
+}
+.sp-slideout.sp-size-small .sp-slideout-title {
+    font-size: 16px;
+}
+.sp-slideout.sp-size-small .sp-slideout .sp-channel-icon {
+    width: 40px;
+    height: 40px;
+}
+.sp-slideout.sp-size-small .sp-slideout .sp-channel-icon svg {
+    width: 20px;
+    height: 20px;
+}
+.sp-slideout.sp-size-small .sp-slideout .sp-channel-label {
+    font-size: 13px;
+}
+.sp-slideout.sp-size-small .sp-slideout-content {
+    padding: 16px;
+}
+
+.sp-slideout.sp-size-large .sp-slideout-panel {
+    width: 400px;
+}
+.sp-slideout.sp-size-large .sp-slideout-title {
+    font-size: 20px;
+}
+.sp-slideout.sp-size-large .sp-slideout .sp-channel-icon {
+    width: 56px;
+    height: 56px;
+}
+.sp-slideout.sp-size-large .sp-slideout .sp-channel-icon svg {
+    width: 28px;
+    height: 28px;
+}
+.sp-slideout.sp-size-large .sp-slideout .sp-channel-label {
+    font-size: 17px;
+}
+.sp-slideout.sp-size-large .sp-slideout-content {
+    padding: 24px;
+}
+.sp-slideout.sp-size-large .sp-slideout-description {
+    font-size: 16px;
+}
+
+/* ----- 13. МОБИЛЬНАЯ АДАПТАЦИЯ ----- */
+@media (max-width: 768px) {
+    .sp-slideout-panel {
+        width: 85%;
+        max-width: 320px;
+    }
+
+    .sp-slideout-trigger {
+        bottom: 20px;
+    }
+
+    .sp-slideout.sp-position-right .sp-slideout-trigger {
+        right: 20px;
+    }
+
+    .sp-slideout.sp-position-left .sp-slideout-trigger {
+        left: 20px;
+    }
+
+    .sp-slideout-tooltip {
+        bottom: 80px;
+    }
+
+    .sp-slideout.sp-position-right .sp-slideout-tooltip {
+        right: 20px;
+    }
+
+    .sp-slideout.sp-position-left .sp-slideout-tooltip {
+        left: 20px;
+    }
+
+    .sp-slideout-title {
+        font-size: 16px;
+    }
+
+    .sp-slideout-description {
+        font-size: 13px;
+    }
+
+    .sp-slideout .sp-channel-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .sp-slideout .sp-channel-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .sp-slideout .sp-channel-label {
+        font-size: 14px;
+    }
+
+    .sp-trigger-text {
+        font-size: 14px;
+    }
+
+    /* Скрываем текст на кнопке для очень маленьких экранов */
+    @media (max-width: 480px) {
+        .sp-trigger-text {
+            display: none;
+        }
+        .sp-slideout-trigger {
+            padding: 12px;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+        }
+        .sp-slideout-trigger svg {
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
