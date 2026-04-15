@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             ->name('cabinet.')
             ->group(base_path('routes/cabinet.php'));
 
+        Route::middleware(['web', 'auth', 'cabinet'])
+            ->prefix('cabinet')
+            ->name('cabinet.')
+            ->group(base_path('routes/crm.php'));
+
+
         // Роуты супер-админа
         Route::middleware('web')
             ->prefix('cpanel')

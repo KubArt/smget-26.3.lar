@@ -16,6 +16,32 @@
                     </a>
                 </li>
 
+                <li class="nav-main-heading">CRM</li>
+                <li class="nav-main-item">
+                    <a class="nav-main-link {{ request()->routeIs('cabinet.crm.tasks.*') ? 'active' : '' }}" href="{{ route('cabinet.crm.tasks.index') }}">
+                        <i class="nav-main-link-icon si si-calendar"></i>
+                        <span class="nav-main-link-name">Мои задачи</span>
+                        @php
+                            $pendingCount = \App\Models\Crm\LeadTask::where('assigned_to', auth()->id())->where('status', 'pending')->count();
+                        @endphp
+                        @if($pendingCount > 0)
+                            <span class="nav-main-link-badge badge rounded-pill bg-danger">{{ $pendingCount }}</span>
+                        @endif
+                    </a>
+                </li>
+                <li class="nav-main-item">
+                    <a class="nav-main-link {{ request()->routeIs('cabinet.crm.leads.*') ? 'active' : '' }}" href="{{ route('cabinet.crm.leads.index') }}">
+                        <i class="nav-main-link-icon si si-users"></i>
+                        <span class="nav-main-link-name">Лиды</span>
+                    </a>
+                </li>
+                <li class="nav-main-item">
+                    <a class="nav-main-link {{ request()->routeIs('cabinet.crm.clients.*') ? 'active' : '' }}" href="{{ route('cabinet.crm.clients.index') }}">
+                        <i class="nav-main-link-icon si si-user-follow"></i>
+                        <span class="nav-main-link-name">Клиенты</span>
+                    </a>
+                </li>
+
                 <li class="nav-main-heading">Виджеты</li>
                 <li class="nav-main-item">
                     <a class="nav-main-link {{ request()->routeIs('cabinet.marketplace.*') ? 'active' : '' }}" href="{{ route('cabinet.marketplace.index') }}">
