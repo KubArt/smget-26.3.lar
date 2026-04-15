@@ -29,10 +29,20 @@ return Application::configure(basePath: dirname(__DIR__))
             ->prefix('cpanel')
             ->name('cpanel.')
             ->group(base_path('routes/cpanel.php'));
+
+        // Стандартные API роуты (добавляем эту строку!)
+        Route::middleware('api')
+            ->prefix('api')
+            ->group(base_path('routes/api.php'));
         },
+
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Bcrk.xftv проверку CSRF
+        $middleware->validateCsrfTokens(except: [
+            'api/v1/track',
+            'api/v1/capture/*', // Исключаем все источники захвата лидов
+        ]);
     })
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([

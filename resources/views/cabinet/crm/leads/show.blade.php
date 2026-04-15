@@ -1,5 +1,16 @@
 @extends('cabinet.layouts.cabinet')
 
+@php
+    $labels = [
+        'utm_source' => 'Источник',
+        'utm_medium' => 'Тип трафика',
+        'page_url'   => 'Страница захвата',
+        'phone'      => 'Телефон',
+        'name'      => 'Имя',
+        // добавьте свои...
+    ];
+@endphp
+
 @section('content')
     <div class="content">
         <div class="row">
@@ -13,9 +24,18 @@
                         <p><strong>Страница:</strong> <small class="text-primary">{{ $lead->page_url }}</small></p>
                         <hr>
                         <p><strong>Данные формы:</strong></p>
-                        @foreach($lead->form_data as $key => $value)
-                            <div class="mb-1"><strong>{{ $key }}:</strong> {{ $value }}</div>
-                        @endforeach
+                        @if($lead->form_data)
+                            @foreach($lead->form_data as $key => $value)
+                                <div class="mb-1">
+                                    <span class="text-muted">{{ $labels[$key] ?? $key }}:</span>
+                                    <span class="fw-semibold">
+                                        {{ is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        @else
+                            <p class="text-muted fs-sm">Дополнительные данные отсутствуют</p>
+                        @endif
                     </div>
                 </div>
 
