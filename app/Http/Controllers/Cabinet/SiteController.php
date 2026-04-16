@@ -12,16 +12,18 @@ class SiteController extends BaseCabinetController
 
     public function index()
     {
-        // Подгружаем активную подписку и сам тариф (plan)
-        $sites = auth()->user()->sites()
-            ->with(['activeSubscription.plan', 'widgets.widgetType']) // Подгружаем виджеты и их типы
+
+        $workspace = auth()->user()->currentWorkspace();
+
+        $sites = $workspace->sites()
+            ->with(['activeSubscription.plan', 'widgets.widgetType'])
             ->withCount(['notifications as unread_count' => function($query) {
                 $query->whereDoesntHave('readStates', function($q) {
                     $q->where('user_id', auth()->id());
                 });
             }])->get();
 
-        return view('cabinet.sites.index', compact('sites'));
+        return view('cabinet.sites.index', compact('sites', 'workspace'));
     }
 
 
@@ -71,27 +73,39 @@ class SiteController extends BaseCabinetController
     /**
      * Сохранение сайта в базе
      */
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'domain' => 'required|string|unique:sites,domain', // Валидация домена
+            'domain' => 'required|string|max:255', // желательно добавить уникальность или проверку формата
             'email' => 'required|email',
         ]);
 
-        // Создаем сайт
-        $site = Site::create([
+        // Получаем текущий кабинет пользователя
+        $workspace = auth()->user()->currentWorkspace();
+
+        if (!$workspace) {
+            return back()->with('error', 'Рабочий кабинет не найден. Пожалуйста, обратитесь в поддержку.');
+        }
+
+        // Создаем сайт, привязанный к кабинету
+        $site = $workspace->sites()->create([
             'name' => $validated['name'],
             'domain' => $validated['domain'],
             'email' => $validated['email'],
-            'api_key' => (string) \Illuminate\Support\Str::uuid(),
+            'is_active' => true,
         ]);
 
-        // Привязываем пользователя с ролью owner
+        // Опционально: если вы все еще используете таблицу site_user для ролей
         $site->users()->attach(auth()->id(), ['role' => 'owner']);
 
-        return redirect()->route('cabinet.sites.index')->with('success', 'Сайт добавлен. Теперь подтвердите права.');
+        return redirect()->route('cabinet.sites.show', $site)
+            ->with('success', 'Проект успешно создан в кабинете: ' . $workspace->name);
     }
+
+
+
     public function verify($id)
     {
         $site = auth()->user()->sites()->findOrFail($id);

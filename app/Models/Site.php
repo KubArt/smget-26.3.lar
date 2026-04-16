@@ -76,4 +76,10 @@ class Site extends Model
     {
         return $this->hasMany(Widget::class);
     }
+
+    public function workspace(): BelongsTo
+    {
+        return $this->belongsTo(Workspace::class);
+    }
+
 }

@@ -130,4 +130,30 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->transactions()->sum('amount');
     }
 
+
+    // Добавить в relations
+    public function workspaces(): BelongsToMany
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_user')
+            ->withPivot('role', 'permissions')
+            ->withTimestamps();
+    }
+
+    /**
+     * Кабинеты, которыми владеет пользователь
+     */
+    public function ownedWorkspaces(): HasMany
+    {
+        return $this->hasMany(Workspace::class, 'owner_id');
+    }
+
+    /**
+     * Получить текущий рабочий кабинет (логика может быть через сессию)
+     */
+    public function currentWorkspace()
+    {
+        // Временная логика: возвращаем первый доступный или личный
+        return $this->workspaces()->first();
+    }
+
 }

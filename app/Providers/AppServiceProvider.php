@@ -29,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
             return $notificationModel->hasMany(NotificationReadState::class, 'notification_id', 'id');
         });
 
+        // Автоматическое создание кабинета при регистрации пользователя.
+        \App\Models\User::observe(\App\Observers\UserObserver::class);
+
         view()->composer('cabinet.layouts.partials.header', function ($view) {
             $user = auth()->user();
             if ($user) {

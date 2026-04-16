@@ -68,6 +68,12 @@
 
                 <li class="nav-main-heading">Система</li>
                 <li class="nav-main-item">
+                    <a class="nav-main-link {{ request()->routeIs('cabinet.team.*') ? 'active' : '' }}" href="{{ route('cabinet.team.index') }}">
+                        <i class="nav-main-link-icon si si-users"></i>
+                        <span class="nav-main-link-name">Сотрудники</span>
+                    </a>
+                </li>
+                <li class="nav-main-item">
                     <a class="nav-main-link {{ request()->routeIs('cabinet.messages.*') ? 'active' : '' }}" href="{{ route('cabinet.messages.index') }}">
                         <i class="nav-main-link-icon si si-envelope"></i>
                         <span class="nav-main-link-name">Сообщения</span>

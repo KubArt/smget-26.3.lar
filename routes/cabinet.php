@@ -4,6 +4,12 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [\App\Http\Controllers\Cabinet\IndexCabinetController::class, 'index'])->name('index');
 
+
+Route::get('team', [\App\Http\Controllers\Cabinet\TeamController::class, 'index'])->name('team.index');
+Route::post('team', [\App\Http\Controllers\Cabinet\TeamController::class, 'store'])->name('team.store');
+Route::delete('team/{user}', [\App\Http\Controllers\Cabinet\TeamController::class, 'destroy'])->name('team.destroy');
+
+
 // Дашборд
 Route::get('/dashboard', [\App\Http\Controllers\Cabinet\DashboardCabinetController::class, 'index'])->name('dashboard');
 
