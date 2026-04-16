@@ -3,7 +3,6 @@ window.SmWidget_lidup = class extends SmWidget {
         super(settings, id, assets);
         this.storageKey = `sm_lidup_${this.id}_closed`;
         this.formSubmitted = false;
-        this.timerInterval = null;
         this.exitIntentTriggered = false;
     }
 
@@ -108,12 +107,8 @@ window.SmWidget_lidup = class extends SmWidget {
 
         // Генерация изображения
         const imageHtml = this.settings.has_image && this.settings.image
-            ? `<img src="${this.settings.image}" class="sp-lidup-image" alt="${this.settings.title}">`
+            ? `<img src="${this.settings.image}" class="sp-lidup-image" alt="${this.escapeHtml(this.settings.title)}">`
             : '';
-
-        // Таймер
-        const hasTimer = this.settings.has_timer && this.settings.timer_target_date;
-        const timerDisplay = hasTimer ? 'block' : 'none';
 
         // Подстановка в HTML
         let html = this.assets.html
@@ -122,13 +117,6 @@ window.SmWidget_lidup = class extends SmWidget {
             .replace(/\{image_html\}/g, imageHtml)
             .replace(/\{image_position\}/g, this.settings.image_position || 'left')
             .replace(/\{btn_text\}/g, this.escapeHtml(this.settings.btn_text || 'Отправить'))
-            .replace(/\{timer_display\}/g, timerDisplay)
-            .replace(/\{timer_title\}/g, this.escapeHtml(this.settings.timer_title || 'До конца акции осталось:'))
-            .replace(/\{timer_days_text\}/g, this.escapeHtml(this.settings.timer_days_text || 'дней'))
-            .replace(/\{timer_hours_text\}/g, this.escapeHtml(this.settings.timer_hours_text || 'часов'))
-            .replace(/\{timer_minutes_text\}/g, this.escapeHtml(this.settings.timer_minutes_text || 'минут'))
-            .replace(/\{timer_seconds_text\}/g, this.escapeHtml(this.settings.timer_seconds_text || 'секунд'))
-            .replace(/\{size\}/g, this.settings.size || 'medium')
             .replace(/\{position\}/g, this.settings.position || 'center')
             .replace(/\{animation_in\}/g, this.settings.animation_in || 'fadeIn');
 
@@ -139,11 +127,6 @@ window.SmWidget_lidup = class extends SmWidget {
             const formFieldsContainer = this.container.querySelector('#sp-form-fields');
             if (formFieldsContainer) {
                 formFieldsContainer.innerHTML = formFieldsHtml;
-            }
-
-            // Запускаем таймер
-            if (hasTimer) {
-                this.startTimer();
             }
 
             // Настраиваем обработчики
@@ -167,50 +150,23 @@ window.SmWidget_lidup = class extends SmWidget {
         const fields = this.settings.form_fields || [];
         return fields.map(field => {
             const required = field.required ? 'required' : '';
-            return `
-                <input type="${field.type}"
-                       name="${field.name}"
-                       placeholder="${this.escapeHtml(field.placeholder || field.label)}"
-                       ${required}
-                       data-sp-field>
-            `;
-        }).join('');
-    }
+            const name = field.name || field.type + '_' + Date.now() + '_' + Math.random();
+            const placeholder = this.escapeHtml(field.placeholder || field.label || '');
+            const defaultValue = this.escapeHtml(field.default_value || '');
 
-    startTimer() {
-        const targetDate = new Date(this.settings.timer_target_date).getTime();
-        if (isNaN(targetDate)) return;
-
-        const daysEl = this.container.querySelector('.sp-timer-days');
-        const hoursEl = this.container.querySelector('.sp-timer-hours');
-        const minutesEl = this.container.querySelector('.sp-timer-minutes');
-        const secondsEl = this.container.querySelector('.sp-timer-seconds');
-
-        if (!daysEl) return;
-
-        this.timerInterval = setInterval(() => {
-            const now = Date.now();
-            const diff = targetDate - now;
-
-            if (diff <= 0) {
-                clearInterval(this.timerInterval);
-                daysEl.textContent = '00';
-                hoursEl.textContent = '00';
-                minutesEl.textContent = '00';
-                secondsEl.textContent = '00';
-                return;
+            // Скрытое поле
+            if (field.type === 'hidden') {
+                return `<input type="hidden" name="${name}" value="${defaultValue}">`;
             }
 
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (86400000)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (3600000)) / (1000 * 60));
-            const seconds = Math.floor((diff % (60000)) / 1000);
+            // Текстовая область
+            if (field.type === 'textarea') {
+                return `<textarea name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field"></textarea>`;
+            }
 
-            daysEl.textContent = days.toString().padStart(2, '0');
-            hoursEl.textContent = hours.toString().padStart(2, '0');
-            minutesEl.textContent = minutes.toString().padStart(2, '0');
-            secondsEl.textContent = seconds.toString().padStart(2, '0');
-        }, 1000);
+            // Обычное поле
+            return `<input type="${field.type}" name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field">`;
+        }).join('');
     }
 
     bindEvents() {
@@ -239,16 +195,19 @@ window.SmWidget_lidup = class extends SmWidget {
         if (this.formSubmitted) return;
 
         const form = e.target;
-        const fields = form.querySelectorAll('[data-sp-field]');
+        const fields = form.querySelectorAll('input, textarea, select');
         const formData = {};
 
         fields.forEach(field => {
-            formData[field.name] = field.value;
+            if (field.name) {
+                formData[field.name] = field.value;
+            }
         });
 
         // Добавляем метаданные
         formData.widget_id = this.id;
         formData.url = window.location.href;
+        formData.timestamp = new Date().toISOString();
 
         const submitBtn = form.querySelector('.sp-lidup-submit');
         const messageEl = form.querySelector('.sp-lidup-message');
@@ -257,23 +216,30 @@ window.SmWidget_lidup = class extends SmWidget {
         submitBtn.textContent = 'Отправка...';
 
         try {
-            const webhookUrl = this.settings.webhook_url;
-            if (webhookUrl) {
-                await fetch(webhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-            }
+            // Отправка данных через fetch на ваш API endpoint
+            const apiUrl = this.settings.api_url || '/api/widgets/lidup/submit';
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(formData)
+            });
 
             this.track('submit');
             this.formSubmitted = true;
 
-            messageEl.textContent = this.settings.success_message || 'Спасибо! Мы свяжемся с вами.';
+            const result = await response.json();
+
+            messageEl.textContent = result.message || this.settings.success_message || 'Спасибо! Мы свяжемся с вами.';
             messageEl.className = 'sp-lidup-message success';
             messageEl.style.display = 'block';
 
-            form.innerHTML = messageEl.outerHTML;
+            // Очищаем форму и показываем сообщение
+            form.innerHTML = '';
+            form.appendChild(messageEl);
 
             setTimeout(() => this.close(), 2000);
 
@@ -288,10 +254,6 @@ window.SmWidget_lidup = class extends SmWidget {
     }
 
     close() {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-        }
-
         const timestamp = Date.now();
         const closeBehavior = this.settings.close_behavior || 'hide_session';
 

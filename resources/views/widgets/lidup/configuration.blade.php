@@ -67,8 +67,6 @@
                                         <select class="form-select" x-model="settings.image_position">
                                             <option value="left">Слева</option>
                                             <option value="right">Справа</option>
-                                            <option value="top">Сверху</option>
-                                            <option value="bottom">Снизу</option>
                                         </select>
                                     </div>
                                 </div>
@@ -96,19 +94,23 @@
                                                         <option value="email">Email</option>
                                                         <option value="name">Имя</option>
                                                         <option value="textarea">Текстовая область</option>
+                                                        <option value="hidden">Скрытое поле</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-4">
                                                     <input type="text" class="form-control form-control-sm" placeholder="Название поля" x-model="field.label">
                                                 </div>
-                                                <div class="col-3">
+                                                <div class="col-3" x-show="field.type !== 'hidden'">
                                                     <input type="text" class="form-control form-control-sm" placeholder="Placeholder" x-model="field.placeholder">
                                                 </div>
-                                                <div class="col-1">
+                                                <div class="col-1" x-show="field.type !== 'hidden'">
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" x-model="field.required">
                                                         <label class="small">Req</label>
                                                     </div>
+                                                </div>
+                                                <div class="col-2" x-show="field.type === 'hidden'">
+                                                    <input type="text" class="form-control form-control-sm" placeholder="Значение" x-model="field.default_value">
                                                 </div>
                                                 <div class="col-1">
                                                     <button type="button" class="btn btn-sm btn-link text-danger" @click="removeFormField(index)">
@@ -132,33 +134,6 @@
                                 <div class="mt-3">
                                     <label class="small text-muted">Сообщение после отправки</label>
                                     <input type="text" class="form-control" placeholder="Спасибо! Мы свяжемся с вами." x-model="settings.success_message">
-                                </div>
-
-                                <div class="mt-3">
-                                    <label class="small text-muted">Webhook URL (для отправки данных)</label>
-                                    <input type="text" class="form-control" placeholder="https://your-server.com/webhook" x-model="settings.webhook_url">
-                                </div>
-                            </div>
-
-                            <hr>
-
-                            <!-- ТАЙМЕР -->
-                            <div class="mb-4">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" x-model="settings.has_timer">
-                                    <label class="form-check-label fw-bold">Показывать таймер обратного отсчета</label>
-                                </div>
-
-                                <div x-show="settings.has_timer">
-                                    <div class="mb-3">
-                                        <label class="small text-muted">Дата окончания акции</label>
-                                        <input type="datetime-local" class="form-control" x-model="settings.timer_target_date">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="small text-muted">Заголовок таймера</label>
-                                        <input type="text" class="form-control" placeholder="До конца акции осталось:" x-model="settings.timer_title">
-                                    </div>
                                 </div>
                             </div>
 
@@ -226,23 +201,13 @@
                             <div class="mb-4">
                                 <label class="form-label fw-bold">Внешний вид</label>
 
-                                <div class="row g-2 mb-3">
-                                    <div class="col-6">
-                                        <label class="small text-muted">Размер попапа</label>
-                                        <select class="form-select" x-model="settings.size">
-                                            <option value="small">Маленький (400px)</option>
-                                            <option value="medium">Средний (600px)</option>
-                                            <option value="large">Большой (800px)</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="small text-muted">Позиция на экране</label>
-                                        <select class="form-select" x-model="settings.position">
-                                            <option value="center">Центр</option>
-                                            <option value="top">Сверху</option>
-                                            <option value="bottom">Снизу</option>
-                                        </select>
-                                    </div>
+                                <div class="mb-3">
+                                    <label class="small text-muted">Позиция на экране</label>
+                                    <select class="form-select" x-model="settings.position">
+                                        <option value="center">Центр</option>
+                                        <option value="top">Сверху</option>
+                                        <option value="bottom">Снизу</option>
+                                    </select>
                                 </div>
 
                                 <div class="mb-3">
@@ -264,7 +229,7 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="small text-muted">Акцентный цвет (таймер, рамки)</label>
+                                    <label class="small text-muted">Акцентный цвет (рамки, фокус)</label>
                                     <div class="input-group">
                                         <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.design.accent_color">
                                         <input type="text" class="form-control" x-model="settings.design.accent_color">
@@ -321,57 +286,14 @@
             </div>
 
             <!-- ПРЕДПРОСМОТР -->
-            <div class="col-md-7" x-data="{ previewMode: 'desktop' }">
+            <div class="col-md-7">
                 <div class="block block-rounded sticky-top" style="top: 20px;">
                     <div class="block-header block-header-default">
                         <h3 class="block-title">Предпросмотр</h3>
-                        <div class="block-options">
-                            <div class="btn-group btn-group-sm" role="group">
-                                <button type="button" class="btn btn-alt-secondary" :class="previewMode === 'desktop' ? 'active' : ''" @click="previewMode = 'desktop'">
-                                    <i class="fa fa-desktop me-1"></i> ПК
-                                </button>
-                                <button type="button" class="btn btn-alt-secondary" :class="previewMode === 'tablet' ? 'active' : ''" @click="previewMode = 'tablet'">
-                                    <i class="fa fa-tablet-alt me-1"></i> Планшет
-                                </button>
-                                <button type="button" class="btn btn-alt-secondary" :class="previewMode === 'mobile' ? 'active' : ''" @click="previewMode = 'mobile'">
-                                    <i class="fa fa-mobile-alt me-1"></i> Мобильный
-                                </button>
-                            </div>
-                        </div>
                     </div>
                     <div class="block-content p-3 bg-body-dark">
-                        <div class="browser-mockup" :class="previewMode" id="browser-mockup">
-                            <div class="browser-header">
-                                <div class="d-flex gap-1">
-                                    <span class="dot red"></span>
-                                    <span class="dot yellow"></span>
-                                    <span class="dot green"></span>
-                                </div>
-                                <div class="address-bar">
-                                    <i class="fa fa-lock me-1 text-success"></i> your-website.com
-                                </div>
-                                <div class="browser-controls">
-                                    <span class="badge bg-secondary" x-text="previewMode === 'desktop' ? '1920px' : (previewMode === 'tablet' ? '768px' : '375px')"></span>
-                                </div>
-                            </div>
-                            <div class="browser-viewport" id="browser-viewport">
-                                <div id="preview-host"></div>
-                                <div class="site-placeholder">
-                                    <div class="hero-rect"></div>
-                                    <div class="p-3">
-                                        <div class="row g-3">
-                                            <div class="col-4"><div class="line"></div></div>
-                                            <div class="col-8"><div class="line w-75"></div></div>
-                                            <div class="col-12"><div class="line"></div></div>
-                                            <div class="col-12"><div class="line w-50"></div></div>
-                                            <div class="col-6"><div class="line"></div></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-2">
-                            <small class="text-muted" x-text="previewMode === 'desktop' ? '1920px × 800px' : (previewMode === 'tablet' ? '768px × 800px' : '375px × 800px')"></small>
+                        <div class="preview-container" style="min-height: 600px; position: relative; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; overflow: hidden;">
+                            <div id="preview-host" style="position: relative; width: 100%; height: 600px;"></div>
                         </div>
                     </div>
                 </div>
@@ -379,97 +301,17 @@
         </div>
 
         <style>
-            .browser-mockup {
-                border: 1px solid #d1d1d1;
-                border-radius: 8px;
-                background: #fff;
-                overflow: hidden;
-                height: 800px;
-                display: flex;
-                flex-direction: column;
-                margin: 0 auto;
-                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            }
-            .browser-mockup.desktop { width: 100%; max-width: 100%; }
-            .browser-mockup.tablet { width: 768px; }
-            .browser-mockup.mobile { width: 375px; }
-            .browser-header {
-                background: #f1f1f1;
-                padding: 8px 12px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                border-bottom: 1px solid #e1e1e1;
-                flex-shrink: 0;
-            }
-            .browser-header .dot {
-                height: 10px;
-                width: 10px;
-                border-radius: 50%;
-                margin-right: 6px;
-            }
-            .dot.red { background: #ff5f56; }
-            .dot.yellow { background: #ffbd2e; }
-            .dot.green { background: #27c93f; }
-            .browser-header .address-bar {
-                background: #fff;
-                flex: 1;
-                max-width: 400px;
-                margin: 0 12px;
-                border-radius: 4px;
-                font-size: 11px;
-                padding: 3px 10px;
-                color: #666;
-                text-align: center;
-                border: 1px solid #e1e1e1;
-            }
-            .browser-controls { min-width: 60px; text-align: right; }
-            .browser-viewport {
-                position: relative;
-                flex-grow: 1;
-                background: #fff;
-                overflow-y: auto;
-                overflow-x: hidden;
-            }
-            .site-placeholder { padding: 0; pointer-events: none; }
-            .hero-rect {
-                height: 160px;
-                background: linear-gradient(135deg, #f0f2f5 0%, #e9ecef 100%);
-                margin-bottom: 10px;
-                width: 100%;
-            }
-            .line {
-                height: 12px;
-                background: #f0f2f5;
-                border-radius: 6px;
-                margin-bottom: 15px;
-                width: 100%;
-                background: linear-gradient(90deg, #f0f2f5 0%, #e9ecef 50%, #f0f2f5 100%);
-                background-size: 200% auto;
-                animation: shimmer 1.5s infinite;
-            }
-            @keyframes shimmer {
-                0% { background-position: -200% 0; }
-                100% { background-position: 200% 0; }
-            }
             #preview-host {
-                position: absolute;
-                top: 0;
-                left: 0;
+                position: relative;
                 width: 100%;
                 height: 100%;
-                z-index: 100;
-                pointer-events: none;
-            }
-            @media (max-width: 768px) {
-                .browser-mockup.tablet,
-                .browser-mockup.mobile {
-                    width: calc(100% - 32px);
-                }
+                min-height: 600px;
             }
             .form-field-item {
                 border-left: 3px solid #3b82f6;
+            }
+            .preview-container {
+                position: relative;
             }
         </style>
 
@@ -477,30 +319,26 @@
             <script>
                 function lidupEditor(config) {
                     return {
-                        // Данные
                         slug: config.slug,
                         settings: config.settings,
                         skins: config.skins,
-                        previewMode: 'desktop',
-
-                        // Внутреннее состояние
                         rawTemplate: '',
                         rawCss: '',
                         shadowRoot: null,
                         widgetRoot: null,
-                        timerInterval: null,
 
                         async init() {
                             // Инициализация настроек по умолчанию
-                            if (!this.settings) {
-                                this.settings = {};
-                            }
+                            if (!this.settings) this.settings = {};
+
+                            // Дефолтные поля формы (имя + телефон)
                             if (!this.settings.form_fields || this.settings.form_fields.length === 0) {
                                 this.settings.form_fields = [
                                     { type: 'text', name: 'name', label: 'Ваше имя', placeholder: 'Иван Иванов', required: true },
                                     { type: 'tel', name: 'phone', label: 'Телефон', placeholder: '+7 (999) 123-45-67', required: true }
                                 ];
                             }
+
                             if (!this.settings.design) {
                                 this.settings.design = {
                                     bg_color: '#FFFFFF',
@@ -511,12 +349,14 @@
                                     border_radius: '16'
                                 };
                             }
+
+                            // Базовые настройки
                             if (!this.settings.trigger_type) this.settings.trigger_type = 'time';
                             if (!this.settings.delay) this.settings.delay = 3;
                             if (!this.settings.scroll_percent) this.settings.scroll_percent = 50;
                             if (!this.settings.frequency) this.settings.frequency = 'once_session';
                             if (!this.settings.close_behavior) this.settings.close_behavior = 'hide_session';
-                            if (!this.settings.size) this.settings.size = 'medium';
+                            if (!this.settings.auto_close) this.settings.auto_close = 0;
                             if (!this.settings.position) this.settings.position = 'center';
                             if (!this.settings.animation_in) this.settings.animation_in = 'fadeIn';
                             if (!this.settings.overlay_color) this.settings.overlay_color = 'rgba(0,0,0,0.7)';
@@ -526,7 +366,19 @@
                             if (!this.settings.template) this.settings.template = Object.keys(this.skins)[0] || 'default';
 
                             await this.loadSkin(this.settings.template);
-                            this.$watch('settings', () => this.updatePreview(), { deep: true });
+
+                            // Отдельные watchers для каждого поля (чтобы не обновлять весь preview)
+                            this.$watch('settings.title', () => this.updateContent());
+                            this.$watch('settings.description', () => this.updateContent());
+                            this.$watch('settings.has_image', () => this.updateContent());
+                            this.$watch('settings.image', () => this.updateContent());
+                            this.$watch('settings.image_position', () => this.updateContent());
+                            this.$watch('settings.btn_text', () => this.updateContent());
+                            this.$watch('settings.form_fields', () => this.updateFormFields(), { deep: true });
+                            this.$watch('settings.position', () => this.updatePosition());
+                            this.$watch('settings.animation_in', () => this.updateAnimation());
+                            this.$watch('settings.design', () => this.updateColors(), { deep: true });
+                            this.$watch('settings.overlay_color', () => this.updateColors());
                         },
 
                         async loadSkin(skinId) {
@@ -577,116 +429,125 @@
                         updatePreview() {
                             if (!this.widgetRoot || !this.rawTemplate) return;
 
-                            // Генерация полей формы
-                            const formFieldsHtml = this.generateFormFields();
-
                             // Генерация изображения
                             const imageHtml = this.settings.has_image && this.settings.image
                                 ? `<img src="${this.settings.image}" class="sp-lidup-image" alt="${this.escapeHtml(this.settings.title)}">`
                                 : '';
 
-                            // Таймер
-                            const hasTimer = this.settings.has_timer && this.settings.timer_target_date;
-                            const timerDisplay = hasTimer ? 'block' : 'none';
-
-                            // Подстановка в HTML
                             let html = this.rawTemplate
                                 .replace(/\{title\}/g, this.escapeHtml(this.settings.title || ''))
                                 .replace(/\{description\}/g, this.escapeHtml(this.settings.description || ''))
                                 .replace(/\{image_html\}/g, imageHtml)
                                 .replace(/\{image_position\}/g, this.settings.image_position || 'left')
                                 .replace(/\{btn_text\}/g, this.escapeHtml(this.settings.btn_text || 'Отправить'))
-                                .replace(/\{timer_display\}/g, timerDisplay)
-                                .replace(/\{timer_title\}/g, this.escapeHtml(this.settings.timer_title || 'До конца акции осталось:'))
-                                .replace(/\{timer_days_text\}/g, this.escapeHtml(this.settings.timer_days_text || 'дней'))
-                                .replace(/\{timer_hours_text\}/g, this.escapeHtml(this.settings.timer_hours_text || 'часов'))
-                                .replace(/\{timer_minutes_text\}/g, this.escapeHtml(this.settings.timer_minutes_text || 'минут'))
-                                .replace(/\{timer_seconds_text\}/g, this.escapeHtml(this.settings.timer_seconds_text || 'секунд'))
-                                .replace(/\{size\}/g, this.settings.size || 'medium')
                                 .replace(/\{position\}/g, this.settings.position || 'center')
                                 .replace(/\{animation_in\}/g, this.settings.animation_in || 'fadeIn');
 
                             this.widgetRoot.innerHTML = html;
 
                             const widget = this.widgetRoot.firstElementChild;
-                            if (!widget) return;
+                            if (widget) {
+                                this.applyColors(widget);
+                                this.updateFormFields();
 
-                            // Применяем CSS переменные
-                            widget.style.setProperty('--bg-color', this.settings.design?.bg_color || '#FFFFFF');
-                            widget.style.setProperty('--text-color', this.settings.design?.text_color || '#1F2937');
-                            widget.style.setProperty('--accent-color', this.settings.design?.accent_color || '#3B82F6');
-                            widget.style.setProperty('--btn-color', this.settings.design?.btn_color || '#22C55E');
-                            widget.style.setProperty('--btn-text-color', this.settings.design?.btn_text_color || '#FFFFFF');
-                            widget.style.setProperty('--border-radius', this.settings.design?.border_radius || '16');
-                            widget.style.setProperty('--overlay-color', this.settings.overlay_color || 'rgba(0,0,0,0.7)');
-
-                            // Вставляем поля формы
-                            const formFieldsContainer = widget.querySelector('#sp-form-fields');
-                            if (formFieldsContainer) {
-                                formFieldsContainer.innerHTML = formFieldsHtml;
+                                // Показываем попап в предпросмотре
+                                setTimeout(() => widget.classList.add('sp-active'), 100);
                             }
-
-                            // Запускаем таймер в предпросмотре
-                            if (hasTimer && this.settings.timer_target_date) {
-                                this.startPreviewTimer(widget);
-                            }
-
-                            // Показываем попап в предпросмотре
-                            setTimeout(() => {
-                                widget.classList.add('sp-active');
-                            }, 500);
                         },
 
-                        generateFormFields() {
+                        updateContent() {
+                            if (!this.widgetRoot) return;
+                            const widget = this.widgetRoot.firstElementChild;
+                            if (!widget) return;
+
+                            // Обновляем заголовок и описание
+                            const titleEl = widget.querySelector('.sp-lidup-title');
+                            const descEl = widget.querySelector('.sp-lidup-description');
+                            const btnEl = widget.querySelector('.sp-lidup-submit');
+                            const imageContainer = widget.querySelector('.sp-lidup-content');
+
+                            if (titleEl) titleEl.textContent = this.settings.title || '';
+                            if (descEl) descEl.textContent = this.settings.description || '';
+                            if (btnEl) btnEl.textContent = this.settings.btn_text || 'Отправить';
+
+                            // Обновляем изображение
+                            if (imageContainer) {
+                                const oldImage = imageContainer.querySelector('.sp-lidup-image');
+                                if (oldImage) oldImage.remove();
+
+                                if (this.settings.has_image && this.settings.image) {
+                                    const img = document.createElement('img');
+                                    img.src = this.settings.image;
+                                    img.className = 'sp-lidup-image';
+                                    img.alt = this.settings.title || '';
+                                    imageContainer.insertBefore(img, imageContainer.firstChild);
+                                }
+
+                                // Обновляем класс позиции изображения
+                                imageContainer.classList.remove('sp-image-left', 'sp-image-right', 'sp-image-top', 'sp-image-bottom');
+                                imageContainer.classList.add(`sp-image-${this.settings.image_position || 'left'}`);
+                            }
+                        },
+
+                        updateFormFields() {
+                            if (!this.widgetRoot) return;
+                            const formFieldsContainer = this.widgetRoot.querySelector('#sp-form-fields');
+                            if (!formFieldsContainer) return;
+
                             const fields = this.settings.form_fields || [];
-                            return fields.map(field => {
+                            const fieldsHtml = fields.map(field => {
                                 const required = field.required ? 'required' : '';
                                 const placeholder = this.escapeHtml(field.placeholder || field.label || '');
-                                const name = field.name || field.type + '_' + Math.random();
+                                const name = field.name || field.type + '_' + Date.now() + '_' + Math.random();
 
+                                if (field.type === 'hidden') {
+                                    return `<input type="hidden" name="${name}" value="${this.escapeHtml(field.default_value || '')}">`;
+                                }
                                 if (field.type === 'textarea') {
                                     return `<textarea name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field"></textarea>`;
                                 }
                                 return `<input type="${field.type}" name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field">`;
                             }).join('');
+
+                            formFieldsContainer.innerHTML = fieldsHtml;
                         },
 
-                        startPreviewTimer(widget) {
-                            if (this.timerInterval) clearInterval(this.timerInterval);
+                        updatePosition() {
+                            if (!this.widgetRoot) return;
+                            const widget = this.widgetRoot.firstElementChild;
+                            if (!widget) return;
 
-                            const targetDate = new Date(this.settings.timer_target_date).getTime();
-                            if (isNaN(targetDate)) return;
+                            const popup = widget.querySelector('.sp-lidup-popup');
+                            if (popup) {
+                                popup.classList.remove('sp-position-center', 'sp-position-top', 'sp-position-bottom');
+                                popup.classList.add(`sp-position-${this.settings.position || 'center'}`);
+                            }
+                        },
 
-                            const daysEl = widget.querySelector('.sp-timer-days');
-                            const hoursEl = widget.querySelector('.sp-timer-hours');
-                            const minutesEl = widget.querySelector('.sp-timer-minutes');
-                            const secondsEl = widget.querySelector('.sp-timer-seconds');
+                        updateAnimation() {
+                            if (!this.widgetRoot) return;
+                            const widget = this.widgetRoot.firstElementChild;
+                            if (!widget) return;
 
-                            if (!daysEl) return;
+                            widget.classList.remove('sp-fadeIn', 'sp-slideInUp', 'sp-slideInDown', 'sp-zoomIn');
+                            widget.classList.add(`sp-${this.settings.animation_in || 'fadeIn'}`);
+                        },
 
-                            this.timerInterval = setInterval(() => {
-                                const now = Date.now();
-                                const diff = targetDate - now;
+                        applyColors(widget) {
+                            const design = this.settings.design || {};
+                            widget.style.setProperty('--bg-color', design.bg_color || '#FFFFFF');
+                            widget.style.setProperty('--text-color', design.text_color || '#1F2937');
+                            widget.style.setProperty('--accent-color', design.accent_color || '#3B82F6');
+                            widget.style.setProperty('--btn-color', design.btn_color || '#22C55E');
+                            widget.style.setProperty('--btn-text-color', design.btn_text_color || '#FFFFFF');
+                            widget.style.setProperty('--border-radius', design.border_radius || '16');
+                            widget.style.setProperty('--overlay-color', this.settings.overlay_color || 'rgba(0,0,0,0.7)');
+                        },
 
-                                if (diff <= 0) {
-                                    clearInterval(this.timerInterval);
-                                    daysEl.textContent = '00';
-                                    hoursEl.textContent = '00';
-                                    minutesEl.textContent = '00';
-                                    secondsEl.textContent = '00';
-                                    return;
-                                }
-
-                                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                                const hours = Math.floor((diff % (86400000)) / (1000 * 60 * 60));
-                                const minutes = Math.floor((diff % (3600000)) / (1000 * 60));
-                                const seconds = Math.floor((diff % (60000)) / 1000);
-
-                                daysEl.textContent = days.toString().padStart(2, '0');
-                                hoursEl.textContent = hours.toString().padStart(2, '0');
-                                minutesEl.textContent = minutes.toString().padStart(2, '0');
-                                secondsEl.textContent = seconds.toString().padStart(2, '0');
-                            }, 1000);
+                        updateColors() {
+                            if (!this.widgetRoot) return;
+                            const widget = this.widgetRoot.firstElementChild;
+                            if (widget) this.applyColors(widget);
                         },
 
                         async applyTemplate(skinId) {
@@ -708,13 +569,6 @@
 
                         removeFormField(index) {
                             this.settings.form_fields.splice(index, 1);
-                        },
-
-                        hexToRgb(hex) {
-                            hex = hex.replace(/^#/, '');
-                            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-                            const int = parseInt(hex, 16);
-                            return { r: (int >> 16) & 255, g: (int >> 8) & 255, b: int & 255 };
                         },
 
                         escapeHtml(str) {

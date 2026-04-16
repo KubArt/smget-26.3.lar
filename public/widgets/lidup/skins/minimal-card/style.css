@@ -1,0 +1,260 @@
+/* ============================================ */
+/* Minimal Card Skin - Modern Minimalist        */
+/* Единые классы: .sp-lidup-overlay, .sp-lidup-popup и т.д. */
+/* ============================================ */
+
+/* ----- 1. OVERLAY ----- */
+.sp-lidup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--overlay-color, rgba(0, 0, 0, 0.6));
+    backdrop-filter: blur(4px);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sp-lidup-overlay.sp-active {
+    pointer-events: auto;
+    opacity: 1;
+}
+
+/* ----- 2. АНИМАЦИИ ----- */
+@keyframes minimalFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes minimalSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes minimalSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes minimalZoom {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.sp-fadeIn .sp-lidup-popup { animation: minimalFadeIn 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+.sp-slideInUp .sp-lidup-popup { animation: minimalSlideUp 0.35s ease; }
+.sp-slideInDown .sp-lidup-popup { animation: minimalSlideDown 0.35s ease; }
+.sp-zoomIn .sp-lidup-popup { animation: minimalZoom 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+
+/* ----- 3. POPUP КОНТЕЙНЕР ----- */
+.sp-lidup-popup {
+    width: 560px;
+    max-width: calc(100% - 40px);
+    background: var(--bg-color, #FFFFFF);
+    border-radius: 32px;
+    position: relative;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+/* ----- 4. ПОЗИЦИИ ----- */
+.sp-position-center { margin: auto; }
+.sp-position-top { margin-top: 60px; align-self: flex-start; }
+.sp-position-bottom { margin-bottom: 60px; align-self: flex-end; }
+
+/* ----- 5. КНОПКА ЗАКРЫТИЯ ----- */
+.sp-lidup-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+    color: #6B7280;
+}
+.sp-lidup-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #1F2937;
+    transform: rotate(90deg);
+}
+
+/* ----- 6. СЕТКА КОНТЕНТА ----- */
+.sp-lidup-content {
+    display: flex;
+    gap: 24px;
+}
+.sp-image-left { flex-direction: row; }
+.sp-image-right { flex-direction: row-reverse; }
+
+/* ----- 7. ИЗОБРАЖЕНИЕ ----- */
+.sp-lidup-image {
+    object-fit: cover;
+    display: block;
+    flex-shrink: 0;
+}
+.sp-image-left .sp-lidup-image,
+.sp-image-right .sp-lidup-image {
+    width: 200px;
+    height: auto;
+}
+
+/* ----- 8. ВНУТРЕННИЙ БЛОК ----- */
+.sp-lidup-inner {
+    flex: 1;
+    padding: 32px 32px 36px 32px;
+}
+
+/* ----- 9. ЗАГОЛОВОК ----- */
+.sp-lidup-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    color: var(--text-color, #1F2937);
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+}
+
+/* ----- 10. ОПИСАНИЕ ----- */
+.sp-lidup-description {
+    font-size: 14px;
+    line-height: 1.55;
+    color: #6B7280;
+    margin: 0 0 28px 0;
+}
+
+/* ----- 11. ФОРМА ----- */
+.sp-lidup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Поля ввода */
+.sp-lidup-form .sp-lidup-field {
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 16px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #FFFFFF;
+    box-sizing: border-box;
+    font-family: inherit;
+    margin: 5px 0;
+}
+.sp-lidup-form .sp-lidup-field:focus {
+    outline: none;
+    border-color: var(--accent-color, #3B82F6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+.sp-lidup-form .sp-lidup-field::placeholder {
+    color: #9CA3AF;
+    font-weight: 400;
+}
+
+/* ----- 12. КНОПКА ОТПРАВКИ ----- */
+.sp-lidup-submit {
+    background: var(--btn-color, #22C55E);
+    color: var(--btn-text-color, #FFFFFF);
+    border: none;
+    padding: 14px 24px;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 6px;
+    font-family: inherit;
+    letter-spacing: 0.01em;
+}
+.sp-lidup-submit:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+}
+.sp-lidup-submit:active {
+    transform: translateY(0);
+}
+
+/* ----- 13. СООБЩЕНИЕ ОБ ОТПРАВКЕ ----- */
+.sp-lidup-message {
+    padding: 14px 18px;
+    border-radius: 16px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    margin-top: 6px;
+}
+.sp-lidup-message.success {
+    background: #DCFCE7;
+    color: #166534;
+}
+.sp-lidup-message.error {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+/* ----- 14. МОБИЛЬНАЯ АДАПТАЦИЯ ----- */
+@media (max-width: 640px) {
+    .sp-lidup-popup {
+        width: calc(100% - 32px);
+        border-radius: 28px;
+    }
+
+    .sp-lidup-content {
+        flex-direction: column !important;
+    }
+
+    .sp-lidup-image {
+        width: 100% !important;
+        height: 140px !important;
+        object-fit: cover;
+    }
+
+    .sp-lidup-inner {
+        padding: 24px 24px 28px 24px;
+    }
+
+    .sp-lidup-title {
+        font-size: 22px;
+    }
+
+    .sp-lidup-description {
+        font-size: 13px;
+        margin-bottom: 24px;
+    }
+
+    .sp-lidup-form {
+        gap: 12px;
+    }
+
+    .sp-lidup-form .sp-lidup-field {
+        padding: 12px 16px;
+        border-radius: 14px;
+        margin: 5px 0;
+    }
+
+    .sp-lidup-submit {
+        padding: 12px 20px;
+        border-radius: 14px;
+    }
+
+    .sp-position-top {
+        margin-top: 30px;
+    }
+
+    .sp-position-bottom {
+        margin-bottom: 30px;
+    }
+}
