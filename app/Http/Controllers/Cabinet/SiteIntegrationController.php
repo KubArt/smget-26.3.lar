@@ -15,6 +15,8 @@ class SiteIntegrationController extends BaseCabinetController
      */
     public function index(Site $site)
     {
+        $this->authorizeAccess($site); // Проверка прав кабинета
+
         // Получаем все активные сервисы из справочника
         $services = Service::where('is_active', true)->get();
 
@@ -31,6 +33,7 @@ class SiteIntegrationController extends BaseCabinetController
      */
     public function configure(Site $site, Service $service)
     {
+        $this->authorizeAccess($site); // Проверка прав кабинета
         // Ищем существующую связь или создаем новую
         $siteService = SiteService::firstOrCreate(
             ['site_id' => $site->id, 'service_id' => $service->id]
@@ -44,6 +47,8 @@ class SiteIntegrationController extends BaseCabinetController
      */
     public function update(Request $request, Site $site, Service $service)
     {
+        $this->authorizeAccess($site); // Проверка прав кабинета
+
         $siteService = SiteService::where('site_id', $site->id)
             ->where('service_id', $service->id)
             ->firstOrFail();

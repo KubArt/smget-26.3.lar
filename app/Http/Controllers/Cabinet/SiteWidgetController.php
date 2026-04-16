@@ -32,6 +32,7 @@ class SiteWidgetController extends BaseCabinetController
      */
     public function index(Site $site)
     {
+        $this->authorizeAccess($site); // Проверка прав кабинета
         // $this->authorizeOwner($site);
         // $this->authorizeAccess($site); // Метод из BaseCabinetController
 
@@ -44,7 +45,8 @@ class SiteWidgetController extends BaseCabinetController
      */
     public function store(Request $request, Site $site)
     {
-     //   $this->authorizeOwner($site);
+        $this->authorizeAccess($site); // Проверка прав кабинета
+
 
         $request->validate([
             'widget_type_id' => 'required|exists:widget_types,id'
@@ -72,7 +74,7 @@ class SiteWidgetController extends BaseCabinetController
     public function toggle(Request $request, Site $site, Widget $widget)
     {
         // Проверка прав (убедись, что метод authorizeOwner есть в контроллере или BaseCabinetController)
-        // $this->authorizeOwner($site);
+        $this->authorizeAccess($site); // Проверка прав кабинета
 
         $newState = $request->status ? true : false;
 
@@ -92,8 +94,11 @@ class SiteWidgetController extends BaseCabinetController
      */
     public function destroy(Site $site, Widget $widget)
     {
-        $this->authorizeOwner($site);
+        $this->authorizeAccess($site); // Проверка прав кабинета
+        abort_if($widget->site_id !== $site->id, 403);
+
         $widget->delete();
+        return back()->with('success', 'Виджет удален');
 
         return back()->with('success', 'Виджет удален');
     }

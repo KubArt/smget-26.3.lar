@@ -13,8 +13,18 @@ use Carbon\Carbon;
 
 class FunnelController extends BaseCabinetController
 {
+    /**
+     * Обновление этапа воронки для лида
+     */
     public function updateStage(Request $request, Lead $lead)
     {
+        // 1. Получаем текущий кабинет
+        $workspace = auth()->user()->currentWorkspace();
+
+        // 2. Проверка доступа: принадлежит ли лид сайту текущего кабинета
+        // Мы используем загруженную связь site_id для быстрой проверки
+        abort_if(!$workspace->sites->contains('id', $lead->site_id), 403, 'Доступ запрещен');
+
         // Определяем коды стадий, которые считаются отказом
         $rejectedCodes = ['rejected', 'lost', 'refusal'];
 
@@ -33,17 +43,19 @@ class FunnelController extends BaseCabinetController
         $newStage = $request->stage_code;
 
         if ($oldStage !== $newStage) {
+            // Обновляем статус
             $lead->update(['status' => $newStage]);
 
+            // Логируем историю изменений в контексте текущего пользователя
             LeadStageHistory::create([
                 'lead_id'    => $lead->id,
                 'from_stage' => $oldStage,
                 'to_stage'   => $newStage,
                 'changed_by' => auth()->id(),
-                'comment'    => $request->comment // Здесь будет причина
+                'comment'    => $request->comment
             ]);
 
-            return back()->with('success', 'Статус обновлен');
+            return back()->with('success', 'Статус лида успешно обновлен');
         }
 
         return back();

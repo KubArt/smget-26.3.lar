@@ -20,10 +20,20 @@
                 <li class="nav-main-item">
                     <a class="nav-main-link {{ request()->routeIs('cabinet.crm.tasks.*') ? 'active' : '' }}" href="{{ route('cabinet.crm.tasks.index') }}">
                         <i class="nav-main-link-icon si si-calendar"></i>
-                        <span class="nav-main-link-name">Мои задачи</span>
+                        <span class="nav-main-link-name">Задачи</span>
+
                         @php
-                            $pendingCount = \App\Models\Crm\LeadTask::where('assigned_to', auth()->id())->where('status', 'pending')->count();
+                            // 1. Получаем текущий кабинет пользователя
+                            $currentWorkspace = auth()->user()->currentWorkspace();
+
+                            // 2. Считаем задачи только тех сайтов, которые привязаны к этому кабинету
+                            $pendingCount = \App\Models\Crm\LeadTask::where('status', 'pending')
+                                ->whereHas('lead', function($query) use ($currentWorkspace) {
+                                    $query->whereIn('site_id', $currentWorkspace->sites()->pluck('id'));
+                                })
+                                ->count();
                         @endphp
+
                         @if($pendingCount > 0)
                             <span class="nav-main-link-badge badge rounded-pill bg-danger">{{ $pendingCount }}</span>
                         @endif

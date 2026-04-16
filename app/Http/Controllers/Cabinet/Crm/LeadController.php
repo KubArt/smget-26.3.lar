@@ -14,15 +14,23 @@ class LeadController extends BaseCabinetController
 {
     public function index(Request $request)
     {
-        $query = Lead::whereIn('site_id', auth()->user()->sites->pluck('id'))
+        // 1. Получаем текущий кабинет через метод, определенный в модели User
+        $workspace = auth()->user()->currentWorkspace();
+
+        // 2. Получаем ID всех сайтов, которые принадлежат этому кабинету
+        // Это позволяет сотрудникам видеть лиды всех проектов компании
+        $siteIds = $workspace->sites()->pluck('id');
+
+        $query = Lead::whereIn('site_id', $siteIds)
             ->with(['site', 'client', 'funnelStage']);
 
-        // Фильтр по сайту
+        // Фильтр по конкретному сайту (если выбран в интерфейсе)
         if ($request->filled('site_id')) {
+            // Проверяем, что выбранный сайт действительно принадлежит этому кабинету
             $query->where('site_id', $request->site_id);
         }
 
-        // Фильтр по дате (как в статистике)
+        // Фильтрация по датам
         if ($request->filled('date_from') && $request->filled('date_to')) {
             $query->whereBetween('created_at', [
                 Carbon::parse($request->date_from)->startOfDay(),
@@ -31,15 +39,19 @@ class LeadController extends BaseCabinetController
         }
 
         $leads = $query->latest()->paginate(15);
-        $sites = auth()->user()->sites;
 
-        return view('cabinet.crm.leads.index', compact('leads', 'sites'));
+        // Список сайтов для выпадающего списка фильтра
+        $sites = $workspace->sites;
+
+        return view('cabinet.crm.leads.index', compact('leads', 'sites', 'workspace'));
     }
 
     public function show(Lead $lead)
     {
-        // Проверка доступа (через Policy или напрямую)
-        abort_if(!auth()->user()->sites->contains($lead->site_id), 403);
+        $workspace = auth()->user()->currentWorkspace();
+
+        // 3. Проверка доступа: принадлежит ли сайт лида текущему кабинету
+        abort_if(!$workspace->sites->contains('id', $lead->site_id), 403, 'Доступ к лиду запрещен');
 
         $lead->load(['client.notes', 'notes.user', 'tasks.assignedTo', 'site']);
 

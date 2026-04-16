@@ -55,12 +55,6 @@ class SiteController extends BaseCabinetController
         return redirect()->route('cabinet.sites.index')->with('success', 'Настройки сайта обновлены');
     }
 
-    private function authorizeAccess(Site $site)
-    {
-        if (!$site->users->contains(auth()->id())) {
-            abort(403);
-        }
-    }
 
     /**
      * Форма создания нового сайта

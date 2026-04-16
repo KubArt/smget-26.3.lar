@@ -10,6 +10,15 @@ use Illuminate\Support\Str;
 
 class TeamController extends \App\Http\Controllers\Cabinet\BaseCabinetController
 {
+
+
+    /**
+     * TODO: Реализовать сквозную проверку во всех модулях (Виджеты, Лиды, Интеграции),
+     * чтобы доступ сотрудника к ресурсам сайта строго валидировался через
+     * принадлежность этого сайта к текущему активному Workspace.
+     * * Логика: Site::where('id', $id)->where('workspace_id', auth()->user()->current_workspace_id)->exists()
+     */
+
     public function index()
     {
 
