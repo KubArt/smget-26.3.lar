@@ -44,7 +44,6 @@ class LidUpWidget implements WidgetContract
                 'slug' => 'default'
             ];
         }
-
         return $skins;
     }
 

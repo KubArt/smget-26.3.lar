@@ -1,0 +1,46 @@
+<!-- Кнопка открытия -->
+<button class="fw-open-button fw-position-bottom-right fw-button-medium" data-fw-open style="display: none;">
+    <span class="fw-button-icon">{button_icon}</span>
+    <span class="fw-button-text">{button_text}</span>
+</button>
+
+<!-- Модальное окно -->
+<div class="fw-overlay" data-fw-modal style="display: none;">
+    <div class="fw-modal">
+        <button class="fw-close" data-fw-close>✕</button>
+
+        <div class="fw-layout">
+            <!-- Левая колонка - Колесо -->
+            <div class="fw-wheel-col">
+                <div class="fw-wheel-container">
+                    <canvas id="fw-canvas-{id}" width="{wheel_size}" height="{wheel_size}" class="fw-wheel"></canvas>
+                    <div class="fw-pointer"></div>
+                </div>
+            </div>
+
+            <!-- Правая колонка - Контент -->
+            <div class="fw-content-col">
+                <div class="fw-content-inner">
+                    <h2 class="fw-title">{title}</h2>
+                    <p class="fw-description">{description}</p>
+
+                    <div class="fw-form-container">
+                        <form class="fw-form" data-fw-form>
+                            <div id="fw-form-fields"></div>
+                            <button type="submit" class="fw-spin-btn">{form_button_text}</button>
+                            <div class="fw-message" style="display: none;"></div>
+                        </form>
+                    </div>
+
+                    <div class="fw-result-container" style="display: none;">
+                        <div class="fw-result-icon"></div>
+                        <h3 class="fw-result-title"></h3>
+                        <p class="fw-result-description"></p>
+                        <div class="fw-coupon-code"></div>
+                        <button class="fw-close-btn">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

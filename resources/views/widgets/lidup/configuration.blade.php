@@ -286,34 +286,13 @@
             </div>
 
             <!-- ПРЕДПРОСМОТР -->
-            <div class="col-md-7">
-                <div class="block block-rounded sticky-top" style="top: 20px;">
-                    <div class="block-header block-header-default">
-                        <h3 class="block-title">Предпросмотр</h3>
-                    </div>
-                    <div class="block-content p-3 bg-body-dark">
-                        <div class="preview-container" style="min-height: 600px; position: relative; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; overflow: hidden;">
-                            <div id="preview-host" style="position: relative; width: 100%; height: 600px;"></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-md-7" x-data="{ previewMode: 'desktop' }" x-init="$watch('previewMode', () => $dispatch('preview-mode-changed', previewMode))">
+                @include("widgets.configuration.preview")
             </div>
-        </div>
 
-        <style>
-            #preview-host {
-                position: relative;
-                width: 100%;
-                height: 100%;
-                min-height: 600px;
-            }
-            .form-field-item {
-                border-left: 3px solid #3b82f6;
-            }
-            .preview-container {
-                position: relative;
-            }
-        </style>
+        </div>
+    </div>
+
 
         @push('js')
             <script>

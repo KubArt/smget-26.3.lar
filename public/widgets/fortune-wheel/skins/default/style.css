@@ -1,0 +1,385 @@
+/* Alpine.js хелпер */
+[x-cloak] { display: none !important; }
+
+/* Кнопка открытия */
+.fw-open-button {
+    position: fixed;
+    z-index: 999998;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.fw-open-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Позиции кнопки */
+.fw-position-bottom-right { bottom: 20px; right: 20px; }
+.fw-position-bottom-left { bottom: 20px; left: 20px; }
+.fw-position-top-right { top: 20px; right: 20px; }
+.fw-position-top-left { top: 20px; left: 20px; }
+
+/* Размеры кнопки */
+.fw-button-small { padding: 8px 16px; font-size: 14px; }
+.fw-button-medium { padding: 12px 24px; font-size: 16px; }
+.fw-button-large { padding: 16px 32px; font-size: 18px; }
+
+/* Overlay */
+.fw-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+}
+
+/* Modal - новый дизайн с двумя колонками */
+.fw-modal {
+    background: var(--modal-bg, #FFFFFF);
+    border-radius: 24px;
+    max-width: 800px;
+    width: 90%;
+    position: relative;
+    animation: modalIn 0.3s ease;
+    overflow: hidden;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Двухколоночный макет */
+.fw-layout {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+/* Левая колонка - колесо */
+.fw-wheel-col {
+    flex: 0 0 45%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 40px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+/* Правая колонка - контент */
+.fw-content-col {
+    flex: 0 0 55%;
+    padding: 40px 30px;
+    background: var(--modal-bg, #FFFFFF);
+}
+
+/* Контейнер колеса */
+.fw-wheel-container {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto;
+}
+
+.fw-wheel {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 50%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.fw-wheel:hover {
+    transform: scale(1.02);
+}
+
+/* Стрелка */
+.fw-pointer {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 40px solid var(--pointer-color, #FF4444);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    z-index: 10;
+}
+
+/* Кнопка закрытия */
+.fw-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.1);
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fw-close:hover {
+    background: rgba(0,0,0,0.2);
+    transform: rotate(90deg);
+}
+
+/* Контент правой колонки */
+.fw-content-inner {
+    text-align: center;
+}
+
+.fw-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 12px;
+    color: var(--modal-text, #2C3E50);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.fw-description {
+    font-size: 14px;
+    color: #6B7280;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+/* Форма */
+.fw-form-container {
+    margin-top: 10px;
+}
+
+.fw-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.fw-form .fw-field {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    font-size: 14px;
+    transition: all 0.2s;
+    background: #F9FAFB;
+}
+
+.fw-form .fw-field:focus {
+    outline: none;
+    border-color: var(--accent-color, #667eea);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Кнопка Играть */
+.fw-spin-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 40px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.fw-spin-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.fw-spin-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Спиннер при загрузке */
+.fw-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Ссылка закрыть */
+.fw-link-close {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+    margin-top: 10px;
+}
+
+.fw-link-close:hover {
+    color: #667eea;
+}
+
+/* Результат */
+.fw-result-container {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.fw-result-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.fw-result-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: var(--accent-color, #667eea);
+}
+
+.fw-result-description {
+    font-size: 14px;
+    color: #6B7280;
+    margin-bottom: 20px;
+}
+
+.fw-coupon-code {
+    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
+    padding: 12px 20px;
+    border-radius: 40px;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 15px 0;
+    letter-spacing: 1px;
+    display: inline-block;
+}
+
+.fw-close-result-btn {
+    background: var(--accent-color, #667eea);
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: all 0.2s;
+}
+
+.fw-close-result-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Сообщения об ошибках */
+.fw-message {
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    text-align: center;
+}
+
+.fw-message.error {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+.fw-message.success {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 640px) {
+    .fw-layout {
+        flex-direction: column;
+    }
+
+    .fw-wheel-col {
+        flex: auto;
+        padding: 30px 20px;
+    }
+
+    .fw-content-col {
+        flex: auto;
+        padding: 30px 20px;
+    }
+
+    .fw-wheel-container {
+        max-width: 200px;
+    }
+
+    .fw-title {
+        font-size: 22px;
+    }
+
+    .fw-modal {
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* Анимация конфетти */
+.fw-confetti {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000000;
+    animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(500px) rotate(720deg);
+        opacity: 0;
+    }
+}
