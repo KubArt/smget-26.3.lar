@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Integration\SiteService;
 use App\Models\Site;
 use App\Models\Crm\Lead;
 use App\Models\Crm\Client;
@@ -14,9 +15,19 @@ class LeadCaptureController extends Controller
 {
     public function capture(Request $request, $source)
     {
-        // 1. Ищем сайт по API Key (передаем в заголовке или в теле)
-        $apiKey = $request->header('X-Api-Key') ?? $request->api_key;
-        $site = Site::where('api_key', $apiKey)->first();
+        // Ищем конкретную интеграцию по токену в URL или заголовке
+        $token = $request->header('X-Api-Key') ?? $request->token;
+
+        $integration = SiteService::where('api_key', $token)
+            ->where('is_enabled', true)
+            ->with(['site', 'service'])
+            ->first();
+
+        if (!$integration || $integration->service->slug !== $source) {
+            return response()->json(['error' => 'Invalid or inactive integration token'], 403);
+        }
+
+        $site = $integration->site;
 
         if (!$site) {
             return response()->json(['error' => 'Invalid API Key'], 403);
@@ -41,6 +52,8 @@ class LeadCaptureController extends Controller
             ['phone' => $parsedData['phone'], 'site_id' => $site->id],
             ['name' => $parsedData['name'], 'email' => $parsedData['email'] ?? null]
         );
+
+        dd($parsedData);
 
         // 4. Создание Лида
         // Создание лида со всеми мета-данными

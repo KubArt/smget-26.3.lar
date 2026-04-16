@@ -41,6 +41,14 @@
                                         {{ $site->widgets->count() }}
                                     </span>
                                 </a>
+
+                                <a href="{{ route('cabinet.sites.integrations.index', $site->id) }}"
+                                   class="btn btn-sm btn-alt-info"
+                                   data-bs-toggle="tooltip"
+                                   title="Интеграции (Tilda, Calltouch)">
+                                    <i class="fa fa-plug"></i>
+                                </a>
+
                             </td>
                             <td>
                                 @if($site->activeSubscription)

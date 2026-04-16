@@ -49,6 +49,14 @@
                         <span class="nav-main-link-name">Маркетплейс</span>
                     </a>
                 </li>
+                <li class="nav-main-item">
+                    <a class="nav-main-link {{ request()->routeIs('cabinet.sites.integrations.*') ? 'active' : '' }}"
+                       href="{{ isset($site) ? route('cabinet.sites.integrations.index', $site) : '#' }}"
+                       @if(!isset($site)) style="opacity: 0.5; cursor: not-allowed;" title="Выберите сайт" @endif>
+                        <i class="nav-main-link-icon si si-layers"></i>
+                        <span class="nav-main-link-name">Интеграции</span>
+                    </a>
+                </li>
 
                 <li class="nav-main-heading">Мои проекты</li>
                 <li class="nav-main-item">

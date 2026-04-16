@@ -44,19 +44,6 @@ Route::prefix('sites/{site}')->name('sites.')->group(function () {
 
     // 2. Глубокая конфигурация конкретного виджета
     // Префикс уже включает sites/{site}, добавляем только хвост для виджета
-/*
-    Route::group(['prefix' => 'widgets/{widget}/config', 'as' => 'widgets.config.'], function () {
-        // Путь будет: sites/1/widgets/2/config/settings
-        Route::get('settings', [WidgetConfigurationController::class, 'edit'])->name('edit');
-        Route::put('update', [WidgetConfigurationController::class, 'update'])->name('update');
-
-
-    // Дизайн
-        Route::get('design', [WidgetConfigurationController::class, 'design'])->name('widget.design');
-        Route::post('design', [WidgetConfigurationController::class, 'designUpdate'])->name('widget.design.update');
-
-    });
-//*/
     Route::group(['prefix' => 'widgets/{widget}', 'as' => 'widgets.'], function() {
         // Основные настройки (уже есть)
         Route::get('config', [WidgetConfigurationController::class, 'edit'])->name('config');
@@ -75,6 +62,17 @@ Route::prefix('sites/{site}')->name('sites.')->group(function () {
     Route::post('verify', [SiteController::class, 'verify'])->name('verify');
     Route::post('verify-ajax', [SiteController::class, 'verifyAjax'])->name('verify.ajax');
     Route::get('notifications', [SiteController::class, 'notifications'])->name('notifications');
+
+
+
+    // Интеграции сторонних сервисов
+    Route::get('integrations', [\App\Http\Controllers\Cabinet\SiteIntegrationController::class, 'index'])->name('integrations.index');
+    Route::get('integrations/{service}/config', [\App\Http\Controllers\Cabinet\SiteIntegrationController::class, 'configure'])->name('integrations.config');
+    Route::put('integrations/{service}', [\App\Http\Controllers\Cabinet\SiteIntegrationController::class, 'update'])->name('integrations.update');
+    Route::post('integrations/{service}/regenerate', [\App\Http\Controllers\Cabinet\SiteIntegrationController::class, 'regenerateToken'])
+        ->name('integrations.regenerate');
+
+
 });
 
 
