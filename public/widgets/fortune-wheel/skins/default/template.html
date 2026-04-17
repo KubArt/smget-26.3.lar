@@ -1,46 +1,30 @@
-<!-- Кнопка открытия -->
-<button class="fw-open-button fw-position-bottom-right fw-button-medium" data-fw-open style="display: none;">
-    <span class="fw-button-icon">{button_icon}</span>
-    <span class="fw-button-text">{button_text}</span>
-</button>
+<div class="sfw-root sp-position-{position}" id="sfw-{id}" data-widget-id="{widget_id}">
 
-<!-- Модальное окно -->
-<div class="fw-overlay" data-fw-modal style="display: none;">
-    <div class="fw-modal">
-        <button class="fw-close" data-fw-close>✕</button>
-
-        <div class="fw-layout">
-            <!-- Левая колонка - Колесо -->
-            <div class="fw-wheel-col">
-                <div class="fw-wheel-container">
-                    <canvas id="fw-canvas-{id}" width="{wheel_size}" height="{wheel_size}" class="fw-wheel"></canvas>
-                    <div class="fw-pointer"></div>
+    <div class="sfw-overlay" id="sfw-modal-{id}">
+        <div class="sfw-modal-backdrop" data-sp-close></div>
+        <div class="sfw-modal-content">
+        <button class="sfw-close-btn" data-sp-close>×</button>
+        <div class="sfw-grid">
+            <div class="sfw-left">
+                <div class="sfw-wheel-container">
+                    <div class="sfw-pointer"></div>
+                    <canvas id="sfw-canvas-{id}" width="{wheel_size}" height="{wheel_size}"></canvas>
                 </div>
             </div>
-
-            <!-- Правая колонка - Контент -->
-            <div class="fw-content-col">
-                <div class="fw-content-inner">
-                    <h2 class="fw-title">{title}</h2>
-                    <p class="fw-description">{description}</p>
-
-                    <div class="fw-form-container">
-                        <form class="fw-form" data-fw-form>
-                            <div id="fw-form-fields"></div>
-                            <button type="submit" class="fw-spin-btn">{form_button_text}</button>
-                            <div class="fw-message" style="display: none;"></div>
-                        </form>
-                    </div>
-
-                    <div class="fw-result-container" style="display: none;">
-                        <div class="fw-result-icon"></div>
-                        <h3 class="fw-result-title"></h3>
-                        <p class="fw-result-description"></p>
-                        <div class="fw-coupon-code"></div>
-                        <button class="fw-close-btn">Закрыть</button>
+            <div class="sfw-right">
+                <div class="sfw-form-body">
+                    <h3>{title}</h3>
+                    <p>{description}</p>
+                    <div id="sfw-form-fields-{id}">
+                        <button class="sfw-spin-trigger">Играть</button>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+    </div>
+
+    <div class="sfw-trigger" data-sp-toggle>
+        <span class="sfw-icon">🎡</span>
     </div>
 </div>

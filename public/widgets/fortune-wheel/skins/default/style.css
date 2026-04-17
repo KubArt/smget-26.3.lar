@@ -1,385 +1,205 @@
-/* Alpine.js хелпер */
-[x-cloak] { display: none !important; }
 
-/* Кнопка открытия */
-.fw-open-button {
-    position: fixed;
-    z-index: 999998;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-
-.fw-open-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-}
-
-/* Позиции кнопки */
-.fw-position-bottom-right { bottom: 20px; right: 20px; }
-.fw-position-bottom-left { bottom: 20px; left: 20px; }
-.fw-position-top-right { top: 20px; right: 20px; }
-.fw-position-top-left { top: 20px; left: 20px; }
-
-/* Размеры кнопки */
-.fw-button-small { padding: 8px 16px; font-size: 14px; }
-.fw-button-medium { padding: 12px 24px; font-size: 16px; }
-.fw-button-large { padding: 16px 32px; font-size: 18px; }
-
-/* Overlay */
-.fw-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 999999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(4px);
-}
-
-/* Modal - новый дизайн с двумя колонками */
-.fw-modal {
-    background: var(--modal-bg, #FFFFFF);
-    border-radius: 24px;
-    max-width: 800px;
-    width: 90%;
-    position: relative;
-    animation: modalIn 0.3s ease;
+/* Модальное окно: Neumorphism + Glassmorphism */
+.sfw-modal-content {
+    background: var(--sfw-bg-modal);
+    border-radius: 32px;
+    padding: 0;
     overflow: hidden;
-}
-
-@keyframes modalIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-/* Двухколоночный макет */
-.fw-layout {
+    box-shadow: var(--sfw-shadow);
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    width: 850px;
+    max-width: 95vw;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Левая колонка - колесо */
-.fw-wheel-col {
-    flex: 0 0 45%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 40px 20px;
+.sfw-main-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    min-height: 500px;
+}
+
+/* Секция колеса */
+.sfw-wheel-side {
+    background: #f8fafc;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 40px;
     position: relative;
+    border-right: 1px solid #f1f5f9;
 }
 
-/* Правая колонка - контент */
-.fw-content-col {
-    flex: 0 0 55%;
-    padding: 40px 30px;
-    background: var(--modal-bg, #FFFFFF);
-}
-
-/* Контейнер колеса */
-.fw-wheel-container {
-    position: relative;
-    width: 100%;
-    max-width: 280px;
-    margin: 0 auto;
-}
-
-.fw-wheel {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 50%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.fw-wheel:hover {
-    transform: scale(1.02);
-}
-
-/* Стрелка */
-.fw-pointer {
+/* Указатель колеса (стильный треугольник с тенью) */
+.sfw-pointer {
     position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-top: 40px solid var(--pointer-color, #FF4444);
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    top: 50%;
+    right: 30px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: #1f2937;
+    clip-path: polygon(100% 50%, 0 0, 0 100%);
     z-index: 10;
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2));
 }
 
-/* Кнопка закрытия */
-.fw-close {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 32px;
-    height: 32px;
+#sfw-canvas {
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.08));
     border-radius: 50%;
-    background: rgba(0,0,0,0.1);
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    transition: all 0.2s;
-    z-index: 20;
+}
+
+/* Секция контента и формы */
+.sfw-form-side {
+    padding: 50px;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
 }
 
-.fw-close:hover {
-    background: rgba(0,0,0,0.2);
-    transform: rotate(90deg);
-}
-
-/* Контент правой колонки */
-.fw-content-inner {
-    text-align: center;
-}
-
-.fw-title {
+.sfw-form-side h3 {
     font-size: 28px;
     font-weight: 800;
-    margin: 0 0 12px;
-    color: var(--modal-text, #2C3E50);
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--sfw-text-main);
+    margin: 0 0 12px 0;
+    line-height: 1.2;
 }
 
-.fw-description {
-    font-size: 14px;
-    color: #6B7280;
+.sfw-form-side p {
+    color: var(--sfw-text-muted);
+    font-size: 16px;
     margin-bottom: 30px;
     line-height: 1.5;
 }
 
-/* Форма */
-.fw-form-container {
-    margin-top: 10px;
-}
-
-.fw-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.fw-form .fw-field {
+/* Инпуты */
+.sfw-input {
     width: 100%;
-    padding: 14px 16px;
-    border: 1px solid #E5E7EB;
+    padding: 14px 18px;
+    margin-bottom: 15px;
+    border: 2px solid #e5e7eb;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 16px;
     transition: all 0.2s;
-    background: #F9FAFB;
+    box-sizing: border-box;
 }
 
-.fw-form .fw-field:focus {
+.sfw-input:focus {
+    border-color: var(--sfw-primary);
     outline: none;
-    border-color: var(--accent-color, #667eea);
-    background: #FFFFFF;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
-/* Кнопка Играть */
-.fw-spin-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* Кнопка "Играть" */
+.sfw-spin-trigger, .sfw-submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--sfw-primary);
     color: white;
     border: none;
-    padding: 14px 24px;
-    border-radius: 40px;
-    font-size: 16px;
+    border-radius: 14px;
+    font-size: 18px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 10px;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.fw-spin-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+.sfw-spin-trigger:hover {
+    background: #4f46e5;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
 }
 
-.fw-spin-btn:disabled {
-    opacity: 0.7;
+.sfw-spin-trigger:disabled {
+    background: #cbd5e1;
     cursor: not-allowed;
 }
 
-/* Спиннер при загрузке */
-.fw-spinner {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 0.6s linear infinite;
+/* Адаптивность для мобилок */
+@media (max-width: 768px) {
+    .sfw-main-grid { grid-template-columns: 1fr; }
+    .sfw-wheel-side { padding: 20px; }
+    .sfw-form-side { padding: 30px; text-align: center; }
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
 
-/* Ссылка закрыть */
-.fw-link-close {
-    background: none;
-    border: none;
-    color: #9CA3AF;
-    font-size: 13px;
-    cursor: pointer;
-    text-decoration: underline;
-    transition: color 0.2s;
-    margin-top: 10px;
-}
-
-.fw-link-close:hover {
-    color: #667eea;
-}
-
-/* Результат */
-.fw-result-container {
-    text-align: center;
-    padding: 20px 0;
-}
-
-.fw-result-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-    animation: bounce 0.5s ease;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-}
-
-.fw-result-title {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 10px;
-    color: var(--accent-color, #667eea);
-}
-
-.fw-result-description {
-    font-size: 14px;
-    color: #6B7280;
-    margin-bottom: 20px;
-}
-
-.fw-coupon-code {
-    background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%);
-    padding: 12px 20px;
-    border-radius: 40px;
-    font-family: monospace;
-    font-size: 16px;
-    font-weight: bold;
-    margin: 15px 0;
-    letter-spacing: 1px;
-    display: inline-block;
-}
-
-.fw-close-result-btn {
-    background: var(--accent-color, #667eea);
-    color: white;
-    border: none;
-    padding: 10px 30px;
-    border-radius: 40px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 15px;
-    transition: all 0.2s;
-}
-
-.fw-close-result-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-/* Сообщения об ошибках */
-.fw-message {
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 13px;
-    text-align: center;
-}
-
-.fw-message.error {
-    background: #FEE2E2;
-    color: #DC2626;
-}
-
-.fw-message.success {
-    background: #D1FAE5;
-    color: #059669;
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 640px) {
-    .fw-layout {
-        flex-direction: column;
-    }
-
-    .fw-wheel-col {
-        flex: auto;
-        padding: 30px 20px;
-    }
-
-    .fw-content-col {
-        flex: auto;
-        padding: 30px 20px;
-    }
-
-    .fw-wheel-container {
-        max-width: 200px;
-    }
-
-    .fw-title {
-        font-size: 22px;
-    }
-
-    .fw-modal {
-        width: 95%;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-}
-
-/* Анимация конфетти */
-.fw-confetti {
+/* Полная изоляция виджета */
+.sfw-root {
+    all: initial; /* Сброс всех стилей сайта для этого блока */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     position: fixed;
-    pointer-events: none;
-    z-index: 1000000;
-    animation: confettiFall 3s ease-out forwards;
+    bottom: 0;
+    z-index: 2147483647; /* Максимальный z-index */
+    box-sizing: border-box;
 }
 
-@keyframes confettiFall {
-    0% {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(500px) rotate(720deg);
-        opacity: 0;
-    }
+.sfw-root * {
+    box-sizing: border-box; /* Чтобы padding не раздувал элементы */
+}
+
+/* Позиционирование корня */
+.sfw-root.sp-position-right { right: 0; }
+.sfw-root.sp-position-left { left: 0; }
+
+/* Кнопка-триггер */
+.sfw-trigger {
+    position: absolute;
+    bottom: 20px;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #6366f1, #f43f5e);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+.sfw-root.sp-position-right .sfw-trigger { right: 20px; }
+.sfw-root.sp-position-left .sfw-trigger { left: 20px; }
+
+/* Оверлей на весь экран */
+.sfw-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    display: none; /* Скрыто по умолчанию */
+    align-items: center;
+    justify-content: center;
+    z-index: -1;
+}
+
+.sfw-root.sp-active .sfw-overlay {
+    display: flex;
+}
+
+/* Задний фон (затемнение) */
+.sfw-modal-backdrop {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+}
+
+/* Контент модалки */
+.sfw-modal-content {
+    position: relative;
+    background: #fff;
+    width: 800px;
+    max-width: 90vw;
+    border-radius: 24px;
+    overflow: hidden;
+    z-index: 1;
+    display: flex;
+}
+
+.sfw-grid { display: flex; width: 100%; }
+.sfw-left { flex: 1.2; background: #f9fafb; padding: 40px; display: flex; justify-content: center; position: relative; }
+.sfw-right { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; }
+
+/* Адаптив: если места мало — в колонку */
+@media (max-width: 700px) {
+    .sfw-grid { flex-direction: column; }
+    .sfw-modal-content { max-height: 90vh; overflow-y: auto; }
 }

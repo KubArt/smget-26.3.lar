@@ -249,6 +249,24 @@
                     this.widgetRoot = this.shadowRoot.getElementById('widget-root');
                 },
 
+                async loadSkin(skinId) {
+                    try {
+                        const baseUrl = `/widgets/${this.slug}/skins/${skinId}`;
+                        const [htmlRes, cssRes] = await Promise.all([
+                            fetch(`${baseUrl}/template.html?v=${Date.now()}`),
+                            fetch(`${baseUrl}/style.css?v=${Date.now()}`)
+                        ]);
+
+                        this.rawTemplate = await htmlRes.text();
+                        this.rawCss = await cssRes.text();
+
+                        // После загрузки ресурсов один раз инициализируем превью
+                        this.updatePreview();
+                    } catch (e) {
+                        console.error('Error loading skin:', e);
+                    }
+                },
+
                 updatePreview() {
                     if (this.isUpdating) return;
                     if (!this.widgetRoot || !this.rawTemplate) return;

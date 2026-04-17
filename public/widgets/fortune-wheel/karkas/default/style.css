@@ -1,0 +1,30 @@
+:root { --sfw-accent: #FF6B6B; }
+
+/* Копируем логику позиционирования из работающего плагина */
+.sfw-wheel-widget { position: fixed; z-index: 999999; bottom: 20px; }
+.sp-position-right { right: 20px; }
+.sp-position-left { left: 20px; }
+
+/* Оверлей как в lidup */
+.sfw-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+}
+
+/* Состояние открытия через activeClass */
+.sfw-wheel-widget.sp-active .sfw-overlay { display: flex; }
+
+.sfw-modal-content {
+    background: #fff; padding: 30px; border-radius: 20px;
+    width: 700px; max-width: 95%; position: relative;
+}
+
+.sfw-main-grid { display: flex; gap: 30px; align-items: center; }
+.sfw-wheel-side { position: relative; flex: 1; }
+.sfw-form-side { flex: 1; }
+
+/* Анимация вращения через CSS transition */
+.sfw-spinning {
+    transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+}
