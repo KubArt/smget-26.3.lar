@@ -389,19 +389,19 @@
                             css = css.replace(/100vw/g, '100%');
 
                             this.shadowRoot.innerHTML = `
-                        <style>
-                            :host {
-                                display: block;
-                                position: absolute;
-                                top: 0;
-                                left: 0;
-                                right: 0;
-                                bottom: 0;
-                            }
-                            ${css}
-                        </style>
-                        <div id="widget-root"></div>
-                    `;
+                                <style>
+                                    :host {
+                                        display: block;
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        bottom: 0;
+                                    }
+                                    ${css}
+                                </style>
+                                <div id="widget-root"></div>
+                            `;
                             this.widgetRoot = this.shadowRoot.getElementById('widget-root');
                         },
 

@@ -364,9 +364,9 @@
                             css = css.replace(/100vw/g, '100%');
 
                             this.shadowRoot.innerHTML = `
-                        <style>:host { display: block; position: absolute; top: 0; left: 0; right: 0; bottom: 0; } ${css}</style>
-                        <div id="widget-root"></div>
-                    `;
+                                <style>:host { display: block; position: absolute; top: 0; left: 0; right: 0; bottom: 0; } ${css}</style>
+                                <div id="widget-root"></div>
+                            `;
                             this.widgetRoot = this.shadowRoot.getElementById('widget-root');
                         },
 
@@ -388,13 +388,13 @@
                                     const svg = this.availableTypes[c.type]?.svg || this.availableTypes.custom.svg;
 
                                     return `
-                                <a href="${url}" class="sp-channel-item" target="_blank">
-                                    <div class="sp-channel-icon" style="background: ${c.bg_color}; color: ${c.icon_color || '#fff'}">
-                                        ${svg}
-                                    </div>
-                                    <span class="sp-channel-label">${this.escapeHtml(c.label || c.type)}</span>
-                                </a>
-                            `;
+                                        <a href="${url}" class="sp-channel-item" target="_blank">
+                                            <div class="sp-channel-icon" style="background: ${c.bg_color}; color: ${c.icon_color || '#fff'}">
+                                                ${svg}
+                                            </div>
+                                            <span class="sp-channel-label">${this.escapeHtml(c.label || c.type)}</span>
+                                        </a>
+                                    `;
                                 }).join('');
 
                             let html = this.rawTemplate
