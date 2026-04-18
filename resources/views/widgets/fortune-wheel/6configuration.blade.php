@@ -288,13 +288,20 @@
                 isSaving: false,
                 activeTab: 'basic',
 
+                // Состояние виджета в preview
+                isSpinning: false,
+                currentRotation: 0,
+                currentWonSegment: null,
+
                 // Инициализация
                 async init() {
                     this.initDefaultSettings();
                     await this.loadSkin(this.settings.template);
-                    this.setupWatchers();
+
+                    this.$watch('settings', () => this.updatePreview(), { deep: true });
                 },
 
+                // Настройки по умолчанию
                 initDefaultSettings() {
                     if (!this.settings) this.settings = {};
 
@@ -360,21 +367,6 @@
                     }
                 },
 
-                setupWatchers() {
-                    // Следим только за нужными полями
-                    this.$watch('settings.button.position', () => this.updatePosition());
-                    this.$watch('settings.button.bg_color', () => this.updateTriggerColor());
-                    this.$watch('settings.button.icon', () => this.updateTriggerIcon());
-                    this.$watch('settings.button.text', () => this.updateSpinButtonText());
-                    this.$watch('settings.design.title', () => this.updateTitle());
-                    this.$watch('settings.design.description', () => this.updateDescription());
-                    this.$watch('settings.design.accent_color', () => this.updateAccentColor());
-                    this.$watch('settings.wheel.segments', () => this.redrawWheel(), { deep: true });
-                    this.$watch('settings.wheel.size', () => this.redrawWheel());
-                    this.$watch('settings.wheel.text_color', () => this.redrawWheel());
-                    this.$watch('settings.wheel.pointer_color', () => this.updatePointerColor());
-                },
-
                 async loadSkin(skinId) {
                     try {
                         this.isLoading = true;
@@ -386,8 +378,10 @@
                         this.rawTemplate = await htmlRes.text();
                         this.rawCss = await cssRes.text();
                         this.initPreview();
+                        this.updatePreview();
                     } catch (e) {
                         console.error('Error loading skin:', e);
+                        this.showError('Не удалось загрузить скин');
                     } finally {
                         this.isLoading = false;
                     }
@@ -406,29 +400,26 @@
                     css = css.replace(/100vw/g, '100%');
 
                     this.shadowRoot.innerHTML = `
-                <style>
-                    :host {
-                        display: block;
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                    }
-                    ${css}
-                </style>
-                <div id="widget-root"></div>
-            `;
+                                <style>
+                                    :host {
+                                        display: block;
+                                        position: absolute;
+                                        top: 0;
+                                        left: 0;
+                                        right: 0;
+                                        bottom: 0;
+                                    }
+                                    ${css}
+                                </style>
+                                <div id="widget-root"></div>
+                            `;
                     this.widgetRoot = this.shadowRoot.getElementById('widget-root');
-
-                    // Первичный рендер
-                    this.renderWidget();
                 },
 
-                renderWidget() {
+                updatePreview() {
                     if (!this.widgetRoot || !this.rawTemplate) return;
 
-                    // Рендерим HTML
+                    // Подставляем значения в шаблон
                     let html = this.rawTemplate
                         .replace(/{id}/g, 'preview')
                         .replace(/{widget_id}/g, 'preview')
@@ -439,81 +430,59 @@
 
                     this.widgetRoot.innerHTML = html;
 
-                    // Сохраняем ссылки на DOM элементы
-                    this.widget = this.widgetRoot.querySelector('.sfw-root');
-                    this.canvas = this.widget?.querySelector('#sfw-canvas-preview');
-                    this.trigger = this.widget?.querySelector('.sfw-trigger');
-                    this.spinBtn = this.widget?.querySelector('.sfw-spin-trigger');
-                    this.titleEl = this.widget?.querySelector('.sfw-form-body h3');
-                    this.descEl = this.widget?.querySelector('.sfw-form-body p');
+                    // Получаем корневой элемент виджета
+                    const widget = this.widgetRoot.querySelector('.sfw-root');
+                    if (!widget) return;
 
-                    // Применяем стили и рисуем
-                    this.updateTriggerColor();
-                    this.updateTriggerIcon();
-                    this.updateAccentColor();
-                    this.updatePointerColor();
-                    this.redrawWheel();
-                    this.bindEvents();
-                },
-
-                // Простые методы обновления без перерисовки всего виджета
-                updatePosition() {
-                    if (!this.widget) return;
-                    const position = this.settings.button.position;
-                    this.widget.classList.remove('sp-position-right', 'sp-position-left');
-                    this.widget.classList.add(position === 'bottom-right' ? 'sp-position-right' : 'sp-position-left');
-                },
-
-                updateTriggerColor() {
-                    if (!this.trigger) return;
-                    this.trigger.style.background = this.settings.button.bg_color;
-                    this.trigger.style.color = this.settings.button.text_color;
-                },
-
-                updateTriggerIcon() {
-                    if (!this.trigger) return;
-                    const iconSpan = this.trigger.querySelector('.sfw-icon');
-                    if (iconSpan) iconSpan.textContent = this.settings.button.icon;
-                },
-
-                updateSpinButtonText() {
-                    if (!this.spinBtn) return;
-                    this.spinBtn.textContent = this.settings.button.text;
-                },
-
-                updateTitle() {
-                    if (!this.titleEl) return;
-                    this.titleEl.textContent = this.settings.design.title;
-                },
-
-                updateDescription() {
-                    if (!this.descEl) return;
-                    this.descEl.textContent = this.settings.design.description;
-                },
-
-                updateAccentColor() {
-                    if (!this.widget) return;
-                    this.widget.style.setProperty('--sfw-accent', this.settings.design.accent_color);
-                    // Обновляем цвет кнопки spin
-                    if (this.spinBtn) {
-                        this.spinBtn.style.background = this.settings.design.accent_color;
+                    // Добавляем класс позиции
+                    if (this.settings.button.position === 'bottom-right') {
+                        widget.classList.add('sp-position-right');
+                        widget.classList.remove('sp-position-left');
+                    } else {
+                        widget.classList.add('sp-position-left');
+                        widget.classList.remove('sp-position-right');
                     }
+
+                    // Применяем CSS переменные
+                    widget.style.setProperty('--sfw-btn-bg', this.settings.button.bg_color);
+                    widget.style.setProperty('--sfw-btn-text', this.settings.button.text_color);
+                    widget.style.setProperty('--sfw-accent', this.settings.design.accent_color);
+                    widget.style.setProperty('--sfw-modal-bg', this.settings.design.modal_bg_color);
+                    widget.style.setProperty('--sfw-modal-text', this.settings.design.modal_text_color);
+                    widget.style.setProperty('--sfw-pointer', this.settings.wheel.pointer_color);
+
+                    // Обновляем кнопку-триггер
+                    const trigger = widget.querySelector('.sfw-trigger');
+                    if (trigger) {
+                        trigger.style.background = this.settings.button.bg_color;
+                        trigger.style.color = this.settings.button.text_color;
+                        const iconSpan = trigger.querySelector('.sfw-icon');
+                        if (iconSpan) iconSpan.textContent = this.settings.button.icon;
+                    }
+
+                    // Обновляем кнопку вращения
+                    const spinBtn = widget.querySelector('.sfw-spin-trigger');
+                    if (spinBtn) {
+                        spinBtn.textContent = this.settings.button.text;
+                    }
+
+                    // Рисуем колесо
+                    this.drawWheel(widget);
+
+                    // Привязываем события
+                    this.attachEvents(widget);
                 },
 
-                updatePointerColor() {
-                    if (!this.widget) return;
-                    this.widget.style.setProperty('--sfw-pointer', this.settings.wheel.pointer_color);
-                },
+                drawWheel(widget) {
+                    const canvas = widget.querySelector('#sfw-canvas-preview');
+                    if (!canvas) return;
 
-                redrawWheel() {
-                    if (!this.canvas) return;
-
-                    const ctx = this.canvas.getContext('2d');
+                    const ctx = canvas.getContext('2d');
                     const segments = this.settings.wheel.segments || [];
                     const size = this.settings.wheel.size || 280;
 
-                    this.canvas.width = size;
-                    this.canvas.height = size;
+                    canvas.width = size;
+                    canvas.height = size;
 
                     if (segments.length === 0) {
                         ctx.fillStyle = '#e5e7eb';
@@ -565,29 +534,144 @@
                     ctx.fill();
                 },
 
-                bindEvents() {
-                    if (!this.widget) return;
+                attachEvents(widget) {
+                    const self = this;
 
-                    // Открытие
-                    const toggleBtn = this.widget.querySelector('[data-sp-toggle]');
+                    // Кнопка открытия модалки
+                    const toggleBtn = widget.querySelector('[data-sp-toggle]');
                     if (toggleBtn) {
-                        toggleBtn.addEventListener('click', (e) => {
+                        const newToggle = toggleBtn.cloneNode(true);
+                        toggleBtn.parentNode.replaceChild(newToggle, toggleBtn);
+                        newToggle.addEventListener('click', function(e) {
                             e.preventDefault();
-                            this.widget.classList.add('sp-active');
+                            e.stopPropagation();
+                            widget.classList.add('sp-active');
                         });
                     }
 
-                    // Закрытие
-                    const closeBtns = this.widget.querySelectorAll('[data-sp-close]');
+                    // Кнопки закрытия (оверлей и крестик)
+                    const closeBtns = widget.querySelectorAll('[data-sp-close]');
                     closeBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
+                        const newBtn = btn.cloneNode(true);
+                        btn.parentNode.replaceChild(newBtn, btn);
+                        newBtn.addEventListener('click', function(e) {
                             e.preventDefault();
-                            this.widget.classList.remove('sp-active');
+                            e.stopPropagation();
+                            widget.classList.remove('sp-active');
+                            self.resetWheelRotation(widget);
                         });
                     });
+
+                    // Кнопка Spin
+                    const spinBtn = widget.querySelector('.sfw-spin-trigger');
+                    if (spinBtn) {
+                        const newSpin = spinBtn.cloneNode(true);
+                        spinBtn.parentNode.replaceChild(newSpin, spinBtn);
+                        newSpin.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            self.startSpin(widget);
+                        });
+                    }
                 },
 
-                // Методы управления сегментами
+                resetWheelRotation(widget) {
+                    this.currentRotation = 0;
+                    const canvas = widget.querySelector('#sfw-canvas-preview');
+                    if (canvas) {
+                        canvas.style.transform = 'rotate(0deg)';
+                        canvas.style.transition = 'none';
+                    }
+
+                    // Восстанавливаем кнопку Spin
+                    const formContainer = widget.querySelector('#sfw-form-fields-preview');
+                    if (formContainer) {
+                        formContainer.innerHTML = `<button class="sfw-spin-trigger">${this.escapeHtml(this.settings.button.text || 'Крутить колесо')}</button>`;
+                        const newSpin = formContainer.querySelector('.sfw-spin-trigger');
+                        if (newSpin) {
+                            const self = this;
+                            newSpin.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                self.startSpin(widget);
+                            });
+                        }
+                    }
+                },
+
+                startSpin(widget) {
+                    if (this.isSpinning) return;
+
+                    const canvas = widget.querySelector('#sfw-canvas-preview');
+                    const segments = this.settings.wheel.segments;
+
+                    if (!segments || segments.length === 0) {
+                        alert('Добавьте сегменты колеса в настройках');
+                        return;
+                    }
+
+                    this.isSpinning = true;
+
+                    const winIndex = Math.floor(Math.random() * segments.length);
+                    this.currentWonSegment = segments[winIndex];
+
+                    const segmentDeg = 360 / segments.length;
+                    const rotationNeeded = (360 - (winIndex * segmentDeg)) - (segmentDeg / 2);
+                    const totalRotation = 1440 + rotationNeeded;
+
+                    this.currentRotation += totalRotation;
+
+                    canvas.style.transition = `transform ${this.settings.wheel.rotation_speed}s cubic-bezier(0.25, 0.1, 0.15, 1)`;
+                    canvas.style.transform = `rotate(${this.currentRotation}deg)`;
+
+                    setTimeout(() => {
+                        this.isSpinning = false;
+                        this.showWinForm(widget);
+                    }, this.settings.wheel.rotation_speed * 1000);
+                },
+
+                showWinForm(widget) {
+                    const formContainer = widget.querySelector('#sfw-form-fields-preview');
+                    if (!formContainer) return;
+
+                    const wonSegment = this.currentWonSegment;
+
+                    if (!this.settings.form.enabled) {
+                        formContainer.innerHTML = `<div class="sfw-win-msg">🎉 Вы выиграли: <strong>${this.escapeHtml(wonSegment.label)}</strong> 🎉</div>`;
+                        return;
+                    }
+
+                    let html = `<h4 style="margin: 0 0 10px 0; font-size: 20px;">${this.escapeHtml(this.settings.form.title)}</h4>`;
+                    html += `<p style="margin-bottom: 20px;">Ваш приз: <strong>${this.escapeHtml(wonSegment.label)}</strong></p>`;
+
+                    (this.settings.form.fields || []).forEach(field => {
+                        html += `<input type="${field.type}" placeholder="${this.escapeHtml(field.placeholder)}" class="sfw-input">`;
+                    });
+
+                    html += `<button class="sfw-submit-btn">${this.escapeHtml(this.settings.form.button_text)}</button>`;
+
+                    formContainer.innerHTML = html;
+
+                    const submitBtn = formContainer.querySelector('.sfw-submit-btn');
+                    if (submitBtn) {
+                        const self = this;
+                        submitBtn.addEventListener('click', () => {
+                            const couponCode = wonSegment.value || 'PROMO2024';
+                            const msg = (self.settings.form.success_message || 'Ваш купон: {CODE}').replace('{CODE}', couponCode);
+                            formContainer.innerHTML = `<div class="sfw-success-final">🎁 ${msg} 🎁</div>`;
+
+                            setTimeout(() => {
+                                widget.classList.remove('sp-active');
+                                setTimeout(() => self.resetWheelRotation(widget), 300);
+                            }, 2000);
+                        });
+                    }
+                },
+
+                async applyTemplate(skinId) {
+                    if (this.settings.template === skinId) return;
+                    this.settings.template = skinId;
+                    await this.loadSkin(skinId);
+                },
+
                 addSegment() {
                     if (!this.settings.wheel.segments) this.settings.wheel.segments = [];
                     this.settings.wheel.segments.push({
@@ -603,7 +687,10 @@
 
                 addFormField() {
                     if (!this.settings.form.fields) this.settings.form.fields = [];
-                    this.settings.form.fields.push({ type: 'text', placeholder: 'Новое поле' });
+                    this.settings.form.fields.push({
+                        type: 'text',
+                        placeholder: 'Новое поле'
+                    });
                 },
 
                 removeFormField(index) {
@@ -613,12 +700,6 @@
                 updatePreviewMode(mode) {
                     this.previewMode = mode;
                     this.$dispatch('preview-mode-changed', mode);
-                },
-
-                async applyTemplate(skinId) {
-                    if (this.settings.template === skinId) return;
-                    this.settings.template = skinId;
-                    await this.loadSkin(skinId);
                 },
 
                 async saveConfig(event) {
@@ -648,6 +729,10 @@
                     } else {
                         alert(message);
                     }
+                },
+
+                showError(message) {
+                    this.showNotification(message, 'danger');
                 }
             };
         }
