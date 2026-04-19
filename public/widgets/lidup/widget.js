@@ -1,12 +1,14 @@
 window.SmWidget_lidup = class extends SmWidget {
-    constructor(settings, id, assets) {
-        super(settings, id, assets);
+    constructor(settings, id, assets, behavior) {
+        super(settings, id, assets, behavior);
         this.storageKey = `sm_lidup_${this.id}_closed`;
         this.formSubmitted = false;
         this.exitIntentTriggered = false;
     }
 
     init() {
+        super._init();
+        /*
         // Проверка частоты показа
         if (this.shouldHide()) return;
 
@@ -22,6 +24,7 @@ window.SmWidget_lidup = class extends SmWidget {
         } else if (trigger === 'click') {
             this.initClickTrigger();
         }
+        //*/
     }
 
     shouldHide() {
@@ -36,47 +39,6 @@ window.SmWidget_lidup = class extends SmWidget {
         if (frequency === 'once_week' && now - parseInt(closedData) < 604800000) return true;
 
         return false;
-    }
-
-    initScrollTrigger() {
-        const percent = this.settings.scroll_percent || 50;
-        let triggered = false;
-
-        const checkScroll = () => {
-            if (triggered) return;
-            const scrollPercent = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-            if (scrollPercent >= percent) {
-                triggered = true;
-                this.mount();
-                window.removeEventListener('scroll', checkScroll);
-            }
-        };
-
-        window.addEventListener('scroll', checkScroll);
-        setTimeout(checkScroll, 500);
-    }
-
-    initExitIntent() {
-        if (!this.settings.exit_intent) return;
-
-        document.addEventListener('mouseleave', (e) => {
-            if (this.exitIntentTriggered) return;
-            if (e.clientY <= 0) {
-                this.exitIntentTriggered = true;
-                this.mount();
-            }
-        });
-    }
-
-    initClickTrigger() {
-        const selector = this.settings.click_selector || '#open-popup';
-        const element = document.querySelector(selector);
-        if (element) {
-            element.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.mount();
-            });
-        }
     }
 
     mount() {

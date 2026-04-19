@@ -10,6 +10,7 @@
         key: apiKey,
         path: window.location.pathname,
         referrer: document.referrer,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
         _t: new Date().getTime()
     };
 
@@ -17,15 +18,13 @@
 
     // Используем протокол текущей страницы
     const protocol = window.location.protocol;
-    const apiUrl = `${protocol}//smget-26.3.lar/v1/get-widgets?${params}`;
+    const apiUrl = `${protocol}//smget-26.3.lar/api/v1/get-widgets?${params}`;
 
     fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
             if (!data.widgets) return;
-
             window.SmGet = data;
-
             const uniqueWidgets = data.widgets.filter(w => {
                 if (window.SmLoadedTypes.has(w.type)) {
                     console.warn(`SMGET: Widget type [${w.type}] already loaded. Skipping.`);

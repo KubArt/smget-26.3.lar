@@ -29,7 +29,13 @@
                     <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-base">Базовые настройки</button>
                 </li>
                 <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-behavior">Поведение</button>
+                </li>
+                <li class="nav-item">
                     <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-target">Таргетинг</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-target_time">Время показа</button>
                 </li>
             </ul>
 
@@ -42,8 +48,15 @@
                         @include('cabinet.widgets.config.tabs.base')
                     </div>
 
+                    <div class="tab-pane" id="tab-behavior" role="tabpanel">
+                        @include('cabinet.widgets.config.tabs.behavior')
+                    </div>
+
                     <div class="tab-pane" id="tab-target" role="tabpanel">
                         @include('cabinet.widgets.config.tabs.target')
+                    </div>
+                    <div class="tab-pane" id="tab-target_time" role="tabpanel">
+                        @include('cabinet.widgets.config.tabs.target_time')
                     </div>
                 </div>
 

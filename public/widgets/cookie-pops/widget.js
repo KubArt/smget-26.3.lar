@@ -2,8 +2,11 @@
  * Виджет "Cookie Pops" - полная копия оригинальной логики
  */
 window.SmWidget_cookie_pops = class extends SmWidget {
-    constructor(settings, id, assets) {
-        super(settings, id, assets);
+    constructor(settings, id, assets, behavior) {
+        super(settings, id, assets, behavior);
+    }
+    init() {
+        super._init();
     }
 
     mount() {

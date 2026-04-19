@@ -3,8 +3,8 @@
  * Адаптирован под базовый класс SmWidget
  */
 window.SmWidget_alert_bar = class extends SmWidget {
-    constructor(settings, id, assets) {
-        super(settings, id, assets);
+    constructor(settings, id, assets, behavior) {
+        super(settings, id, assets, behavior);
         this.storageKey = `sm_alert_${this.id}_closed`;
         this.placeholder = null;
         this.resizeObserver = null;
@@ -14,8 +14,8 @@ window.SmWidget_alert_bar = class extends SmWidget {
      * Переопределяем init для проверки частоты показа
      */
     init() {
-        if (this.shouldHide()) return;
-        super.init(); // Вызывает логику задержки и скролла из SmWidget
+        super._init();
+        // if (this.shouldHide()) return;
     }
 
     /**

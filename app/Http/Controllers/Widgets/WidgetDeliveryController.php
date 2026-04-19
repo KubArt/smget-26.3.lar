@@ -4,7 +4,7 @@
 namespace App\Http\Controllers\Widgets;
 
 use App\Http\Controllers\Cabinet\BaseCabinetController;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Widgets\Services\TargetTimeManager;
 use App\Models\Site;
 use App\Models\Widgets\WidgetStatistic;
 use Illuminate\Http\Request;
@@ -25,22 +25,22 @@ class WidgetDeliveryController extends BaseCabinetController
         $activeWidgets = $site->widgets()
             ->where('is_active', true)
             ->get()
-            ->filter(function ($widget) use ($currentPath, $currentUtm) {
-                return $this->shouldShowWidget($widget, $currentPath, $currentUtm);
+            ->filter(function ($widget) use ($currentPath, $currentUtm, $request) {
+                return $this->shouldShowWidget($widget, $currentPath, $currentUtm, $request);
             })
             ->map(function ($widget) use ($request, $currentPath, $currentUtm) {
-                $this->logEvent($widget->id, 'view', $request, $currentPath, $currentUtm);
+                //$this->logEvent($widget->id, 'view', $request, $currentPath, $currentUtm);
 
                 // Получаем настройки и выбранный скин
                 $settings = $widget->settings;
-                $slug = $widget->widgetType->slug; // например, 'cookie-pops'
+                $slug = $widget->widgetType->slug;
                 $skin = $settings['template'] ?? 'default';
 
                 return [
                     'id'       => $widget->id,
                     'type'     => $slug,
-                    'settings' => $settings,
-                    // Собираем ассеты
+                    'settings' => $settings ?? [],
+                    'behavior' => $widget->behavior ?? [],
                     'assets'   => $this->getWidgetAssets($slug, $skin)
                 ];
             });
@@ -83,7 +83,7 @@ class WidgetDeliveryController extends BaseCabinetController
     }
 
     /*** */
-    private function shouldShowWidget($widget, $path, $utm)
+    private function shouldShowWidget($widget, $path, $utm, $request)
     {
         // 1. Сначала проверяем URL (Маски) - это первичный фильтр
         $allowed = empty($widget->target_paths['allow']) || $this->matchMasks($path, $widget->target_paths['allow']);
@@ -113,9 +113,18 @@ class WidgetDeliveryController extends BaseCabinetController
                     break;
                 }
             }
-
             // Если таргет по UTM настроен, но совпадений нет — не показываем
             if (!$matched) return false;
+        }
+        // 3. Проверка по времени
+        $timeRules = $widget->target_time ?? [];
+        if (!empty($timeRules)) {
+            $timeManager = new TargetTimeManager();
+            // Передаем часовой пояс пользователя из запроса
+            $timezone = $request->get('timezone', config('app.timezone', 'UTC'));
+            if (!$timeManager->shouldShow($timeRules, $timezone)) {
+                return false;
+            }
         }
 
         return true;

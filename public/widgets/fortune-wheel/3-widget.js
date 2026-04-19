@@ -3,8 +3,8 @@
  * Интегрирован с системой конфигурации Blade
  */
 window.SmWidget_fortune_wheel = class extends SmWidget {
-    constructor(settings, id, assets, behavior) {
-        super(settings, id, assets, behavior);
+    constructor(settings, id, assets) {
+        super(settings, id, assets);
 
         // Дефолтные настройки
         this.defaults = {
@@ -86,11 +86,10 @@ window.SmWidget_fortune_wheel = class extends SmWidget {
      * Точка входа
      */
     init() {
-        super._init();
-        //this.mount();
-        /*
         if (this.shouldHide()) return;
+
         const delay = (this.settings.button.auto_open_delay || 0) * 1000;
+
         if (this.settings.trigger_type === 'scroll') {
             this.initScrollTrigger(this.settings.scroll_percent || 50, delay);
         } else if (this.settings.trigger_type === 'time') {
@@ -102,7 +101,6 @@ window.SmWidget_fortune_wheel = class extends SmWidget {
             this.mount();
             if (delay > 0) setTimeout(() => this.openModal(), delay);
         }
-        //*/
     }
 
     initExitTrigger(delay) {
@@ -117,7 +115,6 @@ window.SmWidget_fortune_wheel = class extends SmWidget {
     }
 
     mount() {
-        console.log("Условия выполнены! Рисуем Колесо Фортуны...");
         const design = this.settings.design || {};
 
         // Инжекция стилей

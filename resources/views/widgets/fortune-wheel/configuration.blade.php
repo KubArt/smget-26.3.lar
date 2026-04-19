@@ -10,235 +10,391 @@
                         <h3 class="block-title">Настройка Колеса Фортуны</h3>
                     </div>
                     <div class="block-content pb-4">
-                        <!-- Вкладки настроек -->
-                        <ul class="nav nav-tabs nav-tabs-alt mb-3" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" @click.prevent="activeTab = 'basic'" href="#basic" role="tab">
-                                    <i class="fa fa-sliders-h me-1"></i> Основные
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" @click.prevent="activeTab = 'wheel'" href="#wheel" role="tab">
-                                    <i class="fa fa-circle-notch me-1"></i> Колесо
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" @click.prevent="activeTab = 'form'" href="#form" role="tab">
-                                    <i class="fa fa-envelope me-1"></i> Форма
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" @click.prevent="activeTab = 'design'" href="#design" role="tab">
-                                    <i class="fa fa-palette me-1"></i> Дизайн
-                                </a>
-                            </li>
-                        </ul>
+                        <form id="saveForm" @submit.prevent="saveConfig">
+                        @csrf
 
-                        <!-- Вкладка: Основные -->
-                        <div x-show="activeTab === 'basic'" x-cloak>
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Позиция кнопки</label>
-                                <select class="form-select" x-model="settings.button.position">
-                                    <option value="bottom-right">Снизу справа</option>
-                                    <option value="bottom-left">Снизу слева</option>
-                                </select>
-                            </div>
+                        <!-- Вкладки -->
+                            <ul class="nav nav-tabs nav-tabs-alt mb-3" role="tablist" id="widgetTabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-tab="button-tab" href="#" @click.prevent="switchTab('button-tab')">Кнопка</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-tab="wheel-tab" href="#" @click.prevent="switchTab('wheel-tab')">Колесо</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-tab="prizes-tab" href="#" @click.prevent="switchTab('prizes-tab')">Призы</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-tab="display-tab" href="#" @click.prevent="switchTab('display-tab')">Показ</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-tab="limits-tab" href="#" @click.prevent="switchTab('limits-tab')">Лимиты</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-tab="design-tab" href="#" @click.prevent="switchTab('design-tab')">Дизайн</a>
+                                </li>
+                            </ul>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Текст кнопки</label>
-                                <input type="text" class="form-control" x-model="settings.button.text">
-                            </div>
+                            <div class="tab-content">
+                                <!-- ==================== ВКЛАДКА КНОПКА ==================== -->
+                                <div class="tab-pane active" id="button-tab" data-pane="button-tab">
+                                    <div class="mb-3">
+                                        <label class="form-label">Позиция кнопки</label>
+                                        <select class="form-select" x-model="settings.button.position">
+                                            <option value="bottom-right">Снизу справа</option>
+                                            <option value="bottom-left">Снизу слева</option>
+                                        </select>
+                                    </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Иконка кнопки</label>
-                                <input type="text" class="form-control" x-model="settings.button.icon">
-                            </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Текст кнопки</label>
+                                        <input type="text" class="form-control" x-model="settings.button.text">
+                                    </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Автооткрытие (сек)</label>
-                                <input type="number" class="form-control" min="0" max="30" x-model="settings.button.auto_open_delay">
-                                <small class="text-muted">0 - не открывать автоматически</small>
-                            </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Иконка</label>
+                                        <input type="text" class="form-control" x-model="settings.button.icon">
+                                    </div>
 
-                            <hr>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Лимиты</label>
-
-                                <div class="mb-3">
-                                    <label class="small text-muted">Частота показа</label>
-                                    <select class="form-select" x-model="settings.limits.frequency">
-                                        <option value="always">Всегда</option>
-                                        <option value="once_session">Один раз за сессию</option>
-                                        <option value="once_day">Один раз в день</option>
-                                        <option value="once_forever">Один раз навсегда</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Вкладка: Колесо -->
-                        <div x-show="activeTab === 'wheel'" x-cloak>
-                            <div class="mb-4">
-                                <label class="form-label fw-bold d-flex justify-content-between align-items-center">
-                                    Сегменты колеса
-                                    <button type="button" class="btn btn-sm btn-primary" @click="addSegment">
-                                        <i class="fa fa-plus me-1"></i> Добавить
-                                    </button>
-                                </label>
-
-                                <div class="segments-list border rounded p-3 bg-light" style="max-height: 400px; overflow-y: auto;">
-                                    <template x-for="(segment, index) in settings.wheel.segments" :key="index">
-                                        <div class="segment-item bg-white border rounded p-3 mb-2">
-                                            <div class="row g-2 align-items-center">
-                                                <div class="col-5">
-                                                    <input type="text" class="form-control form-control-sm" placeholder="Название" x-model="segment.label">
-                                                </div>
-                                                <div class="col-3">
-                                                    <input type="color" class="form-control form-control-color" x-model="segment.bg_color">
-                                                </div>
-                                                <div class="col-3">
-                                                    <input type="text" class="form-control form-control-sm" placeholder="Код купона" x-model="segment.value">
-                                                </div>
-                                                <div class="col-1">
-                                                    <button type="button" class="btn btn-sm btn-link text-danger" @click="removeSegment(index)">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Цвет фона кнопки</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.button.bg_color">
+                                            <input type="text" class="form-control" x-model="settings.button.bg_color">
                                         </div>
-                                    </template>
-                                    <div x-show="settings.wheel.segments.length === 0" class="text-center text-muted py-3">
-                                        <i class="fa fa-circle-notch fa-2x mb-2 opacity-25"></i>
-                                        <p class="small mb-0">Нет сегментов. Добавьте хотя бы 2 сегмента</p>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Цвет текста кнопки</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.button.text_color">
+                                            <input type="text" class="form-control" x-model="settings.button.text_color">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Размер кнопки</label>
+                                        <select class="form-select" x-model="settings.button.size">
+                                            <option value="small">Маленькая</option>
+                                            <option value="medium">Средняя</option>
+                                            <option value="large">Большая</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Скругление кнопки</label>
+                                        <input type="text" class="form-control" placeholder="50px, 12px" x-model="settings.button.border_radius">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Авто-открытие (сек)</label>
+                                        <input type="number" class="form-control" min="0" max="30" step="0.5" x-model="settings.button.auto_open_delay">
+                                        <small class="text-muted">0 - не открывать автоматически</small>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Параметры колеса</label>
+                                <!-- ==================== ВКЛАДКА КОЛЕСО ==================== -->
+                                <div class="tab-pane" id="wheel-tab" data-pane="wheel-tab" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Размер колеса (px)</label>
+                                        <input type="number" class="form-control" min="200" max="500" step="10" x-model="settings.wheel.size">
+                                    </div>
 
-                                <div class="mb-3">
-                                    <label class="small text-muted">Размер (px)</label>
-                                    <input type="number" class="form-control" min="200" max="400" step="10" x-model="settings.wheel.size">
+                                    <div class="mb-3">
+                                        <label class="form-label">Скорость вращения (сек)</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range flex-grow-1" min="2" max="8" step="0.5" x-model="settings.wheel.rotation_speed">
+                                            <span class="badge bg-secondary" x-text="settings.wheel.rotation_speed + ' сек'"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Цвет текста на сегментах</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.wheel.text_color">
+                                            <input type="text" class="form-control" x-model="settings.wheel.text_color">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Цвет стрелки</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.wheel.pointer_color">
+                                            <input type="text" class="form-control" x-model="settings.wheel.pointer_color">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Размер шрифта (px)</label>
+                                        <input type="number" class="form-control" min="10" max="20" x-model="settings.wheel.font_size">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Цвет границы сегментов</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.wheel.border_color">
+                                            <input type="text" class="form-control" x-model="settings.wheel.border_color">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Толщина границы (px)</label>
+                                        <input type="number" class="form-control" min="0" max="10" x-model="settings.wheel.border_width">
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="small text-muted">Скорость вращения (сек)</label>
-                                    <input type="number" class="form-control" min="2" max="8" step="0.5" x-model="settings.wheel.rotation_speed">
-                                </div>
+                                <!-- ==================== ВКЛАДКА ПРИЗЫ ==================== -->
+                                <div class="tab-pane" id="prizes-tab" data-pane="prizes-tab" style="display: none;">
+                                    <div class="mb-3">
+                                        <div class="alert alert-info">
+                                            <i class="fa fa-info-circle me-1"></i>
+                                            Вероятность выпадения рассчитывается автоматически на основе веса каждого приза.
+                                        </div>
 
-                                <div class="mb-3">
-                                    <label class="small text-muted">Цвет указателя</label>
-                                    <input type="color" class="form-control form-control-color" x-model="settings.wheel.pointer_color">
-                                </div>
-                            </div>
-                        </div>
+                                        <label class="form-label d-flex justify-content-between align-items-center">
+                                            <span>Призы</span>
+                                            <button type="button" class="btn btn-sm btn-primary" @click="addCoupon">
+                                                <i class="fa fa-plus me-1"></i> Добавить приз
+                                            </button>
+                                        </label>
 
-                        <!-- Вкладка: Форма -->
-                        <div x-show="activeTab === 'form'" x-cloak>
-                            <div class="mb-4">
-                                <div class="form-check form-switch mb-3">
-                                    <input class="form-check-input" type="checkbox" x-model="settings.form.enabled">
-                                    <label class="form-check-label">Включить сбор данных</label>
-                                </div>
-                            </div>
-
-                            <div x-show="settings.form.enabled">
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Заголовок формы</label>
-                                    <input type="text" class="form-control" x-model="settings.form.title">
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold d-flex justify-content-between align-items-center">
-                                        Поля формы
-                                        <button type="button" class="btn btn-sm btn-primary" @click="addFormField">
-                                            <i class="fa fa-plus me-1"></i> Добавить
-                                        </button>
-                                    </label>
-
-                                    <div class="form-fields-list border rounded p-3 bg-light">
-                                        <template x-for="(field, index) in settings.form.fields" :key="index">
-                                            <div class="bg-white border rounded p-2 mb-2">
-                                                <div class="row g-2 align-items-center">
-                                                    <div class="col-4">
-                                                        <select class="form-select form-select-sm" x-model="field.type">
-                                                            <option value="text">Текст</option>
-                                                            <option value="tel">Телефон</option>
-                                                            <option value="email">Email</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-5">
-                                                        <input type="text" class="form-control form-control-sm" placeholder="Placeholder" x-model="field.placeholder">
-                                                    </div>
-                                                    <div class="col-3">
-                                                        <button type="button" class="btn btn-sm btn-link text-danger" @click="removeFormField(index)">
+                                        <div class="coupons-list" style="max-height: 400px; overflow-y: auto;">
+                                            <template x-for="(coupon, index) in settings.wheel.segments" :key="index">
+                                                <div class="card mb-2 border">
+                                                    <div class="card-header bg-light py-2 d-flex justify-content-between align-items-center">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input" type="checkbox" x-model="coupon.enabled" :id="'coupon_enabled_' + index">
+                                                                <label class="form-check-label small fw-bold" :for="'coupon_enabled_' + index" x-text="coupon.label || 'Новый приз'"></label>
+                                                            </div>
+                                                            <span class="badge bg-secondary">Вес: <span x-text="coupon.weight || 1"></span></span>
+                                                        </div>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" @click="removeSegment(index)">
                                                             <i class="fa fa-trash"></i>
                                                         </button>
                                                     </div>
+                                                    <div class="card-body py-2" x-show="coupon.enabled !== false">
+                                                        <div class="row g-2">
+                                                            <div class="col-12 col-md-4">
+                                                                <label class="small text-muted">Название приза</label>
+                                                                <input type="text" class="form-control form-control-sm" x-model="coupon.label" placeholder="Скидка 10%">
+                                                            </div>
+                                                            <div class="col-6 col-md-2">
+                                                                <label class="small text-muted">Вес</label>
+                                                                <input type="number" class="form-control form-control-sm" x-model="coupon.weight" min="1" step="1" value="1">
+                                                            </div>
+                                                            <div class="col-6 col-md-3">
+                                                                <label class="small text-muted">Цвет сегмента</label>
+                                                                <div class="input-group input-group-sm">
+                                                                    <input type="color" class="form-control form-control-color" style="width: 40px;" x-model="coupon.bg_color">
+                                                                    <input type="text" class="form-control" x-model="coupon.bg_color">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-3">
+                                                                <label class="small text-muted">Срок действия (дней)</label>
+                                                                <input type="number" class="form-control form-control-sm" x-model="coupon.expiry_days" min="0" placeholder="0 - бессрочно">
+                                                            </div>
+                                                        </div>
+                                                        <div class="row g-2 mt-2">
+                                                            <div class="col-12 col-md-6">
+                                                                <label class="small text-muted">Промокод</label>
+                                                                <input type="text" class="form-control form-control-sm" x-model="coupon.value" placeholder="PROMO2024">
+                                                            </div>
+                                                            <div class="col-12 col-md-6">
+                                                                <label class="small text-muted">Описание</label>
+                                                                <input type="text" class="form-control form-control-sm" x-model="coupon.description" placeholder="Описание приза">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-footer py-1 bg-white" x-show="coupon.enabled === false">
+                                                        <small class="text-muted">Приз отключен</small>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </template>
+                                            </template>
+                                        </div>
+
+                                        <div x-show="!settings.wheel.segments || settings.wheel.segments.length === 0" class="text-center text-muted py-4 border rounded">
+                                            <i class="fa fa-gift fa-3x mb-2 opacity-25"></i>
+                                            <p class="mb-0">Нет добавленных призов</p>
+                                            <small>Нажмите "Добавить приз" чтобы создать первый приз</small>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Текст кнопки</label>
-                                    <input type="text" class="form-control" x-model="settings.form.button_text">
+                                <!-- ==================== ВКЛАДКА ПОКАЗ ==================== -->
+                                <div class="tab-pane" id="display-tab" data-pane="display-tab" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Триггер показа</label>
+                                        <select class="form-select" x-model="settings.trigger_type">
+                                            <option value="click">По клику на кнопку</option>
+                                            <option value="time">По таймеру</option>
+                                            <option value="scroll">При прокрутке страницы</option>
+                                            <option value="exit">При уходе мыши с окна</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3" x-show="settings.trigger_type === 'time'">
+                                        <label class="form-label">Задержка перед показом (сек)</label>
+                                        <input type="number" class="form-control" min="0" max="30" step="0.5" x-model="settings.delay">
+                                    </div>
+
+                                    <div class="mb-3" x-show="settings.trigger_type === 'scroll'">
+                                        <label class="form-label">Процент прокрутки для показа</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range flex-grow-1" min="0" max="100" x-model="settings.scroll_percent">
+                                            <span class="badge bg-secondary" x-text="settings.scroll_percent + '%'"></span>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Что собирать у пользователя</label>
+                                        <select class="form-select" x-model="settings.form.contact_type">
+                                            <option value="tel">Телефон</option>
+                                            <option value="email">Email</option>
+                                        </select>
+                                        <small class="text-muted">Пользователь должен указать контакт перед вращением</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Текст кнопки игры</label>
+                                        <input type="text" class="form-control" x-model="settings.form.button_text" placeholder="Играть">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Сообщение при отказе от приза</label>
+                                        <input type="text" class="form-control" x-model="settings.messages.reject_prize" placeholder="Вы отказались от приза. Жаль! Возвращайтесь еще!">
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Поведение при закрытии</label>
+                                        <select class="form-select" x-model="settings.close_behavior">
+                                            <option value="hide_session">Не показывать до конца сессии</option>
+                                            <option value="hide_forever">Больше никогда не показывать</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Webhook URL для отправки данных</label>
+                                        <input type="url" class="form-control" x-model="settings.form.webhook_url" placeholder="https://your-site.com/webhook">
+                                        <small class="text-muted">Данные контакта и выигрыша будут отправлены на этот URL</small>
+                                    </div>
                                 </div>
 
-                                <div class="mb-4">
-                                    <label class="form-label fw-bold">Сообщение об успехе</label>
-                                    <input type="text" class="form-control" x-model="settings.form.success_message">
+                                <!-- ==================== ВКЛАДКА ЛИМИТЫ ==================== -->
+                                <div class="tab-pane" id="limits-tab" data-pane="limits-tab" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Максимум попыток на пользователя</label>
+                                        <input type="number" class="form-control" min="0" x-model="settings.limits.spins_per_user">
+                                        <small class="text-muted">0 - без ограничений</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Максимум попыток в день</label>
+                                        <input type="number" class="form-control" min="0" x-model="settings.limits.spins_per_day">
+                                        <small class="text-muted">0 - без ограничений</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Общий лимит попыток</label>
+                                        <input type="number" class="form-control" min="0" x-model="settings.limits.spins_total">
+                                        <small class="text-muted">0 - без ограничений</small>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Сообщение при достижении лимита</label>
+                                        <input type="text" class="form-control" x-model="settings.messages.spin_limit_reached" placeholder="Вы уже использовали все попытки">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Сообщение при отказе от ввода контакта</label>
+                                        <input type="text" class="form-control" x-model="settings.messages.fill_contact" placeholder="Пожалуйста, укажите контактные данные">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Сообщение о согласии с условиями</label>
+                                        <input type="text" class="form-control" x-model="settings.messages.accept_terms" placeholder="Пожалуйста, согласитесь с условиями">
+                                    </div>
+                                </div>
+
+                                <!-- ==================== ВКЛАДКА ДИЗАЙН ==================== -->
+                                <div class="tab-pane" id="design-tab" data-pane="design-tab" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Заголовок</label>
+                                        <input type="text" class="form-control" x-model="settings.design.title" placeholder="Выиграйте приз!">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Описание</label>
+                                        <textarea class="form-control" rows="2" x-model="settings.design.description" placeholder="Крутите колесо и получите скидку"></textarea>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Цвет фона модального окна</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.design.modal_bg_color">
+                                            <input type="text" class="form-control" x-model="settings.design.modal_bg_color">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Цвет текста</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.design.modal_text_color">
+                                            <input type="text" class="form-control" x-model="settings.design.modal_text_color">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Акцентный цвет</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" style="width: 50px;" x-model="settings.design.accent_color">
+                                            <input type="text" class="form-control" x-model="settings.design.accent_color">
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Заголовок выигрыша</label>
+                                        <input type="text" class="form-control" x-model="settings.form.title" placeholder="Поздравляем!">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Сообщение после выигрыша</label>
+                                        <textarea class="form-control" rows="2" x-model="settings.form.success_message" placeholder="Ваш купон: {CODE}"></textarea>
+                                        <small class="text-muted">Используйте {CODE} для подстановки кода купона</small>
+                                    </div>
+
+                                    <hr>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Текст согласия с условиями</label>
+                                        <input type="text" class="form-control" x-model="settings.form.terms_text" placeholder="Я согласен с условиями розыгрыша">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Шаблон (скин)</label>
+                                        <select class="form-select" x-model="settings.template">
+                                            <template x-for="skin in skins" :key="skin.slug">
+                                                <option :value="skin.slug" x-text="skin.name"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- Вкладка: Дизайн -->
-                        <div x-show="activeTab === 'design'" x-cloak>
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Цвета кнопки</label>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <label class="small text-muted">Фон</label>
-                                        <input type="color" class="form-control form-control-color" x-model="settings.button.bg_color">
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="small text-muted">Текст</label>
-                                        <input type="color" class="form-control form-control-color" x-model="settings.button.text_color">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Цвета модального окна</label>
-                                <div class="row g-2">
-                                    <div class="col-6">
-                                        <label class="small text-muted">Фон</label>
-                                        <input type="color" class="form-control form-control-color" x-model="settings.design.modal_bg_color">
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="small text-muted">Акцент</label>
-                                        <input type="color" class="form-control form-control-color" x-model="settings.design.accent_color">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Заголовок и описание</label>
-                                <input type="text" class="form-control mb-2" placeholder="Заголовок" x-model="settings.design.title">
-                                <textarea class="form-control" rows="2" placeholder="Описание" x-model="settings.design.description"></textarea>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <button type="button" class="btn btn-alt-primary w-100" @click="saveConfig" :disabled="isSaving">
-                            <i class="fa fa-save opacity-50 me-1"></i>
-                            <span x-show="!isSaving">Сохранить изменения</span>
-                            <span x-show="isSaving">Сохранение...</span>
-                        </button>
+                            <button type="submit" class="btn btn-alt-primary w-100 mt-3">
+                                <i class="fa fa-save me-1"></i> Сохранить изменения
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -247,14 +403,6 @@
             <div class="col-md-7" x-data="{ previewMode: 'desktop' }"
                  x-init="$watch('previewMode', (value) => updatePreviewMode(value))">
                 @include("widgets.configuration.preview")
-                <style>
-                    #preview-host {
-                        display: block;
-                        min-height: 500px; /* Резервируем место под раскрытое колесо */
-                        width: 100%;
-                        position: relative;
-                    }
-                </style>
             </div>
         </div>
     </div>
@@ -262,394 +410,10 @@
     <style>
         [x-cloak] { display: none !important; }
         .nav-tabs .nav-link { cursor: pointer; }
-        .segments-list, .form-fields-list { max-height: 400px; overflow-y: auto; }
+        .coupons-list, .form-fields-list { overflow-y: auto; }
+        .tab-pane { transition: none; }
+        .card-header .form-check-input { cursor: pointer; }
     </style>
 
 @endsection
-
-@push('js')
-    <script>
-        function fortuneWheelEditor(config) {
-            return {
-                // Данные
-                slug: config.slug,
-                settings: config.settings,
-                skins: config.skins,
-
-                // Preview
-                rawTemplate: '',
-                rawCss: '',
-                shadowRoot: null,
-                widgetRoot: null,
-                previewMode: 'desktop',
-
-                // UI
-                isLoading: false,
-                isSaving: false,
-                activeTab: 'basic',
-
-                // Инициализация
-                async init() {
-                    this.initDefaultSettings();
-                    await this.loadSkin(this.settings.template);
-                    this.setupWatchers();
-                },
-
-                initDefaultSettings() {
-                    if (!this.settings) this.settings = {};
-
-                    if (!this.settings.button) {
-                        this.settings.button = {
-                            position: 'bottom-right',
-                            text: 'Крутить колесо',
-                            icon: '🎡',
-                            bg_color: '#6366f1',
-                            text_color: '#ffffff',
-                            auto_open_delay: 0
-                        };
-                    }
-
-                    if (!this.settings.wheel) {
-                        this.settings.wheel = {
-                            size: 280,
-                            rotation_speed: 4,
-                            text_color: '#333333',
-                            pointer_color: '#ff4444',
-                            font_size: 12,
-                            segments: [
-                                { label: 'Скидка 10%', bg_color: '#f1f5f9', value: 'DISCOUNT10' },
-                                { label: 'Скидка 20%', bg_color: '#e2e8f0', value: 'DISCOUNT20' },
-                                { label: 'Скидка 30%', bg_color: '#f1f5f9', value: 'DISCOUNT30' },
-                                { label: 'Бесплатная доставка', bg_color: '#e2e8f0', value: 'FREESHIP' }
-                            ]
-                        };
-                    }
-
-                    if (!this.settings.design) {
-                        this.settings.design = {
-                            modal_bg_color: '#ffffff',
-                            modal_text_color: '#1f2937',
-                            accent_color: '#6366f1',
-                            title: 'Выиграйте приз!',
-                            description: 'Испытайте свою удачу прямо сейчас'
-                        };
-                    }
-
-                    if (!this.settings.form) {
-                        this.settings.form = {
-                            enabled: true,
-                            title: 'Поздравляем!',
-                            fields: [
-                                { type: 'text', placeholder: 'Ваше имя', required: true },
-                                { type: 'email', placeholder: 'Ваш Email', required: true }
-                            ],
-                            button_text: 'Получить приз',
-                            success_message: 'Ваш купон: {CODE}'
-                        };
-                    }
-
-                    if (!this.settings.limits) {
-                        this.settings.limits = {
-                            spins_per_user: 1,
-                            frequency: 'once_session'
-                        };
-                    }
-
-                    if (!this.settings.template) {
-                        this.settings.template = Object.keys(this.skins)[0] || 'default';
-                    }
-                },
-
-                setupWatchers() {
-                    // Следим только за нужными полями
-                    this.$watch('settings.button.position', () => this.updatePosition());
-                    this.$watch('settings.button.bg_color', () => this.updateTriggerColor());
-                    this.$watch('settings.button.icon', () => this.updateTriggerIcon());
-                    this.$watch('settings.button.text', () => this.updateSpinButtonText());
-                    this.$watch('settings.design.title', () => this.updateTitle());
-                    this.$watch('settings.design.description', () => this.updateDescription());
-                    this.$watch('settings.design.accent_color', () => this.updateAccentColor());
-                    this.$watch('settings.wheel.segments', () => this.redrawWheel(), { deep: true });
-                    this.$watch('settings.wheel.size', () => this.redrawWheel());
-                    this.$watch('settings.wheel.text_color', () => this.redrawWheel());
-                    this.$watch('settings.wheel.pointer_color', () => this.updatePointerColor());
-                },
-
-                async loadSkin(skinId) {
-                    try {
-                        this.isLoading = true;
-                        const baseUrl = `/widgets/${this.slug}/skins/${skinId}`;
-                        const [htmlRes, cssRes] = await Promise.all([
-                            fetch(`${baseUrl}/template.html`),
-                            fetch(`${baseUrl}/style.css`)
-                        ]);
-                        this.rawTemplate = await htmlRes.text();
-                        this.rawCss = await cssRes.text();
-                        this.initPreview();
-                    } catch (e) {
-                        console.error('Error loading skin:', e);
-                    } finally {
-                        this.isLoading = false;
-                    }
-                },
-
-                initPreview() {
-                    const container = document.getElementById('preview-host');
-                    if (!container) return;
-
-                    this.shadowRoot = container.shadowRoot || container.attachShadow({ mode: 'open' });
-
-                    let css = this.rawCss;
-                    css = css.replace(/position:\s*fixed/g, 'position: absolute');
-                    css = css.replace(/position:fixed/g, 'position: absolute');
-                    css = css.replace(/100vh/g, '100%');
-                    css = css.replace(/100vw/g, '100%');
-
-                    this.shadowRoot.innerHTML = `
-                <style>
-                    :host {
-                        display: block;
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        right: 0;
-                        bottom: 0;
-                    }
-                    ${css}
-                </style>
-                <div id="widget-root"></div>
-            `;
-                    this.widgetRoot = this.shadowRoot.getElementById('widget-root');
-
-                    // Первичный рендер
-                    this.renderWidget();
-                },
-
-                renderWidget() {
-                    if (!this.widgetRoot || !this.rawTemplate) return;
-
-                    // Рендерим HTML
-                    let html = this.rawTemplate
-                        .replace(/{id}/g, 'preview')
-                        .replace(/{widget_id}/g, 'preview')
-                        .replace(/{position}/g, this.settings.button.position === 'bottom-right' ? 'right' : 'left')
-                        .replace(/{wheel_size}/g, this.settings.wheel.size)
-                        .replace(/{title}/g, this.escapeHtml(this.settings.design.title))
-                        .replace(/{description}/g, this.escapeHtml(this.settings.design.description));
-
-                    this.widgetRoot.innerHTML = html;
-
-                    // Сохраняем ссылки на DOM элементы
-                    this.widget = this.widgetRoot.querySelector('.sfw-root');
-                    this.canvas = this.widget?.querySelector('#sfw-canvas-preview');
-                    this.trigger = this.widget?.querySelector('.sfw-trigger');
-                    this.spinBtn = this.widget?.querySelector('.sfw-spin-trigger');
-                    this.titleEl = this.widget?.querySelector('.sfw-form-body h3');
-                    this.descEl = this.widget?.querySelector('.sfw-form-body p');
-
-                    // Применяем стили и рисуем
-                    this.updateTriggerColor();
-                    this.updateTriggerIcon();
-                    this.updateAccentColor();
-                    this.updatePointerColor();
-                    this.redrawWheel();
-                    this.bindEvents();
-                },
-
-                // Простые методы обновления без перерисовки всего виджета
-                updatePosition() {
-                    if (!this.widget) return;
-                    const position = this.settings.button.position;
-                    this.widget.classList.remove('sp-position-right', 'sp-position-left');
-                    this.widget.classList.add(position === 'bottom-right' ? 'sp-position-right' : 'sp-position-left');
-                },
-
-                updateTriggerColor() {
-                    if (!this.trigger) return;
-                    this.trigger.style.background = this.settings.button.bg_color;
-                    this.trigger.style.color = this.settings.button.text_color;
-                },
-
-                updateTriggerIcon() {
-                    if (!this.trigger) return;
-                    const iconSpan = this.trigger.querySelector('.sfw-icon');
-                    if (iconSpan) iconSpan.textContent = this.settings.button.icon;
-                },
-
-                updateSpinButtonText() {
-                    if (!this.spinBtn) return;
-                    this.spinBtn.textContent = this.settings.button.text;
-                },
-
-                updateTitle() {
-                    if (!this.titleEl) return;
-                    this.titleEl.textContent = this.settings.design.title;
-                },
-
-                updateDescription() {
-                    if (!this.descEl) return;
-                    this.descEl.textContent = this.settings.design.description;
-                },
-
-                updateAccentColor() {
-                    if (!this.widget) return;
-                    this.widget.style.setProperty('--sfw-accent', this.settings.design.accent_color);
-                    // Обновляем цвет кнопки spin
-                    if (this.spinBtn) {
-                        this.spinBtn.style.background = this.settings.design.accent_color;
-                    }
-                },
-
-                updatePointerColor() {
-                    if (!this.widget) return;
-                    this.widget.style.setProperty('--sfw-pointer', this.settings.wheel.pointer_color);
-                },
-
-                redrawWheel() {
-                    if (!this.canvas) return;
-
-                    const ctx = this.canvas.getContext('2d');
-                    const segments = this.settings.wheel.segments || [];
-                    const size = this.settings.wheel.size || 280;
-
-                    this.canvas.width = size;
-                    this.canvas.height = size;
-
-                    if (segments.length === 0) {
-                        ctx.fillStyle = '#e5e7eb';
-                        ctx.fillRect(0, 0, size, size);
-                        return;
-                    }
-
-                    const radius = size / 2;
-                    const centerX = radius;
-                    const centerY = radius;
-                    const arc = (2 * Math.PI) / segments.length;
-
-                    ctx.clearRect(0, 0, size, size);
-
-                    segments.forEach((seg, i) => {
-                        const startAngle = i * arc;
-                        const endAngle = startAngle + arc;
-
-                        ctx.beginPath();
-                        ctx.fillStyle = seg.bg_color || (i % 2 ? '#f1f5f9' : '#e2e8f0');
-                        ctx.moveTo(centerX, centerY);
-                        ctx.arc(centerX, centerY, radius - 10, startAngle, endAngle);
-                        ctx.fill();
-
-                        ctx.beginPath();
-                        ctx.strokeStyle = '#fff';
-                        ctx.lineWidth = 2;
-                        ctx.moveTo(centerX, centerY);
-                        ctx.arc(centerX, centerY, radius - 10, startAngle, endAngle);
-                        ctx.lineTo(centerX, centerY);
-                        ctx.stroke();
-
-                        ctx.save();
-                        ctx.translate(centerX, centerY);
-                        ctx.rotate(startAngle + arc / 2);
-                        ctx.textAlign = "center";
-                        ctx.fillStyle = this.settings.wheel.text_color || '#333';
-                        ctx.font = `bold ${Math.min(this.settings.wheel.font_size || 12, 14)}px system-ui`;
-
-                        let label = seg.label || '';
-                        if (label.length > 12) label = label.slice(0, 10) + '..';
-                        ctx.fillText(label, radius - 45, 5);
-                        ctx.restore();
-                    });
-
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
-                    ctx.fillStyle = '#fff';
-                    ctx.fill();
-                },
-
-                bindEvents() {
-                    if (!this.widget) return;
-
-                    // Открытие
-                    const toggleBtn = this.widget.querySelector('[data-sp-toggle]');
-                    if (toggleBtn) {
-                        toggleBtn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            this.widget.classList.add('sp-active');
-                        });
-                    }
-
-                    // Закрытие
-                    const closeBtns = this.widget.querySelectorAll('[data-sp-close]');
-                    closeBtns.forEach(btn => {
-                        btn.addEventListener('click', (e) => {
-                            e.preventDefault();
-                            this.widget.classList.remove('sp-active');
-                        });
-                    });
-                },
-
-                // Методы управления сегментами
-                addSegment() {
-                    if (!this.settings.wheel.segments) this.settings.wheel.segments = [];
-                    this.settings.wheel.segments.push({
-                        label: 'Новый сегмент',
-                        bg_color: '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'),
-                        value: 'PROMO' + Math.floor(Math.random()*1000)
-                    });
-                },
-
-                removeSegment(index) {
-                    this.settings.wheel.segments.splice(index, 1);
-                },
-
-                addFormField() {
-                    if (!this.settings.form.fields) this.settings.form.fields = [];
-                    this.settings.form.fields.push({ type: 'text', placeholder: 'Новое поле' });
-                },
-
-                removeFormField(index) {
-                    this.settings.form.fields.splice(index, 1);
-                },
-
-                updatePreviewMode(mode) {
-                    this.previewMode = mode;
-                    this.$dispatch('preview-mode-changed', mode);
-                },
-
-                async applyTemplate(skinId) {
-                    if (this.settings.template === skinId) return;
-                    this.settings.template = skinId;
-                    await this.loadSkin(skinId);
-                },
-
-                async saveConfig(event) {
-                    this.isSaving = true;
-                    try {
-                        const response = await axios.post(window.location.href, { settings: this.settings });
-                        if (response.data.status === 'success') {
-                            this.showNotification(response.data.message, 'success');
-                        }
-                    } catch (error) {
-                        this.showNotification('Ошибка при сохранении', 'danger');
-                    } finally {
-                        this.isSaving = false;
-                    }
-                },
-
-                escapeHtml(str) {
-                    if (!str) return '';
-                    const div = document.createElement('div');
-                    div.textContent = str;
-                    return div.innerHTML;
-                },
-
-                showNotification(message, type) {
-                    if (typeof window.showNotification === 'function') {
-                        window.showNotification(message, type);
-                    } else {
-                        alert(message);
-                    }
-                }
-            };
-        }
-    </script>
-@endpush
+@include("widgets.fortune-wheel.configuration_js")

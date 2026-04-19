@@ -2,8 +2,8 @@
  * Виджет "Мультикнопка связи"
  */
 window.SmWidget_contact_button = class extends SmWidget {
-    constructor(settings, id, assets) {
-        super(settings, id, assets);
+    constructor(settings, id, assets, behavior) {
+        super(settings, id, assets, behavior);
         this.activeClass = 'sp-active';
 
         // Библиотека иконок SVG
@@ -16,6 +16,10 @@ window.SmWidget_contact_button = class extends SmWidget {
             youtube: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2c-.3-1-1-1.8-2-2-1.8-.5-9.5-.5-9.5-.5s-7.7 0-9.5.5c-1 .2-1.7 1-2 2-.5 1.9-.5 5.8-.5 5.8s0 3.9.5 5.8c.3 1 1 1.8 2 2 1.8.5 9.5.5 9.5.5s7.7 0 9.5-.5c1-.2 1.7-1 2-2 .5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 14.5V9.5l6.5 2.5-6.5 2.5z"/></svg>`,
             custom: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1 0 1.71-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`
         };
+    }
+
+    init() {
+        super._init();
     }
 
     mount() {

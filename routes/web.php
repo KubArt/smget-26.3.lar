@@ -18,9 +18,6 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::get('/v1/get-widgets', [\App\Http\Controllers\Widgets\WidgetDeliveryController::class, 'getPayload']);
-Route::post('/v1/track', [\App\Http\Controllers\Widgets\WidgetDeliveryController::class, 'track']);
-
 Route::get('/', function () {
     return view('welcome');
 });

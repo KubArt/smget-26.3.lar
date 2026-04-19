@@ -19,6 +19,8 @@ class Widget extends Model
         'target_paths',
         'target_utm',
         'settings',
+        'behavior',
+        'target_time',
         'is_active' // Если переименовали в миграции
     ];
 
@@ -26,7 +28,9 @@ class Widget extends Model
         'settings' => 'array',
         'privacy_config' => 'array',
         'target_utm' => 'array',
-        'target_utm' => 'array',
+        'target_paths' => 'array',
+        'target_time' => 'array',
+        'behavior' => 'array',
         'is_active' => 'boolean',
     ];
 
