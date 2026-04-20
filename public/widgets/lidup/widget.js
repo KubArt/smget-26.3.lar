@@ -1,244 +1,198 @@
+/**
+ * Виджет "LidUp" - Оптимизированная версия
+ */
 window.SmWidget_lidup = class extends SmWidget {
     constructor(settings, id, assets, behavior) {
         super(settings, id, assets, behavior);
-        this.storageKey = `sm_lidup_${this.id}_closed`;
+
+        const design = settings.design || {};
+
+        // 1. Централизованная конфигурация
+        this.config = {
+            title: settings.title || '',
+            description: settings.description || '',
+            btnText: settings.btn_text || 'Отправить',
+            image: settings.image || '',
+            hasImage: !!(settings.has_image && settings.image),
+            imgPos: settings.image_position || 'left',
+            position: settings.position || 'center',
+            animIn: settings.animation_in || 'fadeIn',
+            apiUrl: settings.api_url || '/api/widgets/lidup/submit',
+            fields: settings.form_fields || [],
+            // Дизайн
+            colors: {
+                bg: design.bg_color || '#FFFFFF',
+                text: design.text_color || '#1F2937',
+                accent: design.accent_color || '#3B82F6',
+                btn: design.btn_color || '#22C55E',
+                btnText: design.btn_text_color || '#FFFFFF',
+                overlay: settings.overlay_color || 'rgba(0,0,0,0.7)',
+                radius: design.border_radius || '16'
+            }
+        };
+
         this.formSubmitted = false;
-        this.exitIntentTriggered = false;
     }
 
     init() {
         super._init();
-        /*
-        // Проверка частоты показа
-        if (this.shouldHide()) return;
-
-        // Настройка триггера показа
-        const trigger = this.settings.trigger_type || 'time';
-
-        if (trigger === 'time') {
-            setTimeout(() => this.mount(), (this.settings.delay || 3) * 1000);
-        } else if (trigger === 'scroll') {
-            this.initScrollTrigger();
-        } else if (trigger === 'exit') {
-            this.initExitIntent();
-        } else if (trigger === 'click') {
-            this.initClickTrigger();
-        }
-        //*/
-    }
-
-    shouldHide() {
-        const closedData = localStorage.getItem(this.storageKey) || sessionStorage.getItem(this.storageKey);
-        if (!closedData) return false;
-
-        const frequency = this.settings.frequency || 'once_session';
-        const now = Date.now();
-
-        if (frequency === 'once_session') return true;
-        if (frequency === 'once_day' && now - parseInt(closedData) < 86400000) return true;
-        if (frequency === 'once_week' && now - parseInt(closedData) < 604800000) return true;
-
-        return false;
     }
 
     mount() {
-        const design = this.settings.design || {};
+        this.injectStyles();
 
-        // Инжекция стилей
-        const styleId = `sp-style-${this.id}`;
-        if (!document.getElementById(styleId)) {
-            const style = document.createElement('style');
-            style.id = styleId;
-            style.textContent = `
-                :root {
-                    --bg-color: ${design.bg_color || '#FFFFFF'};
-                    --text-color: ${design.text_color || '#1F2937'};
-                    --accent-color: ${design.accent_color || '#3B82F6'};
-                    --btn-color: ${design.btn_color || '#22C55E'};
-                    --btn-text-color: ${design.btn_text_color || '#FFFFFF'};
-                    --border-radius: ${design.border_radius || '16'};
-                    --overlay-color: ${this.settings.overlay_color || 'rgba(0,0,0,0.7)'};
-                }
-                ${this.assets.css}
-            `;
-            document.head.appendChild(style);
-        }
-
-        // Генерация полей формы
-        const formFieldsHtml = this.generateFormFields();
-
-        // Генерация изображения
-        const imageHtml = this.settings.has_image && this.settings.image
-            ? `<img src="${this.settings.image}" class="sp-lidup-image" alt="${this.escapeHtml(this.settings.title)}">`
+        // 2. Подготовка контента
+        const imageHtml = this.config.hasImage
+            ? `<img src="${this.config.image}" class="sp-lidup-image" alt="image">`
             : '';
 
-        // Подстановка в HTML
-        let html = this.assets.html
-            .replace(/\{title\}/g, this.escapeHtml(this.settings.title || ''))
-            .replace(/\{description\}/g, this.escapeHtml(this.settings.description || ''))
-            .replace(/\{image_html\}/g, imageHtml)
-            .replace(/\{image_position\}/g, this.settings.image_position || 'left')
-            .replace(/\{btn_text\}/g, this.escapeHtml(this.settings.btn_text || 'Отправить'))
-            .replace(/\{position\}/g, this.settings.position || 'center')
-            .replace(/\{animation_in\}/g, this.settings.animation_in || 'fadeIn');
+        const replacements = {
+            '{title}': this.escapeHtml(this.config.title),
+            '{description}': this.escapeHtml(this.config.description),
+            '{image_html}': imageHtml,
+            '{image_position}': this.config.imgPos,
+            '{btn_text}': this.escapeHtml(this.config.btnText),
+            '{position}': this.config.position,
+            '{animation_in}': this.config.animIn
+        };
 
+        let html = this.assets.html;
+        for (const [key, val] of Object.entries(replacements)) {
+            html = html.split(key).join(val);
+        }
+
+        // 3. Создание и рендер
         this.createContainer(html);
 
         if (this.container) {
-            // Вставляем поля формы
             const formFieldsContainer = this.container.querySelector('#sp-form-fields');
             if (formFieldsContainer) {
-                formFieldsContainer.innerHTML = formFieldsHtml;
+                formFieldsContainer.innerHTML = this.renderFields();
             }
 
-            // Настраиваем обработчики
             this.bindEvents();
 
-            // Показываем с анимацией
-            setTimeout(() => {
+            // Плавное появление
+            requestAnimationFrame(() => {
                 this.container.classList.add('sp-active');
-            }, 50);
-
-            // Авто-закрытие
-            if (this.settings.auto_close > 0) {
-                setTimeout(() => this.close(), this.settings.auto_close * 1000);
-            }
-
-            this.track('view');
+            });
         }
     }
 
-    generateFormFields() {
-        const fields = this.settings.form_fields || [];
-        return fields.map(field => {
-            const required = field.required ? 'required' : '';
-            const name = field.name || field.type + '_' + Date.now() + '_' + Math.random();
+    renderFields() {
+        return this.config.fields.map(field => {
+            const req = field.required ? 'required' : '';
+            const name = field.name || `${field.type}_${Date.now()}`;
             const placeholder = this.escapeHtml(field.placeholder || field.label || '');
-            const defaultValue = this.escapeHtml(field.default_value || '');
+            const val = this.escapeHtml(field.default_value || '');
 
-            // Скрытое поле
-            if (field.type === 'hidden') {
-                return `<input type="hidden" name="${name}" value="${defaultValue}">`;
-            }
+            if (field.type === 'hidden') return `<input type="hidden" name="${name}" value="${val}">`;
 
-            // Текстовая область
             if (field.type === 'textarea') {
-                return `<textarea name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field"></textarea>`;
+                return `<textarea name="${name}" placeholder="${placeholder}" ${req} class="sp-lidup-field"></textarea>`;
             }
 
-            // Обычное поле
-            return `<input type="${field.type}" name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field">`;
+            return `<input type="${field.type}" name="${name}" placeholder="${placeholder}" ${req} class="sp-lidup-field">`;
         }).join('');
     }
 
+    injectStyles() {
+        const styleId = `sp-style-${this.id}`;
+        if (document.getElementById(styleId)) return;
+
+        const c = this.config.colors;
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+            :root {
+                --bg-color: ${c.bg};
+                --text-color: ${c.text};
+                --accent-color: ${c.accent};
+                --btn-color: ${c.btn};
+                --btn-text-color: ${c.btnText};
+                --border-radius: ${c.radius}px;
+                --overlay-color: ${c.overlay};
+            }
+            ${this.assets.css}
+        `;
+        document.head.appendChild(style);
+    }
+
     bindEvents() {
-        // Закрытие
-        const closeBtn = this.container.querySelector('[data-sp-close]');
-        const overlay = this.container.querySelector('[data-sp-overlay]');
+        this.container.onclick = (e) => {
+            if (e.target.hasAttribute('data-sp-close') || e.target.hasAttribute('data-sp-overlay')) {
+                this.close();
+            }
+        };
 
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => this.close());
-        }
-        if (overlay) {
-            overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) this.close();
-            });
-        }
-
-        // Отправка формы
         const form = this.container.querySelector('[data-sp-form]');
         if (form) {
-            form.addEventListener('submit', (e) => this.submitForm(e));
+            form.onsubmit = (e) => this.handleSubmit(e);
         }
     }
 
-    async submitForm(e) {
+    async handleSubmit(e) {
         e.preventDefault();
         if (this.formSubmitted) return;
 
         const form = e.target;
-        const fields = form.querySelectorAll('input, textarea, select');
-        const formData = {};
-
-        fields.forEach(field => {
-            if (field.name) {
-                formData[field.name] = field.value;
-            }
-        });
-
-        // Добавляем метаданные
-        formData.widget_id = this.id;
-        formData.url = window.location.href;
-        formData.timestamp = new Date().toISOString();
-
         const submitBtn = form.querySelector('.sp-lidup-submit');
         const messageEl = form.querySelector('.sp-lidup-message');
 
+        // Сбор данных через FormData (более современно)
+        const formData = Object.fromEntries(new FormData(form));
+        formData.widget_id = this.id;
+        formData.url = window.location.href;
+
         submitBtn.disabled = true;
+        const originalBtnText = submitBtn.textContent;
         submitBtn.textContent = 'Отправка...';
 
         try {
-            // Отправка данных через fetch на ваш API endpoint
-            const apiUrl = this.settings.api_url || '/api/widgets/lidup/submit';
-
-            const response = await fetch(apiUrl, {
+            const response = await fetch(this.config.apiUrl, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
                 body: JSON.stringify(formData)
             });
 
-            this.track('submit');
+            if (!response.ok) throw new Error();
+
             this.formSubmitted = true;
+            this.track('submit');
 
             const result = await response.json();
-
-            messageEl.textContent = result.message || this.settings.success_message || 'Спасибо! Мы свяжемся с вами.';
+            messageEl.textContent = result.message || this.settings.success_message || 'Спасибо!';
             messageEl.className = 'sp-lidup-message success';
             messageEl.style.display = 'block';
 
-            // Очищаем форму и показываем сообщение
-            form.innerHTML = '';
-            form.appendChild(messageEl);
+            form.style.opacity = '0';
+            setTimeout(() => {
+                form.innerHTML = '';
+                form.appendChild(messageEl);
+                form.style.opacity = '1';
+            }, 300);
 
-            setTimeout(() => this.close(), 2000);
+            setTimeout(() => this.close(), 2500);
 
-        } catch (error) {
-            console.error('Submit error:', error);
+        } catch (err) {
             messageEl.textContent = this.settings.error_message || 'Ошибка. Попробуйте позже.';
             messageEl.className = 'sp-lidup-message error';
             messageEl.style.display = 'block';
             submitBtn.disabled = false;
-            submitBtn.textContent = this.settings.btn_text || 'Отправить';
+            submitBtn.textContent = originalBtnText;
         }
     }
 
     close() {
-        const timestamp = Date.now();
-        const closeBehavior = this.settings.close_behavior || 'hide_session';
-
-        if (closeBehavior === 'hide_forever') {
-            localStorage.setItem(this.storageKey, timestamp.toString());
-        } else {
-            sessionStorage.setItem(this.storageKey, timestamp.toString());
-        }
-
+        this.saveClosed();
         this.track('close');
 
         if (this.container) {
             this.container.classList.remove('sp-active');
             setTimeout(() => {
                 if (this.container) this.container.remove();
+                this.container = null;
             }, 300);
         }
-    }
-
-    escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 };

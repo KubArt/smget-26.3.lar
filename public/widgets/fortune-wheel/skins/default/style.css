@@ -1,7 +1,6 @@
 /* Полная изоляция виджета */
 /* Базовая изоляция без сброса всего */
 
-
 .sfw-root.sp-position-right { right: 0; }
 .sfw-root.sp-position-left { left: 0; }
 

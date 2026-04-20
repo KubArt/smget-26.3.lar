@@ -281,6 +281,25 @@ class SmWidget {
     mount() {
         console.warn('Mount method not implemented');
     }
+
+    /*** Общие методы */
+    hexToRgb(hex) {
+        hex = hex.replace(/^#/, '');
+        if (hex.length === 3) {
+            hex = hex.split('').map(c => c + c).join('');
+        }
+        const intVal = parseInt(hex, 16);
+        return {
+            r: (intVal >> 16) & 255,
+            g: (intVal >> 8) & 255,
+            b: intVal & 255
+        };
+    }
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text || '';
+        return div.innerHTML;
+    }
 }
 
 // Запуск виджетов - ИСПРАВЛЕНА РЕКУРСИЯ
@@ -355,4 +374,7 @@ class SmWidget {
         .catch(error => {
             console.error('SMGET: Failed to load widget scripts:', error);
         });
+
+
+
 })();

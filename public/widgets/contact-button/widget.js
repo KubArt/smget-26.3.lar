@@ -1,10 +1,26 @@
 /**
- * Виджет "Мультикнопка связи"
+ * Виджет "Мультикнопка связи" - Оптимизированная версия
  */
 window.SmWidget_contact_button = class extends SmWidget {
     constructor(settings, id, assets, behavior) {
         super(settings, id, assets, behavior);
-        this.activeClass = 'sp-active';
+
+        const design = settings.design || {};
+        const scaleMap = { small: '0.8', medium: '1', large: '1.2' };
+
+        // 1. Централизованный конфиг
+        this.config = {
+            mainColor: design.main_color || '#3b82f6',
+            iconColor: design.icon_color || '#ffffff',
+            opacity: design.opacity || '1',
+            scale: scaleMap[design.size] || '1',
+            position: settings.position || 'right',
+            tooltip: settings.main_tooltip || '',
+            animation: settings.animation?.type || 'none',
+            hover: design.hover_effect || 'none',
+            size: design.size || 'medium',
+            channels: (settings.channels || []).filter(c => c.is_active !== false && c.action_value)
+        };
 
         // Библиотека иконок SVG
         this.icons = {
@@ -16,6 +32,8 @@ window.SmWidget_contact_button = class extends SmWidget {
             youtube: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2c-.3-1-1-1.8-2-2-1.8-.5-9.5-.5-9.5-.5s-7.7 0-9.5.5c-1 .2-1.7 1-2 2-.5 1.9-.5 5.8-.5 5.8s0 3.9.5 5.8c.3 1 1 1.8 2 2 1.8.5 9.5.5 9.5.5s7.7 0 9.5-.5c1-.2 1.7-1 2-2 .5-1.9.5-5.8.5-5.8s0-3.9-.5-5.8zM9.5 14.5V9.5l6.5 2.5-6.5 2.5z"/></svg>`,
             custom: `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1 0 1.71-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`
         };
+
+        this.activeClass = 'sp-active';
     }
 
     init() {
@@ -23,178 +41,112 @@ window.SmWidget_contact_button = class extends SmWidget {
     }
 
     mount() {
-        const mainColor = this.settings.design?.main_color || '#3b82f6';
+        this.injectStyles();
 
-        // 1. Инжекция стилей с RGB
-        const rgb = this.hexToRgb(mainColor);
-        const styleId = `sp-style-${this.id}`;
-        if (!document.getElementById(styleId)) {
-            const style = document.createElement('style');
-            style.id = styleId;
-            // Добавляем RGB переменные в начало CSS
-            const cssWithVars = `:root { --main-color-rgb: ${rgb.r}, ${rgb.g}, ${rgb.b}; }\n${this.assets.css}`;
-            style.textContent = cssWithVars;
-            document.head.appendChild(style);
-        }
-
-        // 2. Генерация каналов
-        const channelsHtml = (this.settings.channels || [])
-            .filter(c => c.is_active !== false && c.action_value)
+        // 2. Генерация каналов через лаконичный map
+        const channelsHtml = this.config.channels
             .map(c => this.renderChannel(c))
             .join('');
 
-        // 3. Формирование HTML
+        // 3. Подготовка и вставка HTML
         let html = this.assets.html
-            .replace(/\{channels_html\}/g, channelsHtml)
-            .replace(/\{position\}/g, this.settings.position || 'right')
-            .replace(/\{main_tooltip\}/g, this.escapeHtml(this.settings.main_tooltip || ''))
-            .replace(/\{widget_id\}/g, this.id);
+            .split('{channels_html}').join(channelsHtml)
+            .split('{position}').join(this.config.position)
+            .split('{main_tooltip}').join(this.escapeHtml(this.config.tooltip))
+            .split('{widget_id}').join(this.id);
 
-        // 4. Рендер контейнера
         this.createContainer(html);
 
-        // 5. Применение дизайна и событий
         if (this.container) {
-            this.applyDesign(mainColor);
+            this.applyDesign();
             this.bindEvents();
-
-            // Добавляем классы анимации и размера
-            this.applyAnimationClasses();
-            this.applySizeClass();
-            this.applyHoverClass();
         }
     }
 
     renderChannel(c) {
         const url = this.getChannelUrl(c);
-        const icon = this.icons[c.type] || this.icons.custom;
+        const icon = this.getIcon(c.type);
         const label = this.escapeHtml(c.label || c.type);
 
         return `
-            <a href="${url}"
-               class="sp-channel-item"
-               target="_blank"
-               rel="noopener noreferrer"
-               data-channel="${c.type}"
+            <a href="${url}" class="sp-channel-item" target="_blank" rel="noopener"
                onclick="if(window.SmGet) window.SmGet.trackEvent(${this.id}, 'click_${c.type}')">
                 <div class="sp-channel-icon" style="background-color: ${c.bg_color || '#555'}; color: ${c.icon_color || '#fff'}">
                     ${icon}
                 </div>
                 <span class="sp-channel-label">${label}</span>
-            </a>
-        `;
+            </a>`;
     }
 
     getChannelUrl(c) {
-        let val = (c.action_value || '').trim();
+        const val = c.action_value.trim();
+        const clean = val.replace(/\D/g, '');
 
-        switch (c.type) {
-            case 'whatsapp':
-                return `https://wa.me/${val.replace(/\D/g, '')}`;
-            case 'telegram':
-                return `https://t.me/${val.replace('@', '')}`;
-            case 'phone':
-                return `tel:${val.replace(/\D/g, '')}`;
-            case 'email':
-                return `mailto:${val}`;
-            case 'vk':
-                return `https://vk.com/${val}`;
-            case 'youtube':
-                return `https://youtube.com/${val}`;
-            default:
-                return val;
-        }
+        const protocols = {
+            whatsapp: `https://wa.me/${clean}`,
+            telegram: `https://t.me/${val.replace('@', '')}`,
+            phone: `tel:${clean}`,
+            email: `mailto:${val}`,
+            vk: `https://vk.com/${val}`,
+            youtube: `https://youtube.com/${val}`
+        };
+        return protocols[c.type] || val;
     }
 
-    applyDesign(mainColor) {
-        const design = this.settings.design || {};
-        const scaleMap = { small: '0.8', medium: '1', large: '1.2' };
+    applyDesign() {
+        const s = this.container.style;
+        s.setProperty('--main-color', this.config.mainColor);
+        s.setProperty('--icon-color', this.config.iconColor);
+        s.setProperty('--scale-factor', this.config.scale);
+        s.setProperty('--btn-opacity', this.config.opacity);
 
-        this.container.style.setProperty('--main-color', mainColor);
-        this.container.style.setProperty('--icon-color', design.icon_color || '#ffffff');
-        this.container.style.setProperty('--scale-factor', scaleMap[design.size] || '1');
-        this.container.style.setProperty('--btn-opacity', design.opacity || '1');
+        // Добавляем классы одним массивом
+        this.container.classList.add(
+            `sp-animation-${this.config.animation}`,
+            `sp-size-${this.config.size}`,
+            `sp-hover-${this.config.hover}`
+        );
     }
 
-    applyAnimationClasses() {
-        const animation = this.settings.animation || {};
-        if (animation.type && animation.type !== 'none') {
-            this.container.classList.add(`sp-animation-${animation.type}`);
-        }
-    }
+    injectStyles() {
+        const styleId = `sp-style-${this.id}`;
+        if (document.getElementById(styleId)) return;
 
-    applySizeClass() {
-        const design = this.settings.design || {};
-        if (design.size) {
-            this.container.classList.add(`sp-size-${design.size}`);
-        }
-    }
-
-    applyHoverClass() {
-        const design = this.settings.design || {};
-        if (design.hover_effect && design.hover_effect !== 'none') {
-            this.container.classList.add(`sp-hover-${design.hover_effect}`);
-        }
+        const rgb = this.hexToRgb(this.config.mainColor);
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `:root { --main-color-rgb: ${rgb.r},${rgb.g},${rgb.b}; }\n${this.assets.css}`;
+        document.head.appendChild(style);
     }
 
     bindEvents() {
-        // Универсальная логика через data-атрибуты
-        const toggleBtn = this.container.querySelector('[data-sp-toggle]');
-        const closeBtn = this.container.querySelector('[data-sp-close]');
-        const overlay = this.container.querySelector('[data-sp-overlay]');
+        // Используем один слушатель на весь контейнер (делегирование)
+        this.container.addEventListener('click', (e) => {
+            const toggle = e.target.closest('[data-sp-toggle]');
+            const close = e.target.closest('[data-sp-close], [data-sp-overlay]');
 
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', (e) => {
+            if (toggle) {
                 e.preventDefault();
-                e.stopPropagation();
-                this.container.classList.toggle(this.activeClass);
-                this.track(this.container.classList.contains(this.activeClass) ? 'open_menu' : 'close_menu');
-            });
-        }
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', (e) => {
+                const isOpen = this.container.classList.toggle(this.activeClass);
+                this.track(isOpen ? 'open_menu' : 'close_menu');
+            } else if (close) {
                 e.preventDefault();
-                e.stopPropagation();
                 this.container.classList.remove(this.activeClass);
-            });
-        }
+            }
+        });
 
-        if (overlay) {
-            overlay.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+        // Закрытие при клике вне
+        document.addEventListener('click', (e) => {
+            if (this.container && !this.container.contains(e.target)) {
                 this.container.classList.remove(this.activeClass);
-            });
-        }
-
-        // Закрытие при клике вне виджета (только если нет overlay)
-        if (!overlay) {
-            document.addEventListener('click', (e) => {
-                if (this.container && !this.container.contains(e.target)) {
-                    this.container.classList.remove(this.activeClass);
-                }
-            });
-        }
+            }
+        });
     }
 
-    hexToRgb(hex) {
-        hex = hex.replace(/^#/, '');
-        if (hex.length === 3) {
-            hex = hex.split('').map(c => c + c).join('');
-        }
-        const intVal = parseInt(hex, 16);
-        return {
-            r: (intVal >> 16) & 255,
-            g: (intVal >> 8) & 255,
-            b: intVal & 255
-        };
+    getIcon(type) {
+        // Библиотеку иконок можно оставить в конструкторе или вынести,
+        // здесь она вызывается через простую проверку
+        return this.icons[type] || this.icons.custom;
     }
 
-    escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
 };
