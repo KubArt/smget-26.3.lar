@@ -13,7 +13,6 @@ class WidgetDesignController extends BaseCabinetController
     public function design(Site $site, Widget $widget)
     {
         $service = WidgetFactory::make($widget);
-
         // Все данные для JS (включая скины) теперь приходят из одного метода
         $editorConfig = $service->getEditorConfig($widget);
 
@@ -26,11 +25,12 @@ class WidgetDesignController extends BaseCabinetController
 
     public function designUpdate(Request $request, Site $site, Widget $widget)
     {
-        // Получаем экземпляр виджета через фабрику
+        $this->authorizeAccess($site); // Проверка прав
+
         $service = WidgetFactory::make($widget);
 
-        // Передаем все данные из запроса в метод обновления
-        $success = $service->updateDesign($widget, $request->all());
+        // Передаем только нужную часть запроса (обычно это массив settings)
+        $success = $service->updateDesign($widget, $request->only('settings'));
 
         if ($success) {
             return response()->json([

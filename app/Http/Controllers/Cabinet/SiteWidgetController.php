@@ -38,21 +38,27 @@ class SiteWidgetController extends BaseCabinetController
         $request->validate([
             'widget_type_id' => 'required|exists:widget_types,id'
         ]);
-
         $widgetType = WidgetType::findOrFail($request->widget_type_id);
 
-        // В вашей модели Widget есть поле 'type', его нужно заполнить
+        // Загружаем конфиг из файла по slug виджета
+        $config = config("widgets.{$widgetType->slug}");
+
+        if (!$config) {
+            return back()->with('error', 'Конфигурация виджета не найдена');
+        }
+
         $site->widgets()->create([
             'widget_type_id' => $widgetType->id,
-            'type'           => $widgetType->slug, // Используем slug (например, 'cookie-pops') как тип
+            'type'           => $widgetType->slug,
             'name'           => $widgetType->name,
-            'settings'       => $widgetType->manifest['default_settings'] ?? [],
-            'is_enabled'     => true,
+            // Копируем чистые эталонные значения
+            'settings'       => $config['default_values']['settings'],
+            'behavior'       => $config['default_values']['behavior'],
+            'is_active'      => false,
         ]);
 
-        return redirect()
-            ->route('cabinet.sites.widgets.index', $site)
-            ->with('success', "Виджет {$widgetType->name} успешно добавлен");
+        return redirect()->route('cabinet.sites.widgets.index', $site)
+                ->with('success', "Виджет {$widgetType->name} успешно добавлен");
     }
 
     /**
@@ -88,15 +94,5 @@ class SiteWidgetController extends BaseCabinetController
         return back()->with('success', 'Виджет удален');
 
         return back()->with('success', 'Виджет удален');
-    }
-
-    /**
-     * Приватный метод проверки прав (опционально, если нет Policy)
-     */
-    protected function authorizeOwner(Site $site)
-    {
-        if ($site->user_id !== auth()->id()) {
-            abort(403, 'У вас нет доступа к этому проекту');
-        }
     }
 }

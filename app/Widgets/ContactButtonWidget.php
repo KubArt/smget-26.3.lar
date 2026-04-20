@@ -14,50 +14,15 @@ class ContactButtonWidget implements WidgetContract
 
     public function getEditorConfig(Widget $widget): array
     {
-        // Гарантируем структуру данных
-        $settings = $widget->settings;
-
-        if (!isset($settings['channels']) || !is_array($settings['channels'])) {
-            $settings['channels'] = [];
-        }
-
-        if (!isset($settings['design'])) {
-            $settings['design'] = [
-                'main_color' => '#3b82f6',
-                'icon_color' => '#ffffff',
-                'size' => 'medium',
-                'opacity' => 1,
-                'hover_effect' => 'lift'
-            ];
-        }
-
-        if (!isset($settings['animation'])) {
-            $settings['animation'] = [
-                'type' => 'wave',
-                'enabled' => true
-            ];
-        }
-
-        if (!isset($settings['template'])) {
-            $settings['template'] = 'default';
-        }
-
-        if (!isset($settings['position'])) {
-            $settings['position'] = 'bottom-right';
-        }
-
-        if (!isset($settings['delay'])) {
-            $settings['delay'] = 1;
-        }
-
-        if (!isset($settings['main_tooltip'])) {
-            $settings['main_tooltip'] = 'Свяжитесь с нами';
-        }
+        // Берем структуру из файла
+        $baseConfig = config("widgets.contact-button.default_values.settings", []);
+        // Сливаем с тем, что в БД
+        $mergedSettings = array_replace_recursive($baseConfig, $widget->settings ?? []);
 
         return [
-            'slug' => 'contact-button',
-            'settings' => $settings,
-            'skins' => $this->getSkins($widget->widgetType->slug)
+            'slug'     => 'contact-button',
+            'settings' => $mergedSettings,
+            'skins'    => $this->getSkins('contact-button')
         ];
     }
 
@@ -90,32 +55,15 @@ class ContactButtonWidget implements WidgetContract
 
     public function updateDesign(Widget $widget, array $data): bool
     {
-        // Получаем текущие настройки
-        $currentSettings = $widget->settings;
+        $baseConfig = config("widgets.contact-button.default_values.settings", []);
+        $inputSettings = $data['settings'] ?? [];
 
-        // Извлекаем новые настройки
-        $newSettings = $data['settings'] ?? $data;
+        // При сохранении мы тоже делаем merge, чтобы гарантировать
+        // наличие всех ключей, даже если фронт их не прислал.
+        $finalSettings = array_replace_recursive($baseConfig, $inputSettings);
 
-        // Сохраняем только нужные поля
-        $settings = [
-            'template' => $newSettings['template'] ?? $currentSettings['template'] ?? 'default',
-            'position' => $newSettings['position'] ?? $currentSettings['position'] ?? 'bottom-right',
-            'delay' => $newSettings['delay'] ?? $currentSettings['delay'] ?? 1,
-            'main_tooltip' => $newSettings['main_tooltip'] ?? $currentSettings['main_tooltip'] ?? '',
-            'channels' => $newSettings['channels'] ?? $currentSettings['channels'] ?? [],
-            'design' => $newSettings['design'] ?? $currentSettings['design'] ?? [
-                    'main_color' => '#3b82f6',
-                    'icon_color' => '#ffffff',
-                    'size' => 'medium',
-                    'opacity' => 1,
-                    'hover_effect' => 'lift'
-                ],
-            'animation' => $newSettings['animation'] ?? $currentSettings['animation'] ?? [
-                    'type' => 'wave',
-                    'enabled' => true
-                ]
-        ];
-
-        return $widget->update(['settings' => $settings]);
+        return $widget->update([
+            'settings' => $finalSettings
+        ]);
     }
 }

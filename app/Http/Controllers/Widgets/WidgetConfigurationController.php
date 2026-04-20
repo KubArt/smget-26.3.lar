@@ -43,6 +43,42 @@ class WidgetConfigurationController extends BaseCabinetController
         ]);
     }
 
+    public function edit_OTHER(Site $site, Widget $widget)
+    {
+        // 1. Загружаем эталонный конфиг из файла по типу виджета
+        $baseConfig = config("widgets.{$widget->type}.default_values");
+
+        // 2. Сливаем данные: приоритет у данных из БД ($widget->settings),
+        // но если ключа нет — берем дефолт из файла.
+        // array_replace_recursive идеально подходит для вложенных структур
+        $mergedSettings = array_replace_recursive(
+            $baseConfig['settings'] ?? [],
+            $widget->settings ?? []
+        );
+
+        $mergedBehavior = array_replace_recursive(
+            $baseConfig['behavior'] ?? [],
+            $widget->behavior ?? []
+        );
+
+        // 3. Нормализация (ваши менеджеры)
+        $behaviorManager = new BehaviorManager();
+        $behavior = $behaviorManager->normalize($mergedBehavior);
+
+        $targetTimeManager = new TargetTimeManager();
+        $targetTime = $targetTimeManager->normalize($widget->target_time ?? []);
+
+        return view('cabinet.widgets.config', [
+            'site'        => $site,
+            'widget'      => $widget,
+            'config'      => $mergedSettings, // Передаем уже полные данные
+            'behavior'    => $behavior,       // Передаем полные данные
+            'target'      => $widget->target_paths ?? ['allow' => [], 'disallow' => []],
+            'target_time' => $targetTime,
+            'utm_groups'  => $widget->target_utm ?? []
+        ]);
+    }
+
     public function update(Request $request, Site $site, Widget $widget)
     {
         // 1. Очистка UTM данных
