@@ -65,14 +65,14 @@ window.SmWidget_cookie_pops = class extends SmWidget {
         const rgb = this.hexToRgb(this.config.btn);
         const textRgb = this.hexToRgb(this.config.color);
 
-        const style = document.createElement('style');
-        // Объединяем системные переменные и модифицированный CSS скина
-        let css = this.assets.css
+        // 1. Обрабатываем основной CSS скина (замена переменных)
+        const processedCss = this.assets.css
             .replace(/var\(--bg-color\)/g, 'var(--sm-bg-color)')
             .replace(/var\(--text-color\)/g, 'var(--sm-text-color)')
             .replace(/var\(--btn-color\)/g, 'var(--sm-btn-color)');
 
-        style.textContent = `
+        // 2. Формируем строку с динамическими переменными и условиями
+        const fullCss = `
             :root {
                 --sm-bg-color: ${this.config.bg};
                 --sm-text-color: ${this.config.color};
@@ -81,9 +81,11 @@ window.SmWidget_cookie_pops = class extends SmWidget {
                 --sm-text-color-rgb: ${textRgb.r},${textRgb.g},${textRgb.b};
             }
             ${!this.config.showLeave ? '.hidden-btn { display: none !important; }' : ''}
-            ${css}
+            ${processedCss}
         `;
-        document.head.appendChild(style);
+
+        // 3. Передаем готовую строку в системный метод ядра
+        this.injectCustomStyles(fullCss);
     }
 
     bindEvents() {

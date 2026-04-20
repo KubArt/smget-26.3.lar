@@ -44,13 +44,20 @@ window.SmWidget_fortune_wheel = class extends SmWidget {
 
     mount() {
         this.injectStyles();
+        /*
+                const html = this.assets.html
+                    .replace(/{id}/g, this.id)
+                    .replace(/{title}/g, this.escapeHtml(this.config.design.title))
+                    .replace(/{description}/g, this.escapeHtml(this.config.design.desc));
 
-        const html = this.assets.html
-            .replace(/{id}/g, this.id)
-            .replace(/{title}/g, this.escapeHtml(this.config.design.title))
-            .replace(/{description}/g, this.escapeHtml(this.config.design.desc));
-
-        this.container = this.createContainer(html, `sfw-root sp-position-${this.config.btn.pos.includes('right') ? 'right' : 'left'}`);
+                this.container = this.createContainer(html, `sfw-root sp-position-${this.config.btn.pos.includes('right') ? 'right' : 'left'}`);
+        //*/
+        this.container = this.superRender({
+            id: this.escapeHtml(this.id),
+            title: this.escapeHtml(this.config.design.title),
+            description: this.escapeHtml(this.config.design.desc),
+            pos_class: this.config.btn.pos.includes('right') ? 'right' : 'left'
+        });
 
         this.initCanvas();
         this.renderActions(); // Стандартизированный вызов
@@ -59,6 +66,8 @@ window.SmWidget_fortune_wheel = class extends SmWidget {
         if (this.config.btn.delay > 0) {
             setTimeout(() => this.toggle(true), this.config.btn.delay * 1000);
         }
+        // Трекаем просмотр (базовый метод)
+        this.track('view');
     }
 
     /**
@@ -179,21 +188,16 @@ window.SmWidget_fortune_wheel = class extends SmWidget {
     }
 
     injectStyles() {
-        const styleId = `sp-style-${this.id}`;
-        if (document.getElementById(styleId)) return;
-
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
+        const css = `
             .sfw-root {
                 --accent: ${this.config.design.accent};
                 --btn-bg: ${this.config.btn.bg};
                 --btn-color: ${this.config.btn.color};
             }
-            .sp-error { border: 1px solid red !important; }
             ${this.assets.css}
         `;
-        document.head.appendChild(style);
+        this.injectCustomStyles(css);
+        return;
     }
 
     escapeHtml(t) {

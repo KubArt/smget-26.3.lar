@@ -97,14 +97,9 @@ window.SmWidget_lidup = class extends SmWidget {
     }
 
     injectStyles() {
-        const styleId = `sp-style-${this.id}`;
-        if (document.getElementById(styleId)) return;
-
         const c = this.config.colors;
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            :root {
+        const fullCss = `
+        :root {
                 --bg-color: ${c.bg};
                 --text-color: ${c.text};
                 --accent-color: ${c.accent};
@@ -115,7 +110,8 @@ window.SmWidget_lidup = class extends SmWidget {
             }
             ${this.assets.css}
         `;
-        document.head.appendChild(style);
+        // 2. Вызываем метод ядра, который сам проверит ID и добавит стиль в head
+        this.injectCustomStyles(fullCss);
     }
 
     bindEvents() {

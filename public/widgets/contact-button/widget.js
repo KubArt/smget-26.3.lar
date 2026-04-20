@@ -109,14 +109,15 @@ window.SmWidget_contact_button = class extends SmWidget {
     }
 
     injectStyles() {
-        const styleId = `sp-style-${this.id}`;
-        if (document.getElementById(styleId)) return;
-
         const rgb = this.hexToRgb(this.config.mainColor);
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `:root { --main-color-rgb: ${rgb.r},${rgb.g},${rgb.b}; }\n${this.assets.css}`;
-        document.head.appendChild(style);
+        const fullCss = `
+            :root {
+                --main-color-rgb: ${rgb.r},${rgb.g},${rgb.b};
+            }
+            ${this.assets.css}
+        `;
+        // 3. Отправляем в ядро для безопасной инъекции
+        this.injectCustomStyles(fullCss);
     }
 
     bindEvents() {

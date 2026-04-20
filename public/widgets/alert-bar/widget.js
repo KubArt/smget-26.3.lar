@@ -88,12 +88,8 @@ window.SmWidget_alert_bar = class extends SmWidget {
     }
 
     injectStyles() {
-        const styleId = `sp-style-${this.id}`;
-        if (document.getElementById(styleId)) return;
-
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
+        // 1. Формируем строку с CSS-переменными и специфичными стилями виджета
+        const fullCss = `
             :root {
                 --bg-color: ${this.config.bg};
                 --text-color: ${this.config.color};
@@ -102,7 +98,8 @@ window.SmWidget_alert_bar = class extends SmWidget {
             .hidden-btn { display: none !important; }
             ${this.assets.css}
         `;
-        document.head.appendChild(style);
+        // 2. Передаем готовую строку в системный метод ядра
+        this.injectCustomStyles(fullCss);
     }
 
     initPlaceholder(wrapper) {

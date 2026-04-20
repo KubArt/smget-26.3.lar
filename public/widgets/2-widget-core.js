@@ -163,36 +163,15 @@ class SmWidget {
         }
     }
 
-    /** * Автоматически собирает конфиг, применяет стили и создает контейнер.
-     * Упрощает mount() в дочерних классах до 2-3 строк.
-     */
-    superRender(templateData = {}) {
-        const html = this.processTemplate(this.assets.html, {
-            id: this.id,
-            ...this.config,
-            ...templateData
-        });
-        return this.createContainer(html, `sm-widget-root sp-${this.type}`);
-    }
-
-    injectCustomStyles(css) {
+    // Унифицированная инжекция стилей
+    injectStyles() {
         const styleId = `sm-style-${this.id}`;
-        if (document.getElementById(styleId) || !css) return;
-
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = css;
-        document.head.appendChild(style);
-    }
-
-    /**
-     * Заменяет плейсхолдеры {key} в строке HTML данными из объекта data.
-     * Позволяет избежать цепочек .split().join() в дочерних классах.
-     */
-    processTemplate(html, data) {
-        return html.replace(/{(\w+)}/g, (match, key) => {
-            return data[key] !== undefined ? data[key] : match;
-        });
+        if (!document.getElementById(styleId) && this.assets.css) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = this.assets.css;
+            document.head.appendChild(style);
+        }
     }
 
     // Трекинг событий
@@ -299,6 +278,15 @@ class SmWidget {
 
     /*** Общие методы */
 
+    /**
+     * Заменяет плейсхолдеры {key} в строке HTML данными из объекта data.
+     * Позволяет избежать цепочек .split().join() в дочерних классах.
+     */
+    processTemplate(html, data) {
+        return html.replace(/{(\w+)}/g, (match, key) => {
+            return data[key] !== undefined ? data[key] : match;
+        });
+    }
     /**
      * Создает обертку виджета с заданными классами и стилями.
      */
