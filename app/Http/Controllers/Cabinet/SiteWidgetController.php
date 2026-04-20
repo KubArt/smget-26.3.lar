@@ -9,13 +9,6 @@ use Illuminate\Http\Request;
 
 class SiteWidgetController extends BaseCabinetController
 {
-    /*
-    public function __construct()
-    {
-        parent::__construct();
-    }
-    //*/
-
     /**
      * Список всех доступных виджетов в системе (Маркетплейс)
      */
@@ -23,7 +16,6 @@ class SiteWidgetController extends BaseCabinetController
     {
         $widgetTypes = WidgetType::where('is_active', true)->get();
         $preSelectedSite = $request->site_id ? Site::find($request->site_id) : null;
-
         return view('cabinet.widgets.market', compact('widgetTypes', 'preSelectedSite'));
     }
 
@@ -33,9 +25,6 @@ class SiteWidgetController extends BaseCabinetController
     public function index(Site $site)
     {
         $this->authorizeAccess($site); // Проверка прав кабинета
-        // $this->authorizeOwner($site);
-        // $this->authorizeAccess($site); // Метод из BaseCabinetController
-
         $widgets = $site->widgets()->with('widgetType')->get();
         return view('cabinet.sites.widgets.index', compact('site', 'widgets'));
     }
@@ -46,8 +35,6 @@ class SiteWidgetController extends BaseCabinetController
     public function store(Request $request, Site $site)
     {
         $this->authorizeAccess($site); // Проверка прав кабинета
-
-
         $request->validate([
             'widget_type_id' => 'required|exists:widget_types,id'
         ]);

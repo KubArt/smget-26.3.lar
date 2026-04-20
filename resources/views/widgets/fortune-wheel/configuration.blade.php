@@ -223,15 +223,6 @@
 
                                 <!-- ==================== ВКЛАДКА ПОКАЗ ==================== -->
                                 <div class="tab-pane" id="display-tab" data-pane="display-tab" style="display: none;">
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold">Триггер показа</label>
-                                        <select class="form-select" x-model="settings.trigger_type">
-                                            <option value="click">По клику на кнопку</option>
-                                            <option value="time">По таймеру</option>
-                                            <option value="scroll">При прокрутке страницы</option>
-                                            <option value="exit">При уходе мыши с окна</option>
-                                        </select>
-                                    </div>
 
                                     <div class="mb-3" x-show="settings.trigger_type === 'time'">
                                         <label class="form-label">Задержка перед показом (сек)</label>

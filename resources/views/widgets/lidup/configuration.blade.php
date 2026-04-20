@@ -22,9 +22,6 @@
                                     <a class="nav-link" data-tab="form-tab" href="#" @click.prevent="switchTab('form-tab')">Форма</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" data-tab="behavior-tab" href="#" @click.prevent="switchTab('behavior-tab')">Поведение</a>
-                                </li>
-                                <li class="nav-item">
                                     <a class="nav-link" data-tab="design-tab" href="#" @click.prevent="switchTab('design-tab')">Дизайн</a>
                                 </li>
                             </ul>
@@ -152,64 +149,6 @@
                                         <div class="mt-3">
                                             <label class="small text-muted">Сообщение после отправки</label>
                                             <input type="text" class="form-control" placeholder="Спасибо! Мы свяжемся с вами." x-model="settings.success_message">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- ==================== ВКЛАДКА ПОВЕДЕНИЕ ==================== -->
-                                <div class="tab-pane" id="behavior-tab" data-pane="behavior-tab" style="display: none;">
-                                    <div class="mb-4">
-                                        <label class="form-label fw-bold">Поведение</label>
-
-                                        <div class="mb-3">
-                                            <label class="small text-muted">Триггер показа</label>
-                                            <select class="form-select" x-model="settings.trigger_type">
-                                                <option value="time">По времени</option>
-                                                <option value="scroll">При прокрутке страницы</option>
-                                                <option value="exit">При уходе мыши с окна</option>
-                                                <option value="click">По клику на элемент</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-3" x-show="settings.trigger_type === 'time'">
-                                            <label class="small text-muted">Задержка появления (сек)</label>
-                                            <input type="number" class="form-control" min="0" max="30" step="0.5" x-model="settings.delay">
-                                        </div>
-
-                                        <div class="mb-3" x-show="settings.trigger_type === 'scroll'">
-                                            <label class="small text-muted">Показать при прокрутке (%)</label>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <input type="range" class="form-range flex-grow-1" x-model="settings.scroll_percent" min="0" max="100">
-                                                <span class="badge bg-secondary" x-text="settings.scroll_percent + '%'"></span>
-                                            </div>
-                                        </div>
-
-                                        <div class="mb-3" x-show="settings.trigger_type === 'click'">
-                                            <label class="small text-muted">CSS селектор элемента для клика</label>
-                                            <input type="text" class="form-control" placeholder="#open-popup, .open-popup" x-model="settings.click_selector">
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="small text-muted">Частота показа</label>
-                                            <select class="form-select" x-model="settings.frequency">
-                                                <option value="always">Всегда показывать</option>
-                                                <option value="once_session">Один раз за сессию</option>
-                                                <option value="once_day">Один раз в день</option>
-                                                <option value="once_week">Один раз в неделю</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="small text-muted">При закрытии пользователем</label>
-                                            <select class="form-select" x-model="settings.close_behavior">
-                                                <option value="hide_session">Не показывать до конца сессии</option>
-                                                <option value="hide_forever">Больше никогда не показывать</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="small text-muted">Авто-закрытие (сек)</label>
-                                            <input type="number" class="form-control" min="0" max="60" placeholder="0 - не закрывать автоматически" x-model="settings.auto_close">
                                         </div>
                                     </div>
                                 </div>
