@@ -52,6 +52,7 @@
                     this.$watch('settings.design.modal_bg_color', () => this.updateModalBgColor());
                     this.$watch('settings.design.modal_text_color', () => this.updateModalTextColor());
                     this.$watch('settings.wheel.segments', () => this.redrawWheel(), { deep: true });
+                    this.$watch('settings.wheel.size', () => this.redrawWheel());
                     this.$watch('settings.wheel.text_color', () => this.redrawWheel());
                     this.$watch('settings.wheel.pointer_color', () => this.updatePointerColor());
                     this.$watch('settings.wheel.font_size', () => this.redrawWheel());
@@ -232,6 +233,7 @@
                         .replace(/{id}/g, 'preview')
                         .replace(/{widget_id}/g, 'preview')
                         .replace(/{position}/g, this.settings.button.position === 'bottom-right' ? 'right' : 'left')
+                        .replace(/{wheel_size}/g, this.settings.wheel.size)
                         .replace(/{title}/g, this.escapeHtml(this.settings.design.title))
                         .replace(/{description}/g, this.escapeHtml(this.settings.design.description));
 
@@ -271,10 +273,11 @@
                     if (!actionsContainer) return;
 
                     if (!this.showContactForm) {
-                        // Показываем спиннер
-                        actionsContainer.innerHTML = `<div class="sfw-spinner"><i class="fa fa-spinner fa-spin fa-3x"></i><p>Вращаем колесо...</p></div>`;
-                        // Запускаем вращение
-                        setTimeout(() => this.startPreviewSpin(), 100);
+                        actionsContainer.innerHTML = `<button class="sfw-spin-trigger">${this.escapeHtml(this.settings.button.text || 'Крутить колесо')}</button>`;
+                        this.spinBtn = actionsContainer.querySelector('.sfw-spin-trigger');
+                        if (this.spinBtn) {
+                            this.spinBtn.addEventListener('click', () => this.startPreviewSpin());
+                        }
                         return;
                     }
 
@@ -282,32 +285,32 @@
                     const placeholder = contactType === 'tel' ? '+7 (999) 123-45-67' : 'your@email.com';
 
                     let html = `
-                            <div class="sfw-contact-form">
-                                <div class="sfw-form-group">
-                                    <input type="${contactType}" class="sfw-contact-input" placeholder="${placeholder}">
-                                </div>
-                                <div class="sfw-terms">
-                                    <label class="sfw-checkbox-label">
-                                        <input type="checkbox" class="sfw-terms-checkbox">
-                                        <span>${this.escapeHtml(this.settings.form.terms_text || 'Я согласен с условиями розыгрыша')}</span>
-                                    </label>
-                                </div>
-                                <div class="sfw-actions-buttons">
-                                    <button class="sfw-spin-trigger">${this.escapeHtml(this.settings.button.text || 'Крутить колесо')}</button>
-                                    <button class="sfw-decline-btn">Отказаться</button>
-                                </div>
+                        <div class="sfw-contact-form">
+                            <div class="sfw-form-group">
+                                <input type="${contactType}" class="sfw-contact-input" placeholder="${placeholder}" x-model="userContact">
                             </div>
-                        `;
+                            <div class="sfw-terms">
+                                <label class="sfw-checkbox-label">
+                                    <input type="checkbox" class="sfw-terms-checkbox" x-model="termsAccepted">
+                                    <span>${this.escapeHtml(this.settings.form.terms_text || 'Я согласен с условиями розыгрыша')}</span>
+                                </label>
+                            </div>
+                            <div class="sfw-actions-buttons">
+                                <button class="sfw-play-btn">Играть</button>
+                                <button class="sfw-decline-btn">Отказаться</button>
+                            </div>
+                        </div>
+                    `;
 
                     actionsContainer.innerHTML = html;
 
-                    const spinBtn = actionsContainer.querySelector('.sfw-spin-trigger');
+                    const playBtn = actionsContainer.querySelector('.sfw-play-btn');
                     const declineBtn = actionsContainer.querySelector('.sfw-decline-btn');
                     const contactInput = actionsContainer.querySelector('.sfw-contact-input');
                     const termsCheckbox = actionsContainer.querySelector('.sfw-terms-checkbox');
 
-                    if (spinBtn) {
-                        spinBtn.addEventListener('click', () => {
+                    if (playBtn) {
+                        playBtn.addEventListener('click', () => {
                             if (!contactInput?.value) {
                                 alert(this.settings.messages?.fill_contact || 'Пожалуйста, укажите контактные данные');
                                 return;
@@ -341,7 +344,7 @@
 
                     const ctx = this.canvas.getContext('2d');
                     const segments = (this.settings.wheel.segments || []).filter(s => s.enabled !== false);
-                    const size = 380;
+                    const size = this.settings.wheel.size || 280;
 
                     this.canvas.width = size;
                     this.canvas.height = size;
@@ -427,6 +430,12 @@
                     }
 
                     this.isSpinning = true;
+
+                    // Скрываем форму, показываем спиннер
+                    const actionsContainer = this.widget?.querySelector('.sfw-actions');
+                    if (actionsContainer) {
+                        actionsContainer.innerHTML = `<div class="sfw-spinner"><i class="fa fa-spinner fa-spin fa-3x"></i><p>Вращаем колесо...</p></div>`;
+                    }
 
                     // Выбираем случайный выигрыш
                     const winIndex = Math.floor(Math.random() * segments.length);

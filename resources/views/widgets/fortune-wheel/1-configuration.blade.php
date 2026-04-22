@@ -38,29 +38,6 @@
                             <div class="tab-content">
                                 <!-- ==================== ВКЛАДКА КНОПКА ==================== -->
                                 <div class="tab-pane active" id="button-tab" data-pane="button-tab">
-                                    <!-- Выбор макета (скина) -->
-                                    <div class="mb-4">
-                                        <label class="form-label text-primary fw-bold">Выберите макет</label>
-                                        <div class="row g-2">
-                                            <template x-for="skin in skins" :key="skin.slug">
-                                                <div class="col-6">
-                                                    <button type="button"
-                                                            class="btn btn-sm w-100 border p-2 text-start transition-all"
-                                                            :class="settings.template === skin.slug ? 'btn-alt-primary border-primary shadow-sm' : 'btn-alt-secondary opacity-75'"
-                                                            @click="applyTemplate(skin.slug)">
-                                                        <div class="d-flex align-items-center">
-                                                            <i class="fa fa-circle me-2 fs-xs" :class="settings.template === skin.slug ? 'text-primary' : 'text-muted'"></i>
-                                                            <span class="small fw-semibold" x-text="skin.name"></span>
-                                                        </div>
-                                                    </button>
-                                                </div>
-                                            </template>
-                                        </div>
-                                        <input type="hidden" name="template" :value="settings.template">
-                                    </div>
-
-                                    <hr>
-
                                     <div class="mb-3">
                                         <label class="form-label">Позиция кнопки</label>
                                         <select class="form-select" x-model="settings.button.position">
@@ -77,53 +54,6 @@
                                     <div class="mb-3">
                                         <label class="form-label">Иконка</label>
                                         <input type="text" class="form-control" x-model="settings.button.icon">
-                                    </div>
-
-                                    <div class="row g-2 mb-3">
-                                        <div class="col-6">
-                                            <label class="small text-muted">Размер кнопки</label>
-                                            <select class="form-select" x-model="settings.design.size">
-                                                <option value="small">Маленькая</option>
-                                                <option value="medium">Средняя</option>
-                                                <option value="large">Большая</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="small text-muted">Эффект при наведении</label>
-                                            <select class="form-select" x-model="settings.design.hover_effect">
-                                                <option value="lift">Приподнимание</option>
-                                                <option value="scale">Увеличение</option>
-                                                <option value="glow">Свечение</option>
-                                                <option value="rotate">Поворот</option>
-                                                <option value="pulse">Пульсация</option>
-                                                <option value="shake">Тряска</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="small text-muted">Анимация кнопки</label>
-                                        <select class="form-select" x-model="settings.animation.type">
-                                            <option value="none">Нет анимации</option>
-                                            <option value="wave">Волна</option>
-                                            <option value="pulse">Пульсация</option>
-                                            <option value="shake">Тряска</option>
-                                            <option value="ring">Звонок</option>
-                                            <option value="bounce">Подпрыгивание</option>
-                                            <option value="glow">Свечение</option>
-                                            <option value="spin">Вращение иконки</option>
-                                            <option value="heartbeat">Сердцебиение</option>
-                                            <option value="flash">Вспышка</option>
-                                            <option value="swing">Раскачивание</option>
-                                            <option value="wobble">Шаткий эффект</option>
-                                            <option value="fade">Исчезание</option>
-                                            <option value="rotate">Медленный поворот</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="small text-muted">Прозрачность: <span x-text="settings.design.opacity"></span></label>
-                                        <input type="range" class="form-range" min="0.1" max="1" step="0.1" x-model="settings.design.opacity">
                                     </div>
 
                                     <div class="mb-3">
@@ -143,6 +73,15 @@
                                     </div>
 
                                     <div class="mb-3">
+                                        <label class="form-label">Размер кнопки</label>
+                                        <select class="form-select" x-model="settings.button.size">
+                                            <option value="small">Маленькая</option>
+                                            <option value="medium">Средняя</option>
+                                            <option value="large">Большая</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="mb-3">
                                         <label class="form-label">Скругление кнопки</label>
                                         <input type="text" class="form-control" placeholder="50px, 12px" x-model="settings.button.border_radius">
                                     </div>
@@ -156,6 +95,11 @@
 
                                 <!-- ==================== ВКЛАДКА КОЛЕСО ==================== -->
                                 <div class="tab-pane" id="wheel-tab" data-pane="wheel-tab" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Размер колеса (px)</label>
+                                        <input type="number" class="form-control" min="200" max="500" step="10" x-model="settings.wheel.size">
+                                    </div>
+
                                     <div class="mb-3">
                                         <label class="form-label">Скорость вращения (сек)</label>
                                         <div class="d-flex align-items-center gap-2">
@@ -204,7 +148,7 @@
                                     <div class="mb-3">
                                         <div class="alert alert-info">
                                             <i class="fa fa-info-circle me-1"></i>
-                                            Призы выпадают случайным образом с равной вероятностью.
+                                            Вероятность выпадения рассчитывается автоматически на основе веса каждого приза.
                                         </div>
 
                                         <label class="form-label d-flex justify-content-between align-items-center">
@@ -223,6 +167,7 @@
                                                                 <input class="form-check-input" type="checkbox" x-model="coupon.enabled" :id="'coupon_enabled_' + index">
                                                                 <label class="form-check-label small fw-bold" :for="'coupon_enabled_' + index" x-text="coupon.label || 'Новый приз'"></label>
                                                             </div>
+                                                            <span class="badge bg-secondary">Вес: <span x-text="coupon.weight || 1"></span></span>
                                                         </div>
                                                         <button type="button" class="btn btn-sm btn-outline-danger" @click="removeSegment(index)">
                                                             <i class="fa fa-trash"></i>
@@ -230,9 +175,13 @@
                                                     </div>
                                                     <div class="card-body py-2" x-show="coupon.enabled !== false">
                                                         <div class="row g-2">
-                                                            <div class="col-12 col-md-6">
+                                                            <div class="col-12 col-md-4">
                                                                 <label class="small text-muted">Название приза</label>
                                                                 <input type="text" class="form-control form-control-sm" x-model="coupon.label" placeholder="Скидка 10%">
+                                                            </div>
+                                                            <div class="col-6 col-md-2">
+                                                                <label class="small text-muted">Вес</label>
+                                                                <input type="number" class="form-control form-control-sm" x-model="coupon.weight" min="1" step="1" value="1">
                                                             </div>
                                                             <div class="col-6 col-md-3">
                                                                 <label class="small text-muted">Цвет сегмента</label>
@@ -241,7 +190,7 @@
                                                                     <input type="text" class="form-control" x-model="coupon.bg_color">
                                                                 </div>
                                                             </div>
-                                                            <div class="col-6 col-md-3">
+                                                            <div class="col-12 col-md-3">
                                                                 <label class="small text-muted">Срок действия (дней)</label>
                                                                 <input type="number" class="form-control form-control-sm" x-model="coupon.expiry_days" min="0" placeholder="0 - бессрочно">
                                                             </div>
@@ -249,16 +198,11 @@
                                                         <div class="row g-2 mt-2">
                                                             <div class="col-12 col-md-6">
                                                                 <label class="small text-muted">Промокод</label>
-                                                                <div class="input-group input-group-sm">
-                                                                    <input type="text" class="form-control" x-model="coupon.value" placeholder="PROMO2024">
-                                                                    <button type="button" class="btn btn-outline-secondary" @click="generateUniqueCode(index)" title="Сгенерировать уникальный промокод">
-                                                                        <i class="fa fa-magic"></i>
-                                                                    </button>
-                                                                </div>
+                                                                <input type="text" class="form-control form-control-sm" x-model="coupon.value" placeholder="PROMO2024">
                                                             </div>
                                                             <div class="col-12 col-md-6">
                                                                 <label class="small text-muted">Описание</label>
-                                                                <textarea class="form-control form-control-sm" x-model="coupon.description" rows="2" placeholder="Описание приза"></textarea>
+                                                                <input type="text" class="form-control form-control-sm" x-model="coupon.description" placeholder="Описание приза">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -279,6 +223,22 @@
 
                                 <!-- ==================== ВКЛАДКА ПОКАЗ ==================== -->
                                 <div class="tab-pane" id="display-tab" data-pane="display-tab" style="display: none;">
+
+                                    <div class="mb-3" x-show="settings.trigger_type === 'time'">
+                                        <label class="form-label">Задержка перед показом (сек)</label>
+                                        <input type="number" class="form-control" min="0" max="30" step="0.5" x-model="settings.delay">
+                                    </div>
+
+                                    <div class="mb-3" x-show="settings.trigger_type === 'scroll'">
+                                        <label class="form-label">Процент прокрутки для показа</label>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <input type="range" class="form-range flex-grow-1" min="0" max="100" x-model="settings.scroll_percent">
+                                            <span class="badge bg-secondary" x-text="settings.scroll_percent + '%'"></span>
+                                        </div>
+                                    </div>
+
+                                    <hr>
+
                                     <div class="mb-3">
                                         <label class="form-label fw-bold">Что собирать у пользователя</label>
                                         <select class="form-select" x-model="settings.form.contact_type">
@@ -307,6 +267,12 @@
                                             <option value="hide_forever">Больше никогда не показывать</option>
                                         </select>
                                     </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold">Webhook URL для отправки данных</label>
+                                        <input type="url" class="form-control" x-model="settings.form.webhook_url" placeholder="https://your-site.com/webhook">
+                                        <small class="text-muted">Данные контакта и выигрыша будут отправлены на этот URL</small>
+                                    </div>
                                 </div>
 
                                 <!-- ==================== ВКЛАДКА ЛИМИТЫ ==================== -->
@@ -314,7 +280,19 @@
                                     <div class="mb-3">
                                         <label class="form-label">Максимум попыток на пользователя</label>
                                         <input type="number" class="form-control" min="0" x-model="settings.limits.spins_per_user">
-                                        <small class="text-muted">0 - без ограничений. Проверка по контакту пользователя</small>
+                                        <small class="text-muted">0 - без ограничений</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Максимум попыток в день</label>
+                                        <input type="number" class="form-control" min="0" x-model="settings.limits.spins_per_day">
+                                        <small class="text-muted">0 - без ограничений</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Общий лимит попыток</label>
+                                        <input type="number" class="form-control" min="0" x-model="settings.limits.spins_total">
+                                        <small class="text-muted">0 - без ограничений</small>
                                     </div>
 
                                     <hr>

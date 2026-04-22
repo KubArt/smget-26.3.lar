@@ -1,0 +1,621 @@
+/* ========================================
+   Колесо Фортуны - Sidebar Skin 2026
+   ======================================== */
+
+/* Базовые переменные скина */
+.sfw-root {
+    --sidebar-width: 400px;
+    --sidebar-bg: var(--sfw-modal-bg, #ffffff);
+    --sidebar-radius: 0;
+    --wheel-offset: 0px;
+}
+
+/* Позиционирование корня */
+.sfw-root.sp-position-right { right: 0; }
+.sfw-root.sp-position-left { left: 0; }
+
+/* ========== КНОПКА-ТРИГГЕР ========== */
+.sfw-trigger {
+    pointer-events: auto;
+    position: absolute;
+    bottom: 20px;
+    cursor: pointer;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #6366f1, #f43f5e);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    font-size: 28px;
+}
+
+
+.sfw-trigger:hover {
+    transform: scale(1.08) translateY(-4px);
+}
+
+.sfw-root.sp-position-right .sfw-trigger { right: 24px; }
+.sfw-root.sp-position-left .sfw-trigger { left: 24px; }
+
+/* ========== ОВЕРЛЕЙ (затемнение фона) ========== */
+.sfw-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.sfw-root.sp-active .sfw-overlay {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+/* ========== ВЫЕЗЖАЮЩАЯ ПАНЕЛЬ (САЙДБАР) ========== */
+.sfw-modal-content {
+    position: relative;
+    background: var(--sidebar-bg);
+    width: var(--sidebar-width);
+    height: 100vh;
+    max-width: 85vw;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 8px 0 32px rgba(0, 0, 0, 0.15);
+    transform: translateX(-100%);
+    transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1);
+    z-index: 10000;
+}
+
+/* При открытии - выезжаем */
+.sfw-root.sp-active .sfw-modal-content {
+    transform: translateX(0);
+}
+
+/* Для правой позиции */
+.sfw-root.sp-position-right .sfw-modal-content {
+    transform: translateX(100%);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15);
+}
+
+.sfw-root.sp-position-right.sp-active .sfw-modal-content {
+    transform: translateX(0);
+}
+
+/* Скрываем стандартную кнопку закрытия, используем свою */
+.sfw-close-btn {
+    display: none;
+}
+
+/* ========== СЕТКА САЙДБАРА ========== */
+.sfw-grid {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Левая часть - колесо (выступает за границы) */
+.sfw-left {
+    position: relative;
+    width: 100%;
+    min-height: 320px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+    margin-top: 40px;
+}
+
+.sfw-wheel-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: visible;
+}
+
+/* Колесо выступает влево за границы сайдбара */
+.sfw-wheel-container canvas {
+    position: relative;
+    left: var(--wheel-offset);
+    margin-right: var(--wheel-offset);
+}
+
+/* Для правой позиции - колесо выступает вправо */
+.sfw-root.sp-position-right .sfw-wheel-container canvas {
+    left: auto;
+    right: var(--wheel-offset);
+    margin-left: var(--wheel-offset);
+    margin-right: 0;
+}
+
+/* Указатель колеса - слева от колеса */
+.sfw-pointer {
+    position: absolute;
+    top: 50%;
+    left: -30px;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-right: 30px solid var(--sfw-pointer, #ff4444);
+    z-index: 15;
+    filter: drop-shadow(2px 0 4px rgba(0, 0, 0, 0.2));
+}
+
+/* Для правой позиции - указатель справа */
+.sfw-root.sp-position-right .sfw-pointer {
+    left: auto;
+    right: -30px;
+    border-right: none;
+    border-left: 30px solid var(--sfw-pointer, #ff4444);
+}
+
+/* Canvas колеса */
+#sfw-canvas-preview {
+    transition: transform cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    border-radius: 50%;
+    box-shadow: 0 20px 35px -15px rgba(0, 0, 0, 0.3), inset 0 0 0 1px rgba(255,255,255,0.3);
+    background: #fff;
+    width: 380px;
+    height: 380px;
+    cursor: pointer;
+}
+
+/* Правая часть - контент */
+.sfw-right {
+    flex: 1;
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--sidebar-bg);
+}
+
+.sfw-form-body h3 {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--sfw-modal-text, #1f2937), var(--sfw-accent, #6366f1));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+}
+
+.sfw-form-body p {
+    color: #64748b;
+    font-size: 15px;
+    margin-bottom: 28px;
+    line-height: 1.6;
+}
+
+/* ========== ФОРМА КОНТАКТА ========== */
+.sfw-contact-form {
+    width: 100%;
+}
+
+.sfw-form-group {
+    margin-bottom: 20px;
+}
+
+.sfw-contact-input {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    font-size: 15px;
+    transition: all 0.2s;
+    background: #ffffff;
+    font-family: inherit;
+    outline: none;
+}
+
+.sfw-contact-input:focus {
+    border-color: var(--sfw-accent, #6366f1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.sfw-contact-input.error {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+/* Чекбокс согласия */
+.sfw-terms {
+    margin: 20px 0 24px;
+}
+
+.sfw-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.sfw-checkbox-label input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--sfw-accent, #6366f1);
+}
+
+/* Кнопки действий */
+.sfw-actions-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.sfw-actions-buttons .sfw-spin-trigger {
+    flex: 2;
+    margin: 0;
+}
+
+.sfw-decline-btn {
+    flex: 1;
+    background: transparent;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sfw-decline-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+/* ========== СПИННЕР ========== */
+.sfw-spinner {
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.sfw-spinner i {
+    font-size: 48px;
+    color: var(--sfw-accent, #6366f1);
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.sfw-spinner p {
+    margin: 0;
+    color: #64748b;
+    font-size: 15px;
+}
+
+/* ========== РЕЗУЛЬТАТ ВЫИГРЫША ========== */
+.sfw-win-result {
+    text-align: center;
+    padding: 32px 24px;
+}
+
+.sfw-win-icon {
+    font-size: 56px;
+    margin-bottom: 20px;
+    animation: bounce 0.6s ease-out;
+}
+
+.sfw-win-result h4 {
+    margin: 0 0 12px;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--sfw-modal-text, #1f2937);
+}
+
+.sfw-win-result p {
+    margin: 0 0 20px;
+    font-size: 15px;
+    color: #64748b;
+}
+
+.sfw-coupon-code {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    padding: 14px 20px;
+    border-radius: 16px;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin: 20px 0;
+    color: #166534;
+    font-family: monospace;
+    border: 1px solid #bbf7d0;
+    word-break: break-all;
+}
+
+.sfw-close-win {
+    background: var(--sfw-accent, #6366f1);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    padding: 12px 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 16px;
+    transition: all 0.2s;
+}
+
+.sfw-close-win:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+/* Сообщение об отказе */
+.sfw-decline-message {
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.sfw-decline-message i {
+    font-size: 56px;
+    color: #94a3b8;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.sfw-decline-message p {
+    margin: 0 0 24px;
+    font-size: 15px;
+    color: #64748b;
+}
+
+/* ========== КНОПКИ В САЙДБАРЕ ========== */
+.sfw-spin-trigger {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--sfw-accent, #6366f1);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-family: inherit;
+}
+
+.sfw-spin-trigger:hover {
+    background: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(79, 70, 229, 0.3);
+}
+
+.sfw-spin-trigger:active {
+    transform: translateY(0);
+}
+
+/* ========== АНИМАЦИИ ========== */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+/* Эффекты при наведении для триггера */
+.sp-hover-lift .sfw-trigger:hover { transform: translateY(-6px) scale(1.05); }
+.sp-hover-scale .sfw-trigger:hover { transform: scale(1.12); }
+.sp-hover-glow .sfw-trigger:hover { box-shadow: 0 0 20px var(--sfw-accent, #6366f1); }
+.sp-hover-rotate .sfw-trigger:hover { transform: rotate(15deg); }
+.sp-hover-pulse .sfw-trigger:hover { animation: pulse 0.6s infinite; }
+.sp-hover-shake .sfw-trigger:hover { animation: shake 0.3s ease-in-out; }
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* Анимации кнопки-триггера */
+.sp-animation-wave .sfw-trigger { animation: wave 1s infinite; }
+.sp-animation-pulse .sfw-trigger { animation: pulseBtn 1.5s infinite; }
+.sp-animation-shake .sfw-trigger { animation: shakeBtn 0.5s infinite; }
+.sp-animation-ring .sfw-trigger { animation: ring 0.8s ease-out infinite; }
+.sp-animation-bounce .sfw-trigger { animation: bounceBtn 1s infinite; }
+.sp-animation-glow .sfw-trigger { animation: glow 1.5s infinite; }
+.sp-animation-spin .sfw-icon { animation: spin 2s linear infinite; display: inline-block; }
+.sp-animation-heartbeat .sfw-trigger { animation: heartbeat 1.3s ease-in-out infinite; }
+.sp-animation-flash .sfw-trigger { animation: flash 0.8s ease-in-out infinite; }
+.sp-animation-swing .sfw-trigger { animation: swing 1s ease-in-out infinite; transform-origin: top center; }
+.sp-animation-wobble .sfw-trigger { animation: wobble 0.8s ease-in-out infinite; }
+.sp-animation-fade .sfw-trigger { animation: fade 1.5s ease-in-out infinite; }
+.sp-animation-rotate .sfw-icon { animation: rotateSlow 3s linear infinite; display: inline-block; }
+
+@keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(10deg); }
+    75% { transform: rotate(-10deg); }
+}
+@keyframes pulseBtn {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+@keyframes shakeBtn {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+@keyframes ring {
+    0% { transform: rotate(0); }
+    20% { transform: rotate(15deg); }
+    40% { transform: rotate(-10deg); }
+    60% { transform: rotate(5deg); }
+    80% { transform: rotate(-5deg); }
+    100% { transform: rotate(0); }
+}
+@keyframes bounceBtn {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 5px var(--sfw-accent, #6366f1); }
+    50% { box-shadow: 0 0 25px var(--sfw-accent, #6366f1); }
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+@keyframes swing {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(8deg); }
+    75% { transform: rotate(-8deg); }
+    100% { transform: rotate(0deg); }
+}
+@keyframes wobble {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-8px) rotate(-3deg); }
+    30% { transform: translateX(6px) rotate(2deg); }
+    45% { transform: translateX(-4px) rotate(-2deg); }
+    60% { transform: translateX(2px) rotate(1deg); }
+    75% { transform: translateX(-1px) rotate(-0.5deg); }
+}
+@keyframes fade {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+@keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ========== СКРОЛЛ ДЛЯ САЙДБАРА ========== */
+.sfw-modal-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sfw-modal-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.sfw-modal-content::-webkit-scrollbar-thumb {
+    background: var(--sfw-accent, #6366f1);
+    border-radius: 3px;
+}
+
+/* ========== АДАПТИВНОСТЬ ========== */
+@media (max-width: 768px) {
+    .sfw-modal-content {
+        width: 85vw;
+    }
+
+    .sfw-left {
+        min-height: 260px;
+        margin-top: 20px;
+    }
+
+    #sfw-canvas-preview {
+        width: 220px;
+        height: 220px;
+    }
+
+    .sfw-wheel-container canvas {
+        left: -40px;
+        margin-right: -40px;
+    }
+
+    .sfw-root.sp-position-right .sfw-wheel-container canvas {
+        right: -40px;
+        margin-left: -40px;
+    }
+
+    .sfw-pointer {
+        left: -20px;
+        border-right: 20px solid var(--sfw-pointer, #ff4444);
+        border-top: 14px solid transparent;
+        border-bottom: 14px solid transparent;
+    }
+
+    .sfw-root.sp-position-right .sfw-pointer {
+        right: -20px;
+        border-left: 20px solid var(--sfw-pointer, #ff4444);
+        border-right: none;
+    }
+
+    .sfw-right {
+        padding: 24px 20px;
+    }
+
+    .sfw-form-body h3 {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sfw-modal-content {
+        width: 90vw;
+    }
+
+    .sfw-left {
+        min-height: 220px;
+        margin-top: 16px;
+    }
+
+    #sfw-canvas-preview {
+        width: 180px;
+        height: 180px;
+    }
+
+    .sfw-wheel-container canvas {
+        left: -30px;
+        margin-right: -30px;
+    }
+
+    .sfw-right {
+        padding: 20px 16px;
+    }
+
+    .sfw-form-body h3 {
+        font-size: 20px;
+    }
+
+    .sfw-spin-trigger,
+    .sfw-submit-btn,
+    .sfw-decline-btn {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .sfw-coupon-code {
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+}

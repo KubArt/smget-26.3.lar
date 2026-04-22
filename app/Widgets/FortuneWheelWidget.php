@@ -15,10 +15,19 @@ class FortuneWheelWidget implements WidgetContract
 
     public function getEditorConfig(Widget $widget): array
     {
+        // 1. Получаем эталонную структуру из созданного нами конфига
+        // (убедись, что файл config/widgets/fortune-wheel.php создан)
+        $baseConfig = config("widgets.fortune-wheel.default_values.settings", []);
+
+        // 2. Рекурсивно сливаем эталон с данными из БД.
+        // БД в приоритете, но если какого-то ключа (например, новой анимации кнопки) нет,
+        // он возьмется из эталона.
+        $mergedSettings = array_replace_recursive($baseConfig, $widget->settings ?? []);
+
         return [
-            'slug' => 'fortune-wheel',
-            'settings' => $widget->settings,
-            'skins' => $this->getSkins('fortune-wheel')
+            'slug'     => 'fortune-wheel',
+            'settings' => $mergedSettings,
+            'skins'    => $this->getSkins('fortune-wheel')
         ];
     }
 
@@ -49,48 +58,16 @@ class FortuneWheelWidget implements WidgetContract
 
     public function updateDesign(Widget $widget, array $data): bool
     {
-        $settings = $widget->settings ?? [];
+        $baseConfig = config("widgets.fortune-wheel.default_values.settings", []);
+        $inputSettings = $data['settings'] ?? [];
 
-        if (isset($data['settings'])) {
-            $data = $data['settings'];
-        }
+        // Глубокое слияние гарантирует, что массив призов не сбросится в пустой
+        // и все новые поля анимации кнопки будут на месте.
+        $finalSettings = array_replace_recursive($baseConfig, $inputSettings);
 
-        // Обновление настроек
-        $settings['button'] = array_merge($settings['button'] ?? [], $data['button'] ?? []);
-        $settings['wheel'] = array_merge($settings['wheel'] ?? [], $data['wheel'] ?? []);
-        $settings['design'] = array_merge($settings['design'] ?? [], $data['design'] ?? []);
-        $settings['messages'] = array_merge($settings['messages'] ?? [], $data['messages'] ?? []);
-        $settings['limits'] = array_merge($settings['limits'] ?? [], $data['limits'] ?? []);
-
-        // Купоны - важная часть
-        if (isset($data['coupons'])) {
-            $settings['coupons'] = $this->processCoupons($data['coupons'], $settings['coupons'] ?? []);
-        }
-
-        // Форма
-        if (isset($data['form'])) {
-            $settings['form'] = array_merge($settings['form'] ?? [], $data['form']);
-        }
-
-        // Поведение
-        $settings['frequency'] = $data['frequency'] ?? $settings['frequency'] ?? 'once_session';
-        $settings['trigger_type'] = $data['trigger_type'] ?? $settings['trigger_type'] ?? 'click';
-        $settings['delay'] = (int)($data['delay'] ?? $settings['delay'] ?? 0);
-        $settings['scroll_percent'] = (int)($data['scroll_percent'] ?? $settings['scroll_percent'] ?? 50);
-
-        // Генерируем сегменты колеса из активных купонов
-        $settings['wheel']['segments'] = $this->generateWheelSegments($settings['coupons']);
-
-        // Обновляем статистику
-        if (!isset($settings['statistics'])) {
-            $settings['statistics'] = [
-                'total_spins' => 0,
-                'total_wins' => 0,
-                'coupons_issued' => [],
-            ];
-        }
-
-        return $widget->update(['settings' => $settings]);
+        return $widget->update([
+            'settings' => $finalSettings
+        ]);
     }
 
     /**
