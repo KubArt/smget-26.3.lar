@@ -24,6 +24,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link" data-tab="design-tab" href="#" @click.prevent="switchTab('design-tab')">Дизайн</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-tab="bonus-tab" href="#" @click.prevent="switchTab('bonus-tab')">Бонус</a>
+                                </li>
                             </ul>
 
                             <div class="tab-content">
@@ -229,6 +232,95 @@
                                         <div class="mb-3">
                                             <label class="small text-muted">Радиус скругления (px)</label>
                                             <input type="number" class="form-control" min="0" max="50" x-model="settings.design.border_radius">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ==================== ВКЛАДКА БОНУС ==================== -->
+                                <div class="tab-pane" id="bonus-tab" data-pane="bonus-tab" style="display: none;">
+                                    <div class="mb-4">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" x-model="settings.bonus.enabled" id="bonusEnabled">
+                                            <label class="form-check-label fw-bold" for="bonusEnabled">
+                                                <i class="fa fa-gift me-1 text-warning"></i> Выдавать бонус (промокод) после отправки формы
+                                            </label>
+                                        </div>
+
+                                        <div x-show="settings.bonus.enabled" x-cloak>
+                                            <div class="alert alert-info border-0 shadow-sm p-3 mb-4">
+                                                <i class="fa fa-info-circle me-1"></i>
+                                                Пользователь получит промокод после успешной отправки формы. Бонус будет сохранён в CRM.
+                                            </div>
+
+                                            <div class="row g-3">
+                                                <div class="col-12 col-md-6">
+                                                    <label class="form-label small fw-bold">Название бонуса</label>
+                                                    <input type="text" class="form-control" x-model="settings.bonus.name" placeholder="Скидка 30%">
+                                                    <small class="text-muted">Название будет отображаться в CRM</small>
+                                                </div>
+
+                                                <div class="col-12 col-md-6">
+                                                    <label class="form-label small fw-bold">Срок действия (дней)</label>
+                                                    <input type="number" class="form-control" x-model="settings.bonus.expiry_days" min="0" step="1">
+                                                    <small class="text-muted">0 - бессрочно</small>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label small fw-bold">Описание бонуса</label>
+                                                    <textarea class="form-control" rows="2" x-model="settings.bonus.description" placeholder="Описание для CRM"></textarea>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label small fw-bold">Сообщение для пользователя</label>
+                                                    <textarea class="form-control" rows="2" x-model="settings.bonus.message" placeholder="Покажите этот промокод при оплате"></textarea>
+                                                    <small class="text-muted">Пользователь увидит это сообщение после отправки формы</small>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <hr>
+                                                    <label class="form-label small fw-bold">Тип промокода</label>
+                                                    <div class="btn-group w-100 mb-3" role="group">
+                                                        <input type="radio" class="btn-check" name="bonus_code_type" id="code_type_fixed" value="fixed" x-model="settings.bonus.code_type">
+                                                        <label class="btn btn-outline-secondary" for="code_type_fixed">
+                                                            <i class="fa fa-lock me-1"></i> Фиксированный
+                                                        </label>
+                                                        <input type="radio" class="btn-check" name="bonus_code_type" id="code_type_unique" value="unique" x-model="settings.bonus.code_type">
+                                                        <label class="btn btn-outline-secondary" for="code_type_unique">
+                                                            <i class="fa fa-magic me-1"></i> Уникальный (генерируется)
+                                                        </label>
+                                                        <input type="radio" class="btn-check" name="bonus_code_type" id="code_type_random" value="random" x-model="settings.bonus.code_type">
+                                                        <label class="btn btn-outline-secondary" for="code_type_random">
+                                                            <i class="fa fa-shuffle me-1"></i> Случайный (цифры)
+                                                        </label>
+                                                    </div>
+
+                                                    <div x-show="settings.bonus.code_type === 'fixed'">
+                                                        <label class="form-label small fw-bold">Промокод</label>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control" x-model="settings.bonus.code" placeholder="PROMO2024">
+                                                            <button type="button" class="btn btn-outline-secondary" @click="generateBonusCode()">
+                                                                <i class="fa fa-magic"></i> Сгенерировать
+                                                            </button>
+                                                        </div>
+                                                        <small class="text-muted">Все пользователи получат один и тот же код</small>
+                                                    </div>
+
+                                                    <div x-show="settings.bonus.code_type === 'unique'">
+                                                        <div class="alert alert-secondary mb-0">
+                                                            <i class="fa fa-info-circle me-1"></i>
+                                                            Уникальный промокод будет сгенерирован автоматически для каждого пользователя.
+                                                            Формат: <code>PROMO_XXXXXX</code>
+                                                        </div>
+                                                    </div>
+
+                                                    <div x-show="settings.bonus.code_type === 'random'">
+                                                        <div class="alert alert-secondary mb-0">
+                                                            <i class="fa fa-info-circle me-1"></i>
+                                                            Случайный числовой код будет сгенерирован для каждого пользователя.
+                                                            Формат: <code>123456</code>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -258,3 +258,161 @@
         margin-bottom: 30px;
     }
 }
+
+
+/* ============================================ */
+/* Minimal Card Skin - Дополнительные стили     */
+/* ============================================ */
+
+/* ----- СОСТОЯНИЯ (переключение блоков) ----- */
+.sp-lidup-state-form,
+.sp-lidup-state-success,
+.sp-lidup-state-bonus {
+    transition: opacity 0.2s ease;
+}
+
+/* ----- БЛОК УСПЕХА (без приза) ----- */
+.sp-lidup-success-message {
+    text-align: center;
+    padding: 20px;
+}
+
+.success-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    background: var(--btn-color, #22C55E);
+    color: white;
+    font-size: 28px;
+    line-height: 56px;
+    border-radius: 50%;
+}
+
+.success-text {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-color, #1F2937);
+    margin: 0;
+}
+
+/* ----- БЛОК БОНУСА (с призом) ----- */
+.sp-lidup-bonus-card {
+    text-align: center;
+    padding: 16px;
+}
+
+.bonus-icon {
+    font-size: 52px;
+    margin-bottom: 12px;
+}
+
+.bonus-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 16px 0;
+    color: var(--text-color, #1F2937);
+}
+
+.bonus-code {
+    background: #F0FDF4;
+    border: 1px solid #DCFCE7;
+    border-radius: 16px;
+    padding: 14px;
+    margin: 16px 0;
+}
+
+.code-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #166534;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.code-value {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #166534;
+    word-break: break-all;
+}
+
+.bonus-description {
+    font-size: 13px;
+    color: #6B7280;
+    margin: 12px 0;
+}
+
+.bonus-expires {
+    font-size: 11px;
+    color: #EF4444;
+    margin: 8px 0;
+}
+
+.bonus-message {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-color, #3B82F6);
+    margin: 12px 0 0 0;
+}
+
+/* ----- СПИННЕР НА КНОПКЕ ----- */
+.sp-lidup-submit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.sp-lidup-submit .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+.sp-lidup-submit.loading {
+    opacity: 0.8;
+    cursor: wait;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ----- ОШИБКА ВАЛИДАЦИИ ----- */
+.sp-error {
+    border-color: #EF4444 !important;
+    background-color: #FEF2F2 !important;
+    animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+/* ----- АДАПТАЦИЯ БОНУС-КАРТЫ НА МОБИЛЬНЫХ ----- */
+@media (max-width: 640px) {
+    .bonus-title {
+        font-size: 18px;
+    }
+
+    .code-value {
+        font-size: 16px;
+    }
+
+    .bonus-code {
+        padding: 12px;
+    }
+
+    .bonus-icon {
+        font-size: 42px;
+    }
+}

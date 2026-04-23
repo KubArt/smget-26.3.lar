@@ -29,7 +29,7 @@ return [
 
             // Настройки колеса
             'wheel' => [
-                'rotation_speed' => 4,
+                'rotation_speed' => 6,
                 'text_color' => '#333333',
                 'pointer_color' => '#ff4444',
                 'font_size' => 13,

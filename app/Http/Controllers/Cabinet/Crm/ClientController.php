@@ -17,8 +17,13 @@ class ClientController extends BaseCabinetController
         // 2. Получаем ID всех сайтов этого кабинета
         $siteIds = $workspace->sites()->pluck('id');
 
+
         $query = Client::whereIn('site_id', $siteIds)
-            ->withCount('leads');
+            ->withCount(['leads', 'prizes as active_prizes_count' => function($q) {
+                $q->where('is_used', false)->where(function($query) {
+                    $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                });
+            }]);
 
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -46,6 +51,9 @@ class ClientController extends BaseCabinetController
             'leads.widget',
             'notes.user',
             'leads.tasks' => function($q) {
+                $q->latest();
+            },
+            'prizes' => function($q) {
                 $q->latest();
             }
         ]);

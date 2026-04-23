@@ -37,6 +37,16 @@ return [
                     ['type' => 'tel', 'name' => 'phone', 'label' => 'Телефон', 'required' => true, 'placeholder' => '+7 (999) 123-45-67'],
                 ],
 
+                'bonus' => [
+                    'enabled' => false,
+                    'code' => 'PROMO2024',           // фиксированный или генерируемый
+                    'code_type' => 'fixed',          // fixed, unique, random
+                    'name' => 'Скидка 30%',
+                    'description' => 'Скидка 30% на первый приём врача терапевта',
+                    'message' => 'Покажите этот промокод при оплате',
+                    'expiry_days' => 7,
+                ],
+
                 // Дизайн (единственный вложенный объект в твоем шаблоне)
                 'design' => [
                     'bg_color' => '#FFFFFF',

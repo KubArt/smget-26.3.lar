@@ -22,7 +22,7 @@ class LeadController extends BaseCabinetController
         $siteIds = $workspace->sites()->pluck('id');
 
         $query = Lead::whereIn('site_id', $siteIds)
-            ->with(['site', 'client', 'funnelStage']);
+            ->with(['site', 'client', 'funnelStage', 'prize']);
 
         // Фильтр по конкретному сайту (если выбран в интерфейсе)
         if ($request->filled('site_id')) {
@@ -53,7 +53,7 @@ class LeadController extends BaseCabinetController
         // 3. Проверка доступа: принадлежит ли сайт лида текущему кабинету
         abort_if(!$workspace->sites->contains('id', $lead->site_id), 403, 'Доступ к лиду запрещен');
 
-        $lead->load(['client.notes', 'notes.user', 'tasks.assignedTo', 'site']);
+        $lead->load(['client.notes', 'notes.user', 'tasks.assignedTo', 'site', 'prize']);
 
         return view('cabinet.crm.leads.show', compact('lead'));
     }

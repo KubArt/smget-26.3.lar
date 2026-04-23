@@ -12,15 +12,41 @@
             {image_html}
 
             <div class="sp-lidup-inner">
-                <div class="sp-lidup-eyebrow">🔥 Ограниченное предложение</div>
-                <h3 class="sp-lidup-title">{title}</h3>
-                <p class="sp-lidup-description">{description}</p>
+                <!-- Блок: форма -->
+                <div class="sp-lidup-state sp-lidup-state-form">
+                    <div class="sp-lidup-eyebrow">🔥 Ограниченное предложение</div>
+                    <h3 class="sp-lidup-title">{title}</h3>
+                    <p class="sp-lidup-description">{description}</p>
 
-                <form class="sp-lidup-form" data-sp-form>
-                    <div id="sp-form-fields"></div>
-                    <button type="submit" class="sp-lidup-submit">{btn_text}</button>
-                    <div class="sp-lidup-message" style="display: none;"></div>
-                </form>
+                    <form class="sp-lidup-form" data-sp-form>
+                        <div id="sp-form-fields"></div>
+                        <button type="submit" class="sp-lidup-submit">{btn_text}</button>
+                        <div class="sp-lidup-message" style="display: none;"></div>
+                    </form>
+                </div>
+
+                <!-- Блок: успех (без приза) -->
+                <div class="sp-lidup-state sp-lidup-state-success" style="display: none;">
+                    <div class="sp-lidup-success-message">
+                        <p class="success-text"></p>
+                        <div class="success-icon">✓</div>
+                    </div>
+                </div>
+
+                <!-- Блок: бонус (с призом) -->
+                <div class="sp-lidup-state sp-lidup-state-bonus" style="display: none;">
+                    <div class="sp-lidup-bonus-card">
+                        <p class="bonus-message"></p>
+                        <div class="bonus-icon">🎁</div>
+                        <h4 class="bonus-title"></h4>
+                        <div class="bonus-code">
+                            <span class="code-label">Ваш промокод:</span>
+                            <strong class="code-value"></strong>
+                        </div>
+                        <p class="bonus-description"></p>
+                        <p class="bonus-expires"></p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

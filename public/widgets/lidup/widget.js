@@ -1,4 +1,10 @@
 /**
+ * http://smget-26.3.lar
+ *
+ * Виджет "LidUp" - Оптимизированная версия
+ */
+
+/**
  * Виджет "LidUp" - Оптимизированная версия
  */
 window.SmWidget_lidup = class extends SmWidget {
@@ -6,20 +12,24 @@ window.SmWidget_lidup = class extends SmWidget {
         super(settings, id, assets, behavior);
 
         const design = settings.design || {};
+        const bonus = settings.bonus || {};
 
-        // 1. Централизованная конфигурация
         this.config = {
             title: settings.title || '',
             description: settings.description || '',
             btnText: settings.btn_text || 'Отправить',
+            successMessage: settings.success_message || 'Спасибо! Мы свяжемся с вами.',
+            errorMessage: settings.error_message || 'Ошибка. Попробуйте позже.',
             image: settings.image || '',
             hasImage: !!(settings.has_image && settings.image),
             imgPos: settings.image_position || 'left',
             position: settings.position || 'center',
             animIn: settings.animation_in || 'fadeIn',
-            apiUrl: settings.api_url || '/api/widgets/lidup/submit',
+            apiUrl: settings.api_url || 'http://smget-26.3.lar/api/v1/capture/lidup',
             fields: settings.form_fields || [],
-            // Дизайн
+            bonus: {
+                enabled: bonus.enabled || false,
+            },
             colors: {
                 bg: design.bg_color || '#FFFFFF',
                 text: design.text_color || '#1F2937',
@@ -41,7 +51,6 @@ window.SmWidget_lidup = class extends SmWidget {
     mount() {
         this.injectStyles();
 
-        // 2. Подготовка контента
         const imageHtml = this.config.hasImage
             ? `<img src="${this.config.image}" class="sp-lidup-image" alt="image">`
             : '';
@@ -61,7 +70,6 @@ window.SmWidget_lidup = class extends SmWidget {
             html = html.split(key).join(val);
         }
 
-        // 3. Создание и рендер
         this.createContainer(html);
 
         if (this.container) {
@@ -72,7 +80,6 @@ window.SmWidget_lidup = class extends SmWidget {
 
             this.bindEvents();
 
-            // Плавное появление
             requestAnimationFrame(() => {
                 this.container.classList.add('sp-active');
             });
@@ -81,25 +88,25 @@ window.SmWidget_lidup = class extends SmWidget {
 
     renderFields() {
         return this.config.fields.map(field => {
-            const req = field.required ? 'required' : '';
+            const required = field.required ? 'required' : '';
             const name = field.name || `${field.type}_${Date.now()}`;
             const placeholder = this.escapeHtml(field.placeholder || field.label || '');
-            const val = this.escapeHtml(field.default_value || '');
+            const value = this.escapeHtml(field.default_value || '');
 
-            if (field.type === 'hidden') return `<input type="hidden" name="${name}" value="${val}">`;
-
-            if (field.type === 'textarea') {
-                return `<textarea name="${name}" placeholder="${placeholder}" ${req} class="sp-lidup-field"></textarea>`;
+            if (field.type === 'hidden') {
+                return `<input type="hidden" name="${name}" value="${value}">`;
             }
-
-            return `<input type="${field.type}" name="${name}" placeholder="${placeholder}" ${req} class="sp-lidup-field">`;
+            if (field.type === 'textarea') {
+                return `<textarea name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field"></textarea>`;
+            }
+            return `<input type="${field.type}" name="${name}" placeholder="${placeholder}" ${required} class="sp-lidup-field">`;
         }).join('');
     }
 
     injectStyles() {
         const c = this.config.colors;
         const fullCss = `
-        :root {
+            :root {
                 --bg-color: ${c.bg};
                 --text-color: ${c.text};
                 --accent-color: ${c.accent};
@@ -110,8 +117,30 @@ window.SmWidget_lidup = class extends SmWidget {
             }
             ${this.assets.css}
         `;
-        // 2. Вызываем метод ядра, который сам проверит ID и добавит стиль в head
         this.injectCustomStyles(fullCss);
+    }
+
+    setState(state) {
+        const states = ['form', 'success', 'bonus'];
+        states.forEach(s => {
+            const el = this.container?.querySelector(`.sp-lidup-state-${s}`);
+            if (el) el.style.display = s === state ? 'block' : 'none';
+        });
+    }
+
+    setButtonLoading(isLoading) {
+        const submitBtn = this.container?.querySelector('.sp-lidup-submit');
+        if (!submitBtn) return;
+
+        if (isLoading) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = '<span class="spinner"></span> Отправка...';
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+            submitBtn.innerHTML = this.escapeHtml(this.config.btnText);
+        }
     }
 
     bindEvents() {
@@ -132,50 +161,162 @@ window.SmWidget_lidup = class extends SmWidget {
         if (this.formSubmitted) return;
 
         const form = e.target;
-        const submitBtn = form.querySelector('.sp-lidup-submit');
-        const messageEl = form.querySelector('.sp-lidup-message');
 
-        // Сбор данных через FormData (более современно)
-        const formData = Object.fromEntries(new FormData(form));
-        formData.widget_id = this.id;
-        formData.url = window.location.href;
+        const isValid = this.validateForm(form);
+        if (!isValid) {
+            this.showFieldError(form);
+            return;
+        }
 
-        submitBtn.disabled = true;
-        const originalBtnText = submitBtn.textContent;
-        submitBtn.textContent = 'Отправка...';
+        const formData = new FormData(form);
+        const payload = {
+            widget_id: this.id,
+            page_url: window.location.href,
+            utm_source: this.getCookie('utm_source'),
+            utm_medium: this.getCookie('utm_medium'),
+            utm_campaign: this.getCookie('utm_campaign'),
+            utm_term: this.getCookie('utm_term'),
+            utm_content: this.getCookie('utm_content'),
+        };
+
+        for (let [key, value] of formData.entries()) {
+            payload[key] = value;
+        }
+
+        this.formSubmitted = true;
+        this.setButtonLoading(true);
 
         try {
             const response = await fetch(this.config.apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                body: JSON.stringify(formData)
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Api-Key': 'widget',
+                },
+                body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error();
+            const data = await response.json();
 
-            this.formSubmitted = true;
+            if (!response.ok) {
+                throw new Error(data.error || 'Ошибка отправки');
+            }
+
             this.track('submit');
 
-            const result = await response.json();
-            messageEl.textContent = result.message || this.settings.success_message || 'Спасибо!';
-            messageEl.className = 'sp-lidup-message success';
-            messageEl.style.display = 'block';
+            // Скрываем заголовок и описание при успехе
+            const titleEl = this.container?.querySelector('.sp-lidup-title');
+            const descEl = this.container?.querySelector('.sp-lidup-description');
+            if (titleEl) titleEl.style.display = 'none';
+            if (descEl) descEl.style.display = 'none';
 
-            form.style.opacity = '0';
-            setTimeout(() => {
-                form.innerHTML = '';
-                form.appendChild(messageEl);
-                form.style.opacity = '1';
-            }, 300);
-
-            setTimeout(() => this.close(), 2500);
+            // Проверяем, есть ли приз (prize с code)
+            if (data.prize && data.prize.code) {
+                this.showBonus(data);
+            } else {
+                this.showSuccess(data.message || this.config.successMessage);
+            }
 
         } catch (err) {
-            messageEl.textContent = this.settings.error_message || 'Ошибка. Попробуйте позже.';
+            console.error('Submit error:', err);
+            this.formSubmitted = false;
+            this.setButtonLoading(false);
+            this.showFormError(err.message || this.config.errorMessage);
+        }
+    }
+
+    showSuccess(message) {
+        const successBlock = this.container?.querySelector('.sp-lidup-state-success');
+        const textEl = successBlock?.querySelector('.success-text');
+        if (textEl) textEl.textContent = message;
+        this.setState('success');
+    }
+
+    showBonus(data) {
+        const prize = data.prize;
+        const bonusMessage = data.message || prize.user_message;
+        const expiresDate = prize.expires_at ? new Date(prize.expires_at).toLocaleDateString() : null;
+
+        const bonusBlock = this.container?.querySelector('.sp-lidup-state-bonus');
+
+        const titleEl = bonusBlock?.querySelector('.bonus-title');
+        const codeEl = bonusBlock?.querySelector('.code-value');
+        const descEl = bonusBlock?.querySelector('.bonus-description');
+        const expiresEl = bonusBlock?.querySelector('.bonus-expires');
+        const messageEl = bonusBlock?.querySelector('.bonus-message');
+
+        if (titleEl) titleEl.textContent = prize.name || 'Поздравляем!';
+        if (codeEl) codeEl.textContent = prize.code;
+        if (descEl && prize.description) descEl.textContent = prize.description;
+        if (expiresEl && expiresDate) expiresEl.textContent = `🎫 Действителен до: ${expiresDate}`;
+        if (messageEl && bonusMessage) messageEl.textContent = `✨ ${bonusMessage}`;
+
+        this.setState('bonus');
+    }
+
+    showFormError(message) {
+        const messageEl = this.container?.querySelector('.sp-lidup-message');
+        if (messageEl) {
+            messageEl.textContent = message;
             messageEl.className = 'sp-lidup-message error';
             messageEl.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalBtnText;
+            setTimeout(() => {
+                messageEl.style.display = 'none';
+            }, 3000);
+        }
+    }
+
+    validateForm(form) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('[required]');
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('sp-error');
+                isValid = false;
+            } else {
+                field.classList.remove('sp-error');
+            }
+
+            if (field.type === 'email' && field.value.trim()) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(field.value.trim())) {
+                    field.classList.add('sp-error');
+                    isValid = false;
+                }
+            }
+        });
+
+        return isValid;
+    }
+
+    showFieldError(form) {
+        const firstError = form.querySelector('.sp-error');
+        if (firstError) {
+            firstError.focus();
+            firstError.style.animation = 'shake 0.3s ease';
+            setTimeout(() => {
+                firstError.style.animation = '';
+            }, 300);
+        }
+
+        this.showFormError('Пожалуйста, заполните все обязательные поля корректно');
+    }
+
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
+
+    injectCustomStyles(css) {
+        const styleId = `sm-style-${this.id}`;
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement('style');
+            style.id = styleId;
+            style.textContent = css;
+            document.head.appendChild(style);
         }
     }
 

@@ -43,4 +43,9 @@ class Client extends Model
     {
         return $this->hasMany(ClientNote::class);
     }
+
+    public function prizes(): HasMany
+    {
+        return $this->hasMany(Prize::class, 'client_id');
+    }
 }

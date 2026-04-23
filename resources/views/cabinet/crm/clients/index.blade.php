@@ -28,7 +28,12 @@
                     <tbody>
                     @foreach($clients as $client)
                         <tr>
-                            <td class="fw-semibold">{{ $client->last_name }} {{ $client->name }}</td>
+                            <td class="fw-semibold">
+                                {{ $client->last_name }} {{ $client->name }}
+                                @if($client->active_prizes_count > 0)
+                                    <i class="fa fa-gift text-danger ms-1" title="Есть активные подарки ({{ $client->active_prizes_count }})"></i>
+                                @endif
+                            </td>
                             <td>
                                 <div>{{ $client->phone }}</div>
                                 <div class="fs-xs text-muted">{{ $client->email }}</div>

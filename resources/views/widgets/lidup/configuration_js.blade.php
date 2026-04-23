@@ -1,5 +1,6 @@
         @push('js')
             <script>
+
                 function lidupEditor(config) {
                     return {
                         slug: config.slug,
@@ -81,6 +82,14 @@
                             const activeTab = document.querySelector(`[data-tab="${tabId}"]`);
                             if (activeTab) activeTab.classList.add('active');
                         },
+
+                        generateBonusCode() {
+                            const prefixes = ['PROMO', 'BONUS', 'GIFT', 'WELCOME', 'SPECIAL'];
+                            const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                            const suffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+                            this.settings.bonus.code = prefix + '_' + suffix;
+                        },
+
                         async loadSkin(skinId) {
                             try {
                                 const baseUrl = `/widgets/${this.slug}/skins/${skinId}`;

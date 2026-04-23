@@ -40,7 +40,48 @@
                         </table>
                     </div>
                 </div>
-
+                <div class="block block-rounded">
+                    <div class="block-header block-header-default">
+                        <h3 class="block-title">
+                            <i class="fa fa-boxes me-1"></i> История подарков
+                        </h3>
+                    </div>
+                    <div class="block-content">
+                        @if($client->prizes->count() > 0)
+                            <div class="list-group list-group-flush border-bottom mb-3">
+                                @foreach($client->prizes as $prize)
+                                    <div class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <div class="fw-bold fs-sm text-dark">{{ $prize->name }}</div>
+                                            @if($prize->is_used)
+                                                <span class="badge bg-success-light text-success">Использован</span>
+                                            @elseif($prize->expires_at && $prize->expires_at->isPast())
+                                                <span class="badge bg-flat-light text-flat">Истек</span>
+                                            @else
+                                                <span class="badge bg-warning-light text-warning">Активен</span>
+                                            @endif
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <code class="text-primary fw-bold">{{ $prize->code }}</code>
+                                            <span class="fs-xs text-muted">
+                                @if($prize->expires_at)
+                                                    до {{ $prize->expires_at->format('d.m.Y') }}
+                                                @else
+                                                    бессрочно
+                                                @endif
+                            </span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <div class="text-center py-3">
+                                <i class="fa fa-gift fa-2x text-gray-light mb-2"></i>
+                                <p class="fs-sm text-muted">Подарков пока нет</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
                 <div class="block block-rounded">
                     <div class="block-header block-header-default">
                         <h3 class="block-title text-warning">

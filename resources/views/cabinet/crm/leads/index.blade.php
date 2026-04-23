@@ -45,7 +45,12 @@
                         <tr>
                             <td>{{ $lead->created_at->format('d.m.Y H:i') }}</td>
                             <td>
-                                <div class="fw-semibold">{{ $lead->client->name ?? 'Новый лид' }}</div>
+                                <div class="fw-semibold">
+                                    {{ $lead->client->name ?? 'Новый лид' }}
+                                    @if($lead->prize)
+                                        <i class="fa fa-gift text-danger ms-1" title="Лид с подарком: {{ $lead->prize->name }}"></i>
+                                    @endif
+                                </div>
                                 <div class="fs-sm text-muted">{{ $lead->phone }}</div>
                             </td>
                             <td><span class="badge bg-primary-light text-primary">{{ $lead->site->name }}</span></td>

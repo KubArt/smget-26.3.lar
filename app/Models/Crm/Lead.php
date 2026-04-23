@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Site;
 use App\Models\User;
 use App\Models\Widget;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Lead extends Model
 {
@@ -70,5 +71,9 @@ class Lead extends Model
     {
         return $this->hasMany(LeadStageHistory::class, 'lead_id');
     }
-
+    // В файле Lead.php добавьте связь:
+    public function prize(): HasOne
+    {
+        return $this->hasOne(Prize::class, 'lead_id');
+    }
 }

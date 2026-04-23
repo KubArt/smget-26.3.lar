@@ -38,6 +38,95 @@
                         @endif
                     </div>
                 </div>
+                @php
+                    $daysLeft = null;
+                    if ($lead->prize && $lead->prize->expires_at) {
+                        $daysLeft = now()->diffInDays($lead->prize->expires_at, false);
+                    }
+                @endphp
+                @if($lead->prize)
+                    <div class="block block-rounded border-start border-danger border-4 shadow-sm">
+                        <div class="block-header block-header-default">
+                            <h3 class="block-title">
+                                <i class="fa fa-gift me-2 text-danger"></i>Выигранный приз
+                            </h3>
+                            <div class="block-options">
+                                @if($lead->prize->is_used)
+                                    <span class="badge bg-success-light text-success fw-bold">Использован</span>
+                                @elseif($daysLeft !== null && $daysLeft < 0)
+                                    <span class="badge bg-flat-light text-flat fw-bold">Истек</span>
+                                @else
+                                    <span class="badge bg-warning-light text-warning fw-bold">Активен</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="block-content">
+                            <div class="row items-push">
+                                <div class="col-sm-12">
+                                    <div class="fw-bold text-dark fs-lg mb-1">{{ $lead->prize->name }}</div>
+                                    <div class="text-muted fs-sm mb-3">{{ $lead->prize->description }}</div>
+                                    {{-- Секция с промокодом --}}
+                                    <div class="d-flex align-items-center justify-content-between p-3 bg-body-dark rounded-3 mb-3">
+                                        <div>
+                                            <span class="fs-xs fw-bold text-uppercase text-muted d-block">Промокод</span>
+                                            <strong class="fs-4 text-primary font-monospace">{{ $lead->prize->code }}</strong>
+                                        </div>
+                                        <button class="btn btn-sm btn-alt-secondary" onclick="navigator.clipboard.writeText('{{ $lead->prize->code }}')">
+                                            <i class="fa fa-copy"></i>
+                                        </button>
+                                    </div>
+
+                                    {{-- Информация о сроках --}}
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <div class="fs-xs text-muted text-uppercase fw-bold">Выдан</div>
+                                            <div class="fs-sm fw-semibold">{{ $lead->prize->created_at->format('d.m.Y') }}</div>
+                                        </div>
+                                        <div class="col-6 text-end">
+                                            <div class="fs-xs text-muted text-uppercase fw-bold">Истекает</div>
+                                            @if($lead->prize->expires_at)
+                                                <div class="fs-sm fw-semibold {{ $daysLeft < 3 ? 'text-danger' : '' }}">
+                                                    {{ $lead->prize->expires_at->format('d.m.Y') }}
+                                                </div>
+                                            @else
+                                                <div class="fs-sm fw-semibold text-muted">∞</div>
+                                            @endif
+                                        </div>
+                                    </div>
+
+                                    {{-- Счетчик дней --}}
+                                    @if($daysLeft !== null && !$lead->prize->is_used)
+                                        <div class="alert {{ $daysLeft < 3 ? 'alert-danger' : 'alert-info' }} d-flex align-items-center justify-content-between py-2 px-3" role="alert">
+                                            <div class="flex-grow-1 fs-sm">
+                                                <i class="fa fa-clock me-2"></i>
+                                                @if($daysLeft > 0)
+                                                    Осталось дней: <strong>{{ $daysLeft }}</strong>
+                                                @elseif($daysLeft == 0)
+                                                    <strong>Истекает сегодня!</strong>
+                                                @else
+                                                    <span class="fw-bold">Срок действия истек</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Кнопка действия --}}
+                        <div class="block-content block-content-full block-content-sm bg-body-light text-center">
+                            @if(!$lead->prize->is_used)
+                                <button type="button" class="btn btn-alt-danger w-100 py-2" onclick="alert('Логика использования ваучера будет добавлена позже')">
+                                    <i class="fa fa-check-circle me-1"></i> Использовать ваучер
+                                </button>
+                            @else
+                                <button type="button" class="btn btn-light w-100 py-2 disabled">
+                                    <i class="fa fa-history me-1"></i> Использован {{ $lead->prize->used_at ? $lead->prize->used_at->format('d.m.Y') : '' }}
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <div class="block block-rounded">
                     <div class="block-header block-header-default">

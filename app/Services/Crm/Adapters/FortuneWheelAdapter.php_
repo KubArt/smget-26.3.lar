@@ -1,0 +1,198 @@
+<?php
+
+namespace App\Services\Crm\Adapters;
+
+use App\Models\Crm\PrizeAttempt;
+use App\Models\Widget;
+use Illuminate\Support\Str;
+
+/**
+ * Адаптер для виджета "Колесо Фортуны"
+ *
+ * ============================================================================
+ * НАЗНАЧЕНИЕ
+ * ============================================================================
+ *
+ * Преобразует входящие данные от виджета в структурированный массив для контроллера.
+ * Выполняет валидацию, проверку сегментов и лимитов.
+ * НЕ создает записи в БД - только готовит данные.
+ *
+ * ============================================================================
+ */
+class FortuneWheelAdapter implements LeadAdapterInterface
+{
+    /**
+     * Парсинг и валидация входных данных
+     */
+    public function parse(array $data): array
+    {
+        // ====================================================================
+        // ШАГ 1: ИЗВЛЕЧЕНИЕ И ПРОВЕРКА ОБЯЗАТЕЛЬНЫХ ПОЛЕЙ
+        // ====================================================================
+        $widgetId = $data['widget_id'] ?? null;
+        $prizeCode = $data['prize_code'] ?? null;
+
+        // Контакт может прийти в полях 'contact', 'phone' или 'email'
+        $rawContact = $data['contact'] ?? $data['phone'] ?? $data['email'] ?? null;
+
+        if (!$widgetId) {
+            return $this->error('Widget ID is required', 'WIDGET_REQUIRED');
+        }
+
+        if (!$rawContact) {
+            return $this->error('Contact is required (phone or email)', 'CONTACT_REQUIRED');
+        }
+
+        if (!$prizeCode) {
+            return $this->error('Prize code is required', 'PRIZE_CODE_REQUIRED');
+        }
+
+        // ====================================================================
+        // ШАГ 2: ОПРЕДЕЛЕНИЕ ТИПА КОНТАКТА И ОЧИСТКА
+        // ====================================================================
+        // Определяем, что пришло: телефон или email
+        // ====================================================================
+        $phone = null;
+        $email = null;
+        $contactForLog = $rawContact; // исходный контакт для логов
+
+        // Проверяем, является ли контакт email
+        if (filter_var($rawContact, FILTER_VALIDATE_EMAIL)) {
+            $email = $rawContact;
+        } else {
+            // Иначе считаем телефоном и очищаем
+            $phone = preg_replace('/[^\d+]/', '', $rawContact);
+        }
+
+        // Если явно передан phone или email в отдельных полях - используем их
+        if (!empty($data['phone'])) {
+            $phone = preg_replace('/[^\d+]/', '', $data['phone']);
+        }
+        if (!empty($data['email']) && filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+            $email = $data['email'];
+        }
+
+        // ====================================================================
+        // ШАГ 3: ПРОВЕРКА ВИДЖЕТА
+        // ====================================================================
+        $widget = Widget::with('widgetType')->find($widgetId);
+
+        if (!$widget) {
+            return $this->error('Widget not found', 'INVALID_WIDGET');
+        }
+
+        if ($widget->widgetType->slug !== 'fortune-wheel') {
+            return $this->error('Widget is not a fortune wheel', 'INVALID_WIDGET');
+        }
+
+        $siteId = $widget->site_id;
+        $settings = $widget->settings;
+        $segments = $settings['wheel']['segments'] ?? [];
+
+        // ====================================================================
+        // ШАГ 4: ПРОВЕРКА СЕГМЕНТА (ВЫИГРЫША)
+        // ====================================================================
+        $validSegment = null;
+        foreach ($segments as $segment) {
+            $isEnabled = $segment['enabled'] ?? true;
+            if ($isEnabled && ($segment['value'] ?? null) === $prizeCode) {
+                $validSegment = $segment;
+                break;
+            }
+        }
+
+        if (!$validSegment) {
+            PrizeAttempt::log(
+                $siteId,
+                $contactForLog,
+                $prizeCode,
+                $widgetId,
+                null,
+                false,
+                'INVALID_SEGMENT'
+            );
+
+            return $this->error('Invalid prize segment', 'INVALID_SEGMENT');
+        }
+
+        // ====================================================================
+        // ШАГ 5: ПРОВЕРКА ЛИМИТА ПОПЫТОК
+        // ====================================================================
+/*
+        $maxAttempts = $settings['limits']['spins_per_user'] ?? 3;
+        $attemptsCount = PrizeAttempt::getAttemptsCount($siteId, $contactForLog, $widgetId, 24);
+
+        if ($maxAttempts > 0 && $attemptsCount >= $maxAttempts) {
+            PrizeAttempt::log(
+                $siteId,
+                $contactForLog,
+                $prizeCode,
+                $widgetId,
+                null,
+                false,
+                'MAX_ATTEMPTS'
+            );
+
+            return $this->error(
+                'Maximum attempts reached',
+                'MAX_ATTEMPTS_REACHED',
+                429,
+                [
+                    'attempts_used' => $attemptsCount,
+                    'attempts_limit' => $maxAttempts
+                ]
+            );
+        }
+//*/
+        // ====================================================================
+        // ШАГ 6: ПОДГОТОВКА ДАННЫХ ДЛЯ КОНТРОЛЛЕРА
+        // ====================================================================
+        $messageTemplate = $settings['form']['success_message'] ?? 'Ваш купон: {CODE}';
+
+        return [
+            // === Данные для лида ===
+            'site_id' => $siteId,
+            'widget_id' => $widgetId,
+            'contact' => $contactForLog,
+            'phone' => $phone,
+            'email' => $email,
+            'name' => $data['name'] ?? 'Участник колеса фортуны',
+
+            // === UTM метки ===
+            'utm_source'   => $data['utm_source'] ?? null,
+            'utm_medium'   => $data['utm_medium'] ?? null,
+            'utm_campaign' => $data['utm_campaign'] ?? null,
+            'utm_term'     => $data['utm_term'] ?? null,
+            'utm_content'  => $data['utm_content'] ?? null,
+            'utm_referrer' => $data['utm_referrer'] ?? null,
+
+            // === Технические данные ===
+            'page_url'  => $data['page_url'] ?? null,
+            'form_data' => $data,
+
+            // === Данные для приза ===
+            'prize_data' => [
+                'code' => $prizeCode,
+                'name' => $validSegment['label'],
+                'description' => $validSegment['description'] ?? null,
+                'expiry_days' => $validSegment['expiry_days'] ?? 30,
+                'segment_data' => $validSegment
+            ],
+
+            // === Сообщение для пользователя ===
+            'message' => $messageTemplate,
+        ];
+    }
+
+    /**
+     * Формирование ошибки
+     */
+    protected function error(string $message, string $code, int $httpCode = 422, array $extra = []): array
+    {
+        return array_merge([
+            'error' => $message,
+            'code' => $code,
+            'http_code' => $httpCode,
+        ], $extra);
+    }
+}
