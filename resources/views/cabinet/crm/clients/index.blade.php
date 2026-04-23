@@ -35,8 +35,14 @@
                                 @endif
                             </td>
                             <td>
-                                <div>{{ $client->phone }}</div>
-                                <div class="fs-xs text-muted">{{ $client->email }}</div>
+                                @if($client->is_blocked)
+                                    <span class="text-muted" style="user-select: none;">+7 999 *** ** **</span>
+                                    <small class="fs-xs text-warning"><br>Превышен лимит тарифа</small>
+                                @else
+                                    <div>{{ $client->phone }}</div>
+                                    <div class="fs-xs text-muted">{{ $client->email }}</div>
+                                @endif
+
                             </td>
                             <td class="text-center">
                                 <span class="badge rounded-pill bg-primary">{{ $client->leads_count }}</span>

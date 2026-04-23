@@ -1,6 +1,9 @@
 @extends('cabinet.layouts.cabinet')
 
 @section('content')
+    @php
+        $isExceeded = app(App\Services\SubscriptionService::class)->isLeadsLimitExceeded($client->site);
+    @endphp
     <div class="content">
         <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center py-2 text-center text-md-start">
             <div class="flex-grow-1">
@@ -19,7 +22,12 @@
                             <i class="fa fa-user fa-2x"></i>
                         </div>
                         <h4 class="mb-1">{{ $client->last_name }} {{ $client->name }}</h4>
-                        <p class="text-muted">{{ $client->phone }}</p>
+
+                        @if($client->is_blocked)
+                            <small class="fs-xs text-warning"><br>Контакт не доступен из-за превышения лимита по тарифу</small>
+                        @else
+                            <p class="text-muted">{{ $client->phone }}</p>
+                        @endif
                     </div>
                     <div class="block-content">
                         <table class="table table-borderless table-sm fs-sm">
@@ -35,6 +43,17 @@
                             <tr>
                                 <td class="fw-semibold">Создан:</td>
                                 <td>{{ $client->created_at->format('d.m.Y') }}</td>
+                            </tr>
+
+                            <tr>
+                                <td class="fw-semibold"></td>
+                                <td>
+                                    <a href="{{ route('cabinet.crm.clients.force-delete', $client->id) }}"
+                                       class="btn btn-sm btn-danger"
+                                       onclick="return confirm('Вы уверены? Это ПОЛНОЕ удаление без возможности восстановления!')">
+                                        <i class="fa fa-trash"></i> Техническая очистка
+                                    </a>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
@@ -135,11 +154,13 @@
                                             {{ $lead->funnelStage->name ?? 'Новый' }}
                                         </span>
                                             </div>
-                                            <div class="p-2 bg-body-light rounded fs-sm mb-2">
-                                                @foreach($lead->form_data as $label => $value)
-                                                    <strong>{{ $label }}:</strong> {{ $value }}<br>
-                                                @endforeach
-                                            </div>
+                                            @if(!$lead->is_blocked)
+                                                <div class="p-2 bg-body-light rounded fs-sm mb-2">
+                                                    @foreach($lead->form_data as $label => $value)
+                                                        <strong>{{ $label }}:</strong> {{ $value }}<br>
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                             <a class="btn btn-sm btn-alt-secondary" href="{{ route('cabinet.crm.leads.show', $lead->id) }}">
                                                 Подробнее о лиде
                                             </a>

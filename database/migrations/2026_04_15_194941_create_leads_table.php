@@ -28,6 +28,7 @@ return new class extends Migration
             $table->text('vaucher_code')->nullable();
             $table->timestamp('vaucher_end_date')->nullable();
             $table->integer('vaucher_is_active')->default(0);
+            $table->integer('is_blocked')->default(0);
 
             $table->text('description')->nullable();
             $table->integer('tag')->default(0);

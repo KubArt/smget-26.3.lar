@@ -33,3 +33,18 @@
 Я предлагаю сейчас **закрыть пункт №4 (заглушка оплаты)**, чтобы у пользователя был путь «добычи денег» помимо ваучеров, или **пункт №3 (логика Middleware)**, чтобы тарифы начали на что-то реально влиять.
 
 **С чего начнем?**
+
+
+23.04.2026 
+Проверка на количество лимитов в шаблоне 
+
+@php
+    $isExceeded = app(App\Services\SubscriptionService::class)->isLeadsLimitExceeded($lead->site);
+@endphp
+@if($isExceeded)
+    <span class="text-muted" style="user-select: none;">+7 999 *** ** **</span>
+    <small class="fs-xs text-warning"><br>Превышен лимит тарифа</small>
+@else
+    {{ $client->phone }}
+    <span class="fs-xs text-muted">{{ $client->email }}</span>
+@endif

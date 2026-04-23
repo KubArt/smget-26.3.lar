@@ -19,10 +19,17 @@ Route::prefix('crm')->name('crm.')->group(function () {
     Route::get('/clients/{client}', [ClientController::class, 'show'])->name('clients.show');
     Route::post('/clients/{client}/notes', [ClientController::class, 'storeNote'])->name('clients.notes.store');
 
+    // Полное удаление физически
+    Route::get('/clients/{client}/force-delete', [ClientController::class, 'forceDestroy'])
+        ->name('clients.force-delete');
+
     // Задачи и напоминания
     Route::get('/tasks', [TaskController::class, 'tasks'])->name('tasks.index');
     Route::post('/tasks/{task}/toggle', [TaskController::class, 'toggleTask'])->name('tasks.toggle');
 
     // Смена стадии воронки
     Route::post('/leads/{lead}/stage', [FunnelController::class, 'updateStage'])->name('leads.stage.update');
+
+
+
 });

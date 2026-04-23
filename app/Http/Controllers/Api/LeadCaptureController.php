@@ -370,6 +370,8 @@ class LeadCaptureController extends Controller
      */
     protected function findOrCreateClient(int $siteId, array $contact, array $data): Client
     {
+        $isBlocked = $this->checkIsBlocked($siteId);
+
         $searchField = $contact['type'];
         $searchValue = $contact['value'];
 
@@ -383,6 +385,7 @@ class LeadCaptureController extends Controller
                 $searchField => $searchValue,
                 'name' => $data['name'] ?? 'Аноним',
                 'email' => $data['email'] ?? null,
+                'is_blocked' => $isBlocked
             ];
 
             // Если нашли телефон, но есть и email - добавляем
@@ -409,6 +412,9 @@ class LeadCaptureController extends Controller
      */
     protected function createLead(int $siteId, int $clientId, array $data, Request $request): Lead
     {
+        $isBlocked = $this->checkIsBlocked($siteId);
+
+
         $leadData = [
             'site_id'    => $siteId,
             'client_id'  => $clientId,
@@ -417,7 +423,7 @@ class LeadCaptureController extends Controller
             'source'     => $data['source'] ?? $request->route('source'),
 
             // Контактные данные (дублируем для быстрого поиска)
-            'phone'      => $data['phone'] ?? null,
+            'phone'      => format_phoneToInt($data['phone']) ?? null,
             'email'      => $data['email'] ?? null,
 
             // UTM метки
@@ -435,6 +441,7 @@ class LeadCaptureController extends Controller
 
             // Исходные данные (для отладки и аудита)
             'form_data'  => $data['form_data'] ?? $request->all(),
+            'is_blocked' => $isBlocked
         ];
 
         return Lead::create($leadData);
@@ -541,4 +548,27 @@ class LeadCaptureController extends Controller
 
         return $code;
     }
+
+
+    /**
+     * Логика определения: должен ли новый лид быть заблокирован
+     */
+    protected function checkIsBlocked(int $siteId): bool
+    {
+        $site = Site::where('is_active', 1)->findOrFail($siteId);
+
+        $subscription = $site->activeSubscription;
+        // Если подписки вообще нет — блокируем (или разрешаем мизерный лимит Free)
+        if (!$subscription) {
+            return $site->leads()->count() >= 5; // Например, только 5 бесплатных лидов на сайт навсегда
+        }
+        $plan = $subscription->plan;
+        $limit = $plan->features['leads_limit'] ?? 0;
+        // Считаем лиды за период действия текущей подписки
+        $currentLeadsCount = $site->leads()
+            ->where('created_at', '>=', $subscription->starts_at)
+            ->count();
+        return $currentLeadsCount >= $limit;
+    }
+
 }

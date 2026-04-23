@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Cabinet;
 
 use App\Http\Controllers\Controller;
 use App\Models\Site;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -33,8 +34,9 @@ class SiteController extends BaseCabinetController
 
         // Подгружаем данные подписки для детальной страницы
         $site->load(['activeSubscription.plan']);
+        $limits = (new SubscriptionService($site))->getLimitsSummary();
 
-        return view('cabinet.sites.show', compact('site'));
+        return view('cabinet.sites.show', compact('site', 'limits'));
     }
 
     public function edit(Site $site)

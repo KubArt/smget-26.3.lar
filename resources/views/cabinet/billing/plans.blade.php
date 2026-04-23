@@ -11,7 +11,7 @@
 
         <div class="row">
             @foreach($plans as $plan)
-                @php $features = json_decode($plan->features, true); @endphp
+                @php $features = $plan->features @endphp
                 <div class="col-md-6 col-xl-3">
                     <div class="block block-rounded block-link-pop text-center d-flex flex-column h-100">
                         <div class="block-header">

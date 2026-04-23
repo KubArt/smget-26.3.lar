@@ -51,7 +51,29 @@
 
             </div>
 
+
+
             <div class="col-xl-4">
+
+                <div class="block block-rounded">
+                    <div class="block-header block-header-default">
+                        <h3 class="block-title">Лимиты тарифа: {{ $site->plan->name ?? 'Бесплатный' }}</h3>
+                    </div>
+                    <div class="block-content">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="fs-sm fw-semibold">Лиды (за месяц)</span>
+                                <span class="fs-sm text-muted">{{ $limits['leads']['current'] }} / {{ $limits['leads']['limit'] }}</span>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar {{ $limits['leads']['is_exceeded'] ? 'bg-danger' : 'bg-primary' }}"
+                                     role="progressbar"
+                                     style="width: {{ ($limits['leads']['current'] / $limits['leads']['limit']) * 100 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="block block-rounded">
                     <div class="block-header block-header-default">
                         <h3 class="block-title">Информация</h3>

@@ -19,6 +19,10 @@ class BaseCabinetController extends Controller
     {
         // Проверяем, есть ли метод middleware, если нет - используем замыкание для инициализации
         $this->initBaseCabinet();
+
+
+
+
     }
 
     protected function initBaseCabinet()

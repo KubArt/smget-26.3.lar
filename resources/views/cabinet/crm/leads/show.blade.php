@@ -23,18 +23,23 @@
                         <p><strong>Источник:</strong> {{ $lead->utm_source ?? 'Прямой заход' }} / {{ $lead->utm_campaign ?? '-' }}</p>
                         <p><strong>Страница:</strong> <small class="text-primary">{{ $lead->page_url }}</small></p>
                         <hr>
+
                         <p><strong>Данные формы:</strong></p>
-                        @if($lead->form_data)
-                            @foreach($lead->form_data as $key => $value)
-                                <div class="mb-1">
-                                    <span class="text-muted">{{ $labels[$key] ?? $key }}:</span>
-                                    <span class="fw-semibold">
-                                        {{ is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value }}
-                                    </span>
-                                </div>
-                            @endforeach
+                        @if($lead->is_blocked)
+                            <span class="fs-xs text-warning"><br>Превышен лимит тарифа для просмотра контактов</span>
                         @else
-                            <p class="text-muted fs-sm">Дополнительные данные отсутствуют</p>
+                            @if($lead->form_data)
+                                @foreach($lead->form_data as $key => $value)
+                                    <div class="mb-1">
+                                        <span class="text-muted">{{ $labels[$key] ?? $key }}:</span>
+                                        <span class="fw-semibold">
+                                            {{ is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value }}
+                                        </span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="text-muted fs-sm">Дополнительные данные отсутствуют</p>
+                            @endif
                         @endif
                     </div>
                 </div>
@@ -128,16 +133,18 @@
                     </div>
                 @endif
 
-                <div class="block block-rounded">
-                    <div class="block-header block-header-default">
-                        <h3 class="block-title">Карточка клиента</h3>
+                @if(!$lead->is_blocked)
+                    <div class="block block-rounded">
+                        <div class="block-header block-header-default">
+                            <h3 class="block-title">Карточка клиента</h3>
+                        </div>
+                        <div class="block-content pb-3 text-center">
+                            <h4 class="mb-1">{{ $lead->client->name }}</h4>
+                            <p class="text-muted">{{ $lead->phone }}</p>
+                            <a href="{{ route('cabinet.crm.clients.show', $lead->client_id) }}" class="btn btn-sm btn-alt-primary">История всех обращений</a>
+                        </div>
                     </div>
-                    <div class="block-content pb-3 text-center">
-                        <h4 class="mb-1">{{ $lead->client->name }}</h4>
-                        <p class="text-muted">{{ $lead->phone }}</p>
-                        <a href="{{ route('cabinet.crm.clients.show', $lead->client_id) }}" class="btn btn-sm btn-alt-primary">История всех обращений</a>
-                    </div>
-                </div>
+                @endif
             </div>
 
             <div class="col-md-7">

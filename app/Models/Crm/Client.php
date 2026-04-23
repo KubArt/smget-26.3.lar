@@ -17,9 +17,12 @@ class Client extends Model
         'name',
         'last_name',
         'patronymic',
-        'email'
+        'email',
+        'is_blocked'
     ];
-
+    protected $casts = [
+        'is_blocked' => 'boolean'
+    ];
     /**
      * Сайт, к которому привязан клиент
      */

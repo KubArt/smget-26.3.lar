@@ -18,13 +18,14 @@ class Lead extends Model
         'vaucher_code', 'vaucher_end_date', 'vaucher_is_active',
         'description', 'tag', 'utm_source', 'utm_campaign',
         'utm_medium', 'utm_term', 'utm_content', 'utm_referrer',
-        'page_url', 'ip_address', 'user_agent'
+        'page_url', 'ip_address', 'user_agent', 'is_blocked'
     ];
 
     protected $casts = [
         'form_data' => 'array',
         'vaucher_end_date' => 'datetime',
         'vaucher_is_active' => 'boolean',
+        'is_blocked' => 'boolean',
         'tag' => 'integer',
     ];
 
