@@ -129,14 +129,31 @@
 /* Указатель колеса */
 .sfw-pointer {
     position: absolute;
-    top: -24px;
-    left: 50%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
+
+    /* 15 часов  */
+
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    /* Треугольник смотрит ВЛЕВО (на колесо) */
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-right: 40px solid var(--sfw-pointer, #ff4444);
+    border-left: none;
+
+
+    /* 12 часов
+    top: -24px;
+    left: 50%;
+
     border-left: 24px solid transparent;
     border-right: 24px solid transparent;
     border-top: 48px solid var(--sfw-pointer, #ff4444);
+    */
     z-index: 15;
     filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
@@ -565,4 +582,45 @@
         font-size: 16px;
         padding: 12px 16px;
     }
+}
+
+
+/* Внешняя тень на контейнере, а не на canvas */
+.sfw-wheel-container {
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.15));
+}
+
+#sfw-canvas-{id} {
+    display: block;
+    margin: 0 auto;
+    border-radius: 50%;
+    /* Тени убраны - они на контейнере */
+}
+
+
+/* вращение колеса */
+@keyframes slowSpin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.sfw-idle-spin {
+    animation: slowSpin 40s linear infinite;
+}
+.sfw-error {
+    border-color: #ef4444 !important;
+    animation: shake 0.3s ease;
+}
+.sfw-terms-checkbox.sfw-error {
+    outline: 2px solid #ef4444;
+    outline-offset: 2px;
 }

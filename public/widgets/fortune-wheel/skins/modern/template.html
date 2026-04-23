@@ -6,7 +6,68 @@
                 <div class="sfw-left">
                     <div class="sfw-wheel-container">
                         <div class="sfw-pointer"></div>
-                        <canvas id="sfw-canvas-{id}" width="300" height="300"></canvas>
+                        <canvas id="sfw-canvas-{id}" class="sfw-idle-spin" width="300" height="300"></canvas>
+                    </div>
+                </div>
+                <div class="sfw-right">
+                    <div class="sfw-form-body">
+                        <!-- Блок: Форма сбора контакта -->
+                        <div class="sfw-state sfw-state-contact">
+                            <h3>{title}</h3>
+                            <p>{description}</p>
+                            <div class="sfw-form-group">
+                                <input type="{contact_type}" class="sfw-contact-input" placeholder="{contact_placeholder}">
+                            </div>
+                            <div class="sfw-terms">
+                                <label class="sfw-checkbox-label">
+                                    <input type="checkbox" class="sfw-terms-checkbox">
+                                    <span>{terms_text}</span>
+                                </label>
+                            </div>
+                            <div class="sfw-actions-buttons">
+                                <button class="sfw-spin-trigger">{spin_button_text}</button>
+                                <button class="sfw-decline-btn">{decline_text}</button>
+                            </div>
+                        </div>
+
+                        <!-- Блок: Спиннер (вращение) -->
+                        <div class="sfw-state sfw-state-spinner" style="display: none;">
+                            <div class="sfw-spinner">
+                                <i class="fa fa-spinner fa-spin fa-3x"></i>
+                                <p>Вращаем колесо...</p>
+                            </div>
+                        </div>
+
+                        <!-- Блок: Результат выигрыша -->
+                        <div class="sfw-state sfw-state-result" style="display: none;">
+                            <div class="sfw-win-result">
+                                <h4>{win_title}</h4>
+                                <p>Ваш выигрыш: <strong class="sfw-win-label"></strong></p>
+                                <div class="sfw-coupon-code sfw-win-code"></div>
+                                <div class="sfw-win-expires" style="display: none; font-size: 11px; color: #666; margin-top: 5px;"></div>
+                                <button class="sfw-close-win">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sfw-trigger" data-sp-toggle>
+        <span class="sfw-icon">🎡</span>
+    </div>
+</div>
+<!--
+<div class="sfw-root sp-position-{position}" id="sfw-{id}">
+    <div class="sfw-overlay">
+        <div class="sfw-modal-content">
+            <button class="sfw-close-btn" data-sp-close>×</button>
+            <div class="sfw-grid">
+                <div class="sfw-left">
+                    <div class="sfw-wheel-container">
+                        <div class="sfw-pointer"></div>
+                        <canvas id="sfw-canvas-{id}" class="sfw-idle-spin" width="300" height="300"></canvas>
                     </div>
                 </div>
                 <div class="sfw-right">
@@ -26,3 +87,4 @@
         <span class="sfw-icon">🎡</span>
     </div>
 </div>
+-->

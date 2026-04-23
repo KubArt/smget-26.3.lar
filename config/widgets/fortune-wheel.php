@@ -11,7 +11,10 @@ return [
     'default_values' => [
         'settings' => [
             'template' => 'default',
-
+            // API настройки (заполняются автоматически)
+            'site_id' => null,
+            'api_key' => null,
+            'api_url' => null,
             // Настройки кнопки
             'button' => [
                 'position' => 'bottom-right',

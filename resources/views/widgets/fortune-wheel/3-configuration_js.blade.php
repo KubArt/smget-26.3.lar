@@ -4,7 +4,7 @@
             return {
                 // Данные (приходят из PHP, уже с дефолтами)
                 slug: config.slug,
-                settings: config.settings,
+                settings: config.settings,  // Уже содержит все дефолты из PHP
                 skins: config.skins,
 
                 // Preview
@@ -19,42 +19,14 @@
                 isSaving: false,
                 activeTab: 'button-tab',
 
-                // Состояние preview
+                // Состояние preview (только для демонстрации)
                 isSpinning: false,
                 currentRotation: 0,
                 currentWonSegment: null,
-                previewState: 'contact', // contact, spinner, result
+                showContactForm: true,
                 userContact: '',
                 termsAccepted: false,
-
-                // SVG иконки для кнопки (подарочные коробки с бантиком)
-                buttonIcons: [
-                    {
-                        value: 'gift-red',
-                        label: 'Красный подарок',
-                        svg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect><line x1="12" y1="2" x2="12" y2="22"></line><path d="M5 8h14"></path><path d="M8 2 L12 6 L16 2"></path></svg>'
-                    },
-                    {
-                        value: 'gift-gold',
-                        label: 'Золотой подарок',
-                        svg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect><line x1="12" y1="2" x2="12" y2="22"></line><path d="M5 8h14"></path><circle cx="12" cy="12" r="2"></circle><path d="M12 14v4"></path></svg>'
-                    },
-                    {
-                        value: 'gift-box',
-                        label: 'Коробка с бантом',
-                        svg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="14" rx="2"></rect><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M12 10v8"></path><path d="M8 10h8"></path><path d="M4 14h16"></path></svg>'
-                    },
-                    {
-                        value: 'present',
-                        label: 'Презент',
-                        svg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="14" rx="2" ry="2"></rect><line x1="12" y1="2" x2="12" y2="22"></line><path d="M5 8h14"></path><polygon points="8 2 12 6 16 2"></polygon></svg>'
-                    },
-                    {
-                        value: 'gift-stack',
-                        label: 'Стопка подарков',
-                        svg: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="12" rx="2"></rect><path d="M8 10V8a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M12 6V4"></path><path d="M6 14h12"></path><path d="M6 18h12"></path></svg>'
-                    }
-                ],
+                winResult: null,
 
                 // Инициализация
                 async init() {
@@ -63,6 +35,7 @@
                 },
 
                 setupWatchers() {
+                    // Только watchers для preview обновления
                     this.$watch('settings.button.position', () => this.updatePosition());
                     this.$watch('settings.button.bg_color', () => this.updateTriggerColor());
                     this.$watch('settings.button.text_color', () => this.updateTriggerColor());
@@ -81,37 +54,10 @@
                     this.$watch('settings.wheel.segments', () => this.redrawWheel(), { deep: true });
                     this.$watch('settings.wheel.text_color', () => this.redrawWheel());
                     this.$watch('settings.wheel.pointer_color', () => this.updatePointerColor());
+                    this.$watch('settings.wheel.font_size', () => this.redrawWheel());
                     this.$watch('settings.wheel.border_color', () => this.redrawWheel());
                     this.$watch('settings.wheel.border_width', () => this.redrawWheel());
-                    this.$watch('settings.form.terms_text', () => this.updateTermsText());
-                    this.$watch('settings.form.contact_type', () => this.updateContactInput());
-                    this.$watch('settings.form.title', () => this.updateWinTitle());
                     this.$watch('settings.template', (value) => this.applyTemplate(value));
-                },
-
-                // ============ Обновление текстов в preview ============
-
-                updateTermsText() {
-                    const termsSpan = this.widget?.querySelector('.sfw-terms-checkbox + span');
-                    if (termsSpan) {
-                        termsSpan.textContent = this.settings.form.terms_text || 'Я согласен с условиями розыгрыша';
-                    }
-                },
-
-                updateContactInput() {
-                    const contactInput = this.widget?.querySelector('.sfw-contact-input');
-                    if (contactInput) {
-                        const contactType = this.settings.form.contact_type || 'tel';
-                        contactInput.type = contactType;
-                        contactInput.placeholder = contactType === 'tel' ? '+7 (999) 123-45-67' : 'your@email.com';
-                    }
-                },
-
-                updateWinTitle() {
-                    const winTitle = this.widget?.querySelector('.sfw-state-result h4');
-                    if (winTitle) {
-                        winTitle.textContent = this.settings.form.title || 'Поздравляем!';
-                    }
                 },
 
                 // ============ Методы обновления preview UI ============
@@ -127,38 +73,17 @@
                     if (!this.trigger) return;
                     this.trigger.style.background = this.settings.button.bg_color;
                     this.trigger.style.color = this.settings.button.text_color;
-
-                    // Обновляем цвет SVG иконки
-                    const svgIcon = this.trigger.querySelector('svg');
-                    if (svgIcon) {
-                        svgIcon.style.color = this.settings.button.text_color;
-                    }
                 },
 
                 updateTriggerIcon() {
                     if (!this.trigger) return;
-
-                    // Находим выбранную иконку
-                    const selectedIcon = this.buttonIcons.find(icon => icon.value === this.settings.button.icon);
-                    const iconSvg = selectedIcon ? selectedIcon.svg : this.buttonIcons[0].svg;
-
-                    // Заменяем содержимое триггера
-                    this.trigger.innerHTML = iconSvg;
-
-                    // Добавляем класс для стилизации
-                    const svg = this.trigger.querySelector('svg');
-                    if (svg) {
-                        svg.style.width = '28px';
-                        svg.style.height = '28px';
-                        svg.style.color = this.settings.button.text_color;
-                    }
+                    const iconSpan = this.trigger.querySelector('.sfw-icon');
+                    if (iconSpan) iconSpan.textContent = this.settings.button.icon;
                 },
 
                 updateSpinButtonText() {
-                    const spinBtn = this.widget?.querySelector('.sfw-state-contact .sfw-spin-trigger');
-                    if (spinBtn) {
-                        spinBtn.textContent = this.settings.button.text;
-                    }
+                    if (!this.spinBtn) return;
+                    this.spinBtn.textContent = this.settings.button.text;
                 },
 
                 updateButtonSize() {
@@ -167,14 +92,7 @@
                     const size = sizeMap[this.settings.button.size] || '60px';
                     this.trigger.style.width = size;
                     this.trigger.style.height = size;
-
-                    // Меняем размер SVG
-                    const svg = this.trigger.querySelector('svg');
-                    if (svg) {
-                        const iconSize = this.settings.button.size === 'small' ? '20px' : (this.settings.button.size === 'large' ? '32px' : '28px');
-                        svg.style.width = iconSize;
-                        svg.style.height = iconSize;
-                    }
+                    this.trigger.style.fontSize = this.settings.button.size === 'small' ? '20px' : (this.settings.button.size === 'large' ? '32px' : '28px');
                 },
 
                 updateButtonRadius() {
@@ -223,8 +141,7 @@
                 updateAccentColor() {
                     if (!this.widget) return;
                     this.widget.style.setProperty('--sfw-accent', this.settings.design.accent_color);
-                    const spinBtn = this.widget?.querySelector('.sfw-state-contact .sfw-spin-trigger');
-                    if (spinBtn) spinBtn.style.background = this.settings.design.accent_color;
+                    if (this.spinBtn) this.spinBtn.style.background = this.settings.design.accent_color;
                 },
 
                 updateModalBgColor() {
@@ -290,23 +207,6 @@
                     css = css.replace(/100vh/g, '100%');
                     css = css.replace(/100vw/g, '100%');
 
-                    css += `
-                        @keyframes sfwShake {
-                            0%,100% { transform: translateX(0); }
-                            25% { transform: translateX(-4px); }
-                            75% { transform: translateX(4px); }
-                        }
-                        .sfw-error {
-                            border-color: #ef4444 !important;
-                            background-color: #fef2f2 !important;
-                            animation: sfwShake 0.3s ease;
-                        }
-                        .sfw-trigger svg {
-                            display: block;
-                            margin: 0 auto;
-                        }
-                    `;
-
                     this.shadowRoot.innerHTML = `
                         <style>
                             :host {
@@ -333,19 +233,14 @@
                         .replace(/{widget_id}/g, 'preview')
                         .replace(/{position}/g, this.settings.button.position === 'bottom-right' ? 'right' : 'left')
                         .replace(/{title}/g, this.escapeHtml(this.settings.design.title))
-                        .replace(/{description}/g, this.escapeHtml(this.settings.design.description))
-                        .replace(/{contact_type}/g, this.settings.form.contact_type || 'tel')
-                        .replace(/{contact_placeholder}/g, this.settings.form.contact_type === 'tel' ? '+7 (999) 123-45-67' : 'your@email.com')
-                        .replace(/{terms_text}/g, this.escapeHtml(this.settings.form.terms_text || 'Я согласен с условиями розыгрыша'))
-                        .replace(/{spin_button_text}/g, this.escapeHtml(this.settings.button.text || 'Крутить колесо'))
-                        .replace(/{decline_text}/g, this.escapeHtml(this.settings.form.decline_text || 'Отказаться'))
-                        .replace(/{win_title}/g, this.escapeHtml(this.settings.form.title || 'Поздравляем!'));
+                        .replace(/{description}/g, this.escapeHtml(this.settings.design.description));
 
                     this.widgetRoot.innerHTML = html;
 
                     this.widget = this.widgetRoot.querySelector('.sfw-root');
                     this.canvas = this.widget?.querySelector('#sfw-canvas-preview');
                     this.trigger = this.widget?.querySelector('.sfw-trigger');
+                    this.spinBtn = this.widget?.querySelector('.sfw-spin-trigger');
                     this.titleEl = this.widget?.querySelector('.sfw-form-body h3');
                     this.descEl = this.widget?.querySelector('.sfw-form-body p');
 
@@ -353,6 +248,7 @@
                     this.updatePosition();
                     this.updateTriggerColor();
                     this.updateTriggerIcon();
+                    this.updateSpinButtonText();
                     this.updateButtonSize();
                     this.updateButtonRadius();
                     this.updateHoverEffect();
@@ -364,29 +260,78 @@
                     this.updatePointerColor();
 
                     this.redrawWheel();
-                    this.initPreviewStates();
+                    this.renderContactForm();
                     this.bindEvents();
                 },
 
-                // ============ Инициализация состояний preview ============
+                // ============ Форма контакта для preview ============
 
-                initPreviewStates() {
-                    this.updateContactInput();
-                    this.updateTermsText();
-                    this.updateWinTitle();
-                    this.setPreviewState('contact');
-                },
+                renderContactForm() {
+                    const actionsContainer = this.widget?.querySelector('.sfw-actions');
+                    if (!actionsContainer) return;
 
-                setPreviewState(state) {
-                    this.previewState = state;
+                    if (!this.showContactForm) {
+                        // Показываем спиннер
+                        actionsContainer.innerHTML = `<div class="sfw-spinner"><i class="fa fa-spinner fa-spin fa-3x"></i><p>Вращаем колесо...</p></div>`;
+                        // Запускаем вращение
+                        setTimeout(() => this.startPreviewSpin(), 100);
+                        return;
+                    }
 
-                    const contactBlock = this.widget?.querySelector('.sfw-state-contact');
-                    const spinnerBlock = this.widget?.querySelector('.sfw-state-spinner');
-                    const resultBlock = this.widget?.querySelector('.sfw-state-result');
+                    const contactType = this.settings.form.contact_type || 'tel';
+                    const placeholder = contactType === 'tel' ? '+7 (999) 123-45-67' : 'your@email.com';
 
-                    if (contactBlock) contactBlock.style.display = state === 'contact' ? 'block' : 'none';
-                    if (spinnerBlock) spinnerBlock.style.display = state === 'spinner' ? 'block' : 'none';
-                    if (resultBlock) resultBlock.style.display = state === 'result' ? 'block' : 'none';
+                    let html = `
+                            <div class="sfw-contact-form">
+                                <div class="sfw-form-group">
+                                    <input type="${contactType}" class="sfw-contact-input" placeholder="${placeholder}">
+                                </div>
+                                <div class="sfw-terms">
+                                    <label class="sfw-checkbox-label">
+                                        <input type="checkbox" class="sfw-terms-checkbox">
+                                        <span>${this.escapeHtml(this.settings.form.terms_text || 'Я согласен с условиями розыгрыша')}</span>
+                                    </label>
+                                </div>
+                                <div class="sfw-actions-buttons">
+                                    <button class="sfw-spin-trigger">${this.escapeHtml(this.settings.button.text || 'Крутить колесо')}</button>
+                                    <button class="sfw-decline-btn">Отказаться</button>
+                                </div>
+                            </div>
+                        `;
+
+                    actionsContainer.innerHTML = html;
+
+                    const spinBtn = actionsContainer.querySelector('.sfw-spin-trigger');
+                    const declineBtn = actionsContainer.querySelector('.sfw-decline-btn');
+                    const contactInput = actionsContainer.querySelector('.sfw-contact-input');
+                    const termsCheckbox = actionsContainer.querySelector('.sfw-terms-checkbox');
+
+                    if (spinBtn) {
+                        spinBtn.addEventListener('click', () => {
+                            if (!contactInput?.value) {
+                                alert(this.settings.messages?.fill_contact || 'Пожалуйста, укажите контактные данные');
+                                return;
+                            }
+                            if (!termsCheckbox?.checked) {
+                                alert(this.settings.messages?.accept_terms || 'Пожалуйста, согласитесь с условиями');
+                                return;
+                            }
+                            this.userContact = contactInput.value;
+                            this.termsAccepted = true;
+                            this.showContactForm = false;
+                            this.renderContactForm();
+                        });
+                    }
+
+                    if (declineBtn) {
+                        declineBtn.addEventListener('click', () => {
+                            this.widget?.classList.remove('sp-active');
+                            setTimeout(() => {
+                                this.showContactForm = true;
+                                this.renderContactForm();
+                            }, 300);
+                        });
+                    }
                 },
 
                 // ============ Отрисовка колеса ============
@@ -397,7 +342,6 @@
                     const ctx = this.canvas.getContext('2d');
                     const segments = (this.settings.wheel.segments || []).filter(s => s.enabled !== false);
                     const size = 380;
-                    const borderWidth = this.settings.wheel.border_width || 3;
 
                     this.canvas.width = size;
                     this.canvas.height = size;
@@ -428,21 +372,23 @@
                         ctx.arc(centerX, centerY, radius - 8, startAngle, endAngle);
                         ctx.fill();
 
+                        // Граница
                         ctx.beginPath();
                         ctx.strokeStyle = this.settings.wheel.border_color || '#ffffff';
-                        ctx.lineWidth = borderWidth;
+                        ctx.lineWidth = this.settings.wheel.border_width || 3;
                         ctx.moveTo(centerX, centerY);
                         ctx.arc(centerX, centerY, radius - 8, startAngle, endAngle);
                         ctx.lineTo(centerX, centerY);
                         ctx.stroke();
 
+                        // Текст
                         ctx.save();
                         ctx.translate(centerX, centerY);
                         ctx.rotate(startAngle + arc / 2);
                         ctx.textAlign = "center";
                         ctx.textBaseline = "middle";
                         ctx.fillStyle = this.settings.wheel.text_color || '#1f2937';
-                        ctx.font = `bold 13px system-ui`;
+                        ctx.font = `bold ${Math.min(this.settings.wheel.font_size || 13, 16)}px system-ui`;
 
                         let label = seg.label || '';
                         if (label.length > 12) label = label.slice(0, 10) + '..';
@@ -450,12 +396,7 @@
                         ctx.restore();
                     });
 
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius - 8, 0, 2 * Math.PI);
-                    ctx.strokeStyle = this.settings.wheel.border_color || '#ffffff';
-                    ctx.lineWidth = borderWidth + 2;
-                    ctx.stroke();
-
+                    // Внутренний круг
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, 25, 0, 2 * Math.PI);
                     ctx.fillStyle = '#ffffff';
@@ -467,6 +408,7 @@
                     ctx.lineWidth = 2;
                     ctx.stroke();
 
+                    // Центральная точка
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, 8, 0, 2 * Math.PI);
                     ctx.fillStyle = this.settings.design.accent_color || '#6366f1';
@@ -485,8 +427,8 @@
                     }
 
                     this.isSpinning = true;
-                    this.setPreviewState('spinner');
 
+                    // Выбираем случайный выигрыш
                     const winIndex = Math.floor(Math.random() * segments.length);
                     this.currentWonSegment = segments[winIndex];
 
@@ -496,24 +438,47 @@
 
                     this.currentRotation += totalRotation;
 
-                    this.canvas.style.transition = `transform 4s cubic-bezier(0.25, 0.1, 0.15, 1)`;
+                    this.canvas.style.transition = `transform ${this.settings.wheel.rotation_speed || 4}s cubic-bezier(0.25, 0.1, 0.15, 1)`;
                     this.canvas.style.transform = `rotate(${this.currentRotation}deg)`;
 
                     setTimeout(() => {
                         this.isSpinning = false;
                         this.showPreviewWin();
-                    }, 4000);
+                    }, (this.settings.wheel.rotation_speed || 4) * 1000);
                 },
 
                 showPreviewWin() {
+                    const actionsContainer = this.widget?.querySelector('.sfw-actions');
+                    if (!actionsContainer) return;
+
                     const wonSegment = this.currentWonSegment;
+                    const successMsg = (this.settings.form.success_message || 'Ваш купон: {CODE}').replace('{CODE}', wonSegment.value || 'PROMO2024');
 
-                    const labelEl = this.widget?.querySelector('.sfw-win-label');
-                    const codeEl = this.widget?.querySelector('.sfw-win-code');
-                    if (labelEl) labelEl.textContent = wonSegment.label;
-                    if (codeEl) codeEl.textContent = wonSegment.value || 'PROMO2024';
+                    actionsContainer.innerHTML = `
+                        <div class="sfw-win-result">
+                            <div class="sfw-win-icon">🎉</div>
+                            <h4>${this.escapeHtml(this.settings.form.title || 'Поздравляем!')}</h4>
+                            <p>Вы выиграли: <strong>${this.escapeHtml(wonSegment.label)}</strong></p>
+                            <div class="sfw-coupon-code">${this.escapeHtml(wonSegment.value || 'PROMO2024')}</div>
+                            <button class="sfw-close-win">Закрыть</button>
+                        </div>
+                    `;
 
-                    this.setPreviewState('result');
+                    const closeBtn = actionsContainer.querySelector('.sfw-close-win');
+                    if (closeBtn) {
+                        closeBtn.addEventListener('click', () => {
+                            this.widget?.classList.remove('sp-active');
+                            setTimeout(() => {
+                                this.currentRotation = 0;
+                                if (this.canvas) {
+                                    this.canvas.style.transform = 'rotate(0deg)';
+                                    this.canvas.style.transition = 'none';
+                                }
+                                this.showContactForm = true;
+                                this.renderContactForm();
+                            }, 300);
+                        });
+                    }
                 },
 
                 // ============ События виджета ============
@@ -527,8 +492,9 @@
                         toggleBtn.parentNode.replaceChild(newBtn, toggleBtn);
                         newBtn.addEventListener('click', (e) => {
                             e.preventDefault();
+                            this.showContactForm = true;
                             this.widget.classList.add('sp-active');
-                            this.setPreviewState('contact');
+                            setTimeout(() => this.renderContactForm(), 50);
                         });
                     }
 
@@ -541,86 +507,6 @@
                             this.widget.classList.remove('sp-active');
                         });
                     });
-
-                    const spinBtn = this.widget.querySelector('.sfw-state-contact .sfw-spin-trigger');
-                    if (spinBtn) {
-                        const newSpinBtn = spinBtn.cloneNode(true);
-                        spinBtn.parentNode.replaceChild(newSpinBtn, spinBtn);
-                        newSpinBtn.addEventListener('click', () => {
-                            const contactInput = this.widget.querySelector('.sfw-contact-input');
-                            const termsCheckbox = this.widget.querySelector('.sfw-terms-checkbox');
-
-                            if (!contactInput?.value) {
-                                this.showFieldError(contactInput);
-                                return;
-                            }
-                            if (!termsCheckbox?.checked) {
-                                this.showFieldError(termsCheckbox);
-                                return;
-                            }
-
-                            this.userContact = contactInput.value;
-                            this.startPreviewSpin();
-                        });
-                    }
-
-                    const declineBtn = this.widget.querySelector('.sfw-state-contact .sfw-decline-btn');
-                    if (declineBtn) {
-                        const newDeclineBtn = declineBtn.cloneNode(true);
-                        declineBtn.parentNode.replaceChild(newDeclineBtn, declineBtn);
-                        newDeclineBtn.addEventListener('click', () => {
-                            this.widget.classList.remove('sp-active');
-                        });
-                    }
-
-                    const closeWinBtn = this.widget.querySelector('.sfw-state-result .sfw-close-win');
-                    if (closeWinBtn) {
-                        const newCloseWinBtn = closeWinBtn.cloneNode(true);
-                        closeWinBtn.parentNode.replaceChild(newCloseWinBtn, closeWinBtn);
-                        newCloseWinBtn.addEventListener('click', () => {
-                            this.widget.classList.remove('sp-active');
-                            setTimeout(() => {
-                                this.currentRotation = 0;
-                                if (this.canvas) {
-                                    this.canvas.style.transform = 'rotate(0deg)';
-                                    this.canvas.style.transition = 'none';
-                                }
-                                this.setPreviewState('contact');
-                            }, 300);
-                        });
-                    }
-                },
-
-                showFieldError(element) {
-                    if (!element) return;
-
-                    element.classList.add('sfw-error');
-                    element.style.borderColor = '#ef4444';
-                    element.style.backgroundColor = '#fef2f2';
-
-                    if (element.type === 'checkbox') {
-                        const parent = element.closest('.sfw-terms');
-                        if (parent) parent.style.border = '1px solid #ef4444';
-                    }
-
-                    const removeError = () => {
-                        element.classList.remove('sfw-error');
-                        element.style.borderColor = '';
-                        element.style.backgroundColor = '';
-                        if (element.type === 'checkbox') {
-                            const parent = element.closest('.sfw-terms');
-                            if (parent) parent.style.border = '';
-                        }
-                        element.removeEventListener('focus', removeError);
-                        element.removeEventListener('click', removeError);
-                    };
-
-                    element.addEventListener('focus', removeError, { once: true });
-                    element.addEventListener('click', removeError, { once: true });
-                },
-
-                selectIcon(iconValue) {
-                    this.settings.button.icon = iconValue;
                 },
 
                 // ============ Управление призами ============
