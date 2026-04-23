@@ -21,7 +21,7 @@ class SubscriptionService
     /**
      * Загружает фичи из активного плана или дает дефолты
      */
-    protected function loadFeatures(): array
+    public function loadFeatures(): array
     {
         $plan = $this->site->activeSubscription?->plan;
         return $plan ? $plan->features : [

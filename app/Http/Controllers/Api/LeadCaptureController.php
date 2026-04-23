@@ -13,6 +13,7 @@ use App\Services\Crm\Adapters\FortuneWheelAdapter;
 use App\Services\Crm\Adapters\InternalWidgetAdapter;
 use App\Services\Crm\Adapters\LidUpAdapter;
 use App\Services\Crm\Adapters\TildaAdapter;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -555,19 +556,37 @@ class LeadCaptureController extends Controller
      */
     protected function checkIsBlocked(int $siteId): bool
     {
-        $site = Site::where('is_active', 1)->findOrFail($siteId);
+        // 1. Находим сайт. Активность проверяем через scope или where.
+        $site = Site::findOrFail($siteId);
 
+        // 2. Используем сервис (он уже умеет парсить JSON и знает дефолты)
+        $subService = new \App\Services\SubscriptionService($site);
+        $features = $subService->loadFeatures();
+        // 3. Получаем подписку для определения временных рамок
         $subscription = $site->activeSubscription;
-        // Если подписки вообще нет — блокируем (или разрешаем мизерный лимит Free)
+        // Если подписки нет — применяем жесткий лимит Free (5 лидов за всё время)
+//*
         if (!$subscription) {
-            return $site->leads()->count() >= 5; // Например, только 5 бесплатных лидов на сайт навсегда
+            return $site->leads()->count() >= 5;
         }
-        $plan = $subscription->plan;
-        $limit = $plan->features['leads_limit'] ?? 0;
-        // Считаем лиды за период действия текущей подписки
+//*/
+        // 4. Берем лимит из JSON.
+        // Если в JSON "leads_limit" не задан, используем 0 (или другое безопасное число)
+        $limit = isset($features['leads_limit']) ? (int)$features['leads_limit'] : 0;
+
+        // 5. Проверка на "Безлимит" (если вы решите ставить -1 для бесконечности)
+        if ($limit === -1) {
+            return false;
+        }
+
+        // 6. Считаем лиды только за период действия текущей подписки
+        // Это важно: когда клиент продлевает тариф, счетчик для него "обнуляется"
         $currentLeadsCount = $site->leads()
             ->where('created_at', '>=', $subscription->starts_at)
             ->count();
+
+//        dd($currentLeadsCount,   $limit);
+
         return $currentLeadsCount >= $limit;
     }
 
