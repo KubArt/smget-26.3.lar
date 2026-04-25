@@ -46,6 +46,15 @@
                             @endif
                             <p>сделать проверку по расписанию</p>
                         </div>
+
+
+                        <a href="{{ route('cabinet.sites.metrics.index', $site) }}"
+                           class="btn btn-sm btn-alt-success"
+                           data-bs-toggle="tooltip"
+                           title="Метрики и аналитика">
+                            <i class="fa fa-chart-line"></i>
+                        </a>
+
                     </div>
                 </div>
 

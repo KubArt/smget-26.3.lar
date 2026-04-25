@@ -103,8 +103,20 @@ Route::prefix('billing')->name('billing.')->group(function () {
 });
 
 
-
-
+// Метрики сайта
+// В cabinet.php добавить
+Route::prefix('sites/{site}/metrics')->name('sites.metrics.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'index'])
+        ->name('index');
+    Route::get('{metricSlug}/config', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'configure'])
+        ->name('config');
+    Route::put('{metricSlug}', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'update'])
+        ->name('update');
+    Route::delete('{metricSlug}', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'destroy'])
+        ->name('destroy');
+    Route::post('{metricSlug}/test', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'test'])
+        ->name('test');
+});
 
 
 

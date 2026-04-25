@@ -211,6 +211,21 @@ class WidgetDeliveryController extends BaseCabinetController
         if ($type === 'view') {
             $widget->site->increment('total_widgets_show');
         }
+
+        /*
+        if ($result) {
+            (new \App\Metrics\MetricsManager())->execute(
+                $widget->site,
+                $data['event'],
+                [
+                    'client_id' => $data['ym_client_id'] ?? null,
+                    'widget_id' => $widget->id
+                ]
+            );
+        }
+        //*/
+
+
         return true;
     }
 
