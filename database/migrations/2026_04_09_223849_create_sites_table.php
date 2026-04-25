@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('email'); // smile-center.ru
             $table->uuid('api_key')->unique(); // Ключ для JS-виджета
             $table->boolean('is_active')->default(true);
+            //общее количество показов виджетов за отчетный период
+            $table->integer('total_widgets_show')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

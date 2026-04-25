@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Models\Site;
-use App\Models\Crm\Lead;
+use App\Services\Billing\PlanConfiguration;
 use Carbon\Carbon;
 
 class SubscriptionService
@@ -14,7 +14,6 @@ class SubscriptionService
     public function __construct(Site $site)
     {
         $this->site = $site;
-        // Загружаем лимиты один раз при инициализации
         $this->features = $this->loadFeatures();
     }
 
@@ -24,12 +23,28 @@ class SubscriptionService
     public function loadFeatures(): array
     {
         $plan = $this->site->activeSubscription?->plan;
-        return $plan ? $plan->features : [
-            'leads_limit' => 5,
-            'widgets_limit' => 1,
-            'allowed_widget_types' => ['simple_form'],
-            'hide_contacts' => true
-        ];
+        // Мержим дефолты с тем, что в базе, чтобы старые тарифы не ломались
+        // при добавлении новых фич в код
+        return array_replace_recursive(
+            PlanConfiguration::getDefaultLimit(),
+            $plan ? (array)$plan->features : []
+        );
+    }
+
+    /**
+    * Проверка доступа к конкретной фиче (например, 'telegram_notifications')
+    */
+    public function hasFeature(string $featureKey): bool
+    {
+        return $this->features[PlanConfiguration::FEATURES][$featureKey] ?? false;
+    }
+
+    /**
+     * Проверка доступности интеграции
+     */
+    public function canUseIntegration(string $serviceName): bool
+    {
+        return in_array($serviceName, $this->features[PlanConfiguration::INTEGRATIONS] ?? []);
     }
 
     /**
@@ -58,6 +73,18 @@ class SubscriptionService
     {
         $limit = $this->features['widgets_limit'] ?? 0;
         return $this->site->widgets()->count() < $limit;
+    }
+
+    /**
+     * Проверка количества показов видета на тарифе
+     *
+     */
+    public function canShowWidgets(): bool
+    {
+        $limit = $this->features['total_widgets_show'] ?? 0;
+        if ($limit === -1) return true;
+
+        return $this->site->total_impressions < $limit;
     }
 
     /**

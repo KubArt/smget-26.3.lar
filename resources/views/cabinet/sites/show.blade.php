@@ -57,89 +57,84 @@
 
                 <div class="block block-rounded">
                     <div class="block-header block-header-default">
-                        <h3 class="block-title">Лимиты тарифа: {{ $site->plan->name ?? 'Бесплатный' }}</h3>
+                        <h3 class="block-title">Управление тарифом</h3>
+                        <div class="block-options">
+                            @if($site->is_active)
+                                <span class="badge bg-success">Активен</span>
+                            @else
+                                <span class="badge bg-danger">Пауза</span>
+                            @endif
+                        </div>
                     </div>
                     <div class="block-content">
                         <div class="mb-4">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span class="fs-sm fw-semibold">Лиды (за месяц)</span>
-                                <span class="fs-sm text-muted">{{ $limits['leads']['current'] }} / {{ $limits['leads']['limit'] }}</span>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fs-sm fw-semibold text-uppercase text-muted">Лимит лидов</span>
+                                <span class="fs-sm fw-bold {{ $progressPercent >= 90 ? 'text-danger' : 'text-dark' }}">
+                                    {{ $leadsCount }} / {{ $isUnlimited ? '∞' : $leadsLimit }}
+                                </span>
                             </div>
-                            <div class="progress" style="height: 8px;">
-                                <div class="progress-bar {{ $limits['leads']['is_exceeded'] ? 'bg-danger' : 'bg-primary' }}"
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated {{ $progressPercent >= 90 ? 'bg-danger' : 'bg-primary' }}"
                                      role="progressbar"
-                                     style="width: {{ ($limits['leads']['current'] / $limits['leads']['limit']) * 100 }}%"></div>
+                                     style="width: {{ $isUnlimited ? 100 : $progressPercent }}%">
+                                </div>
                             </div>
+                            @if(!$isUnlimited && $leadsCount >= $leadsLimit)
+                                <small class="text-danger mt-1 d-block fw-medium">
+                                    <i class="fa fa-exclamation-triangle me-1"></i> Лимит исчерпан
+                                </small>
+                            @endif
                         </div>
-                    </div>
-                </div>
 
-                <div class="block block-rounded">
-                    <div class="block-header block-header-default">
-                        <h3 class="block-title">Информация</h3>
-                    </div>
-                    <div class="block-content">
-                        <table class="table table-borderless table-sm fs-sm">
+                        <table class="table table-borderless table-sm fs-sm mb-0">
                             <tbody>
                             <tr>
-                                <td>Статус:</td>
-                                <td class="text-end">
-                                    @if($site->is_active) <span class="text-success">Активен</span> @else <span class="text-danger">Пауза</span> @endif
+                                <td class="text-muted">Тариф:</td>
+                                <td class="text-end fw-bold text-primary">
+                                    {{ $site->plan->name ?? 'Бесплатный' }}
                                 </td>
                             </tr>
-
-                            {{-- Блок тарифа --}}
-                            <tr class="border-top">
-                                <td class="pt-2">Тариф:</td>
-                                <td class="text-end pt-2">
-                                    @if($site->activeSubscription)
-                                        <span class="fw-bold text-primary">{{ $site->activeSubscription->plan->name }}</span>
-                                    @else
-                                        <span class="text-muted">Не оплачен</span>
-                                    @endif
-                                </td>
-                            </tr>
-
-                            @if($site->activeSubscription)
+                            @if($activeSub)
                                 <tr>
-                                    <td>Истекает:</td>
-                                    <td class="text-end text-danger fw-medium">
-                                        {{ $site->activeSubscription->expires_at->format('d.m.Y') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" class="text-center pt-2">
-                                        <a class="btn btn-sm btn-alt-primary w-100" href="{{ route('cabinet.billing.plans.index') }}">
-                                            Продлить или сменить
-                                        </a>
-                                    </td>
-                                </tr>
-                            @else
-                                <tr>
-                                    <td colspan="2" class="text-center pt-2">
-                                        <a class="btn btn-sm btn-primary w-100" href="{{ route('cabinet.billing.plans.index') }}">
-                                            <i class="fa fa-shopping-cart me-1"></i> Купить тариф
-                                        </a>
+                                    <td class="text-muted">Истекает:</td>
+                                    <td class="text-end {{ $isExpiredSoon ? 'text-danger fw-bold' : '' }}">
+                                        {{ $activeSub->expires_at->format('d.m.Y') }}
                                     </td>
                                 </tr>
                             @endif
 
-                            <tr class="border-top">
-                                <td class="pt-2">Добавлен:</td>
-                                <td class="text-end pt-2">{{ $site->created_at->format('d.m.Y') }}</td>
-                            </tr>
+                            @if($site->plan && $site->plan->features_description)
+                                @foreach($site->plan->features_description as $label => $value)
+                                    <tr class="border-top">
+                                        <td class="text-muted pt-2">{{ $label }}:</td>
+                                        <td class="text-end pt-2 text-dark">{{ $value }}</td>
+                                    </tr>
+                                @endforeach
+                            @endif
                             </tbody>
                         </table>
+
+                        @if($features['hide_contacts'] ?? false)
+                            <div class="alert alert-soft-warning p-2 mt-3 mb-0">
+                                <p class="fs-xs mb-0 text-center">
+                                    <i class="fa fa-lock me-1"></i> Контакты скрыты (нужен Medium+)
+                                </p>
+                            </div>
+                        @endif
                     </div>
 
-                    {{-- Ссылка на описание тарифов --}}
-                    <div class="block-content block-content-full bg-body-light fs-xs text-center">
-                        <a href="{{ route('cabinet.billing.plans.index') }}" class="fw-medium">
-                            <i class="fa fa-info-circle me-1"></i> Подробнее о возможностях тарифов
+                    <div class="block-content block-content-full">
+                        <a href="{{ route('cabinet.billing.plans.index') }}" class="btn btn-sm btn-alt-primary w-100">
+                            <i class="fa fa-sync-alt opacity-50 me-1"></i>
+                            {{ $activeSub ? 'Улучшить тариф' : 'Активировать тариф' }}
                         </a>
                     </div>
-                </div>
 
+                    <div class="block-content block-content-full bg-body-light py-2 text-center">
+                        <span class="fs-xs text-muted">ID: {{ $site->id }} | Создан: {{ $site->created_at->format('d.m.Y') }}</span>
+                    </div>
+                </div>
 
                 <div class="block block-rounded">
                     <div class="block-content block-content-full d-flex align-items-center justify-content-between">

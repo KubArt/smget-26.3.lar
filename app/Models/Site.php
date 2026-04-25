@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 class Site extends Model
 {
     use Notifiable, SoftDeletes;
-    protected $fillable = ['name', 'domain', 'email', 'api_key', 'is_active', 'is_verified', 'verified_at'];
+    protected $fillable = ['name', 'domain', 'email', 'api_key', 'is_active', 'is_verified', 'verified_at', 'total_widgets_show'];
 
     protected $casts = [
         'is_active' => 'boolean',

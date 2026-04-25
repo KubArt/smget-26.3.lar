@@ -11,42 +11,45 @@
 
         <div class="row">
             @foreach($plans as $plan)
-                @php $features = $plan->features @endphp
-                <div class="col-md-6 col-xl-3">
-                    <div class="block block-rounded block-link-pop text-center d-flex flex-column h-100">
+                <div class="col-md-6 col-xl-4"> <div class="block block-rounded block-link-pop text-center d-flex flex-column h-100 {{ $plan->price > 0 ? 'border-top border-primary border-4' : '' }}">
                         <div class="block-header">
-                            <h3 class="block-title text-uppercase">{{ $plan->name }}</h3>
+                            <h3 class="block-title text-uppercase fw-bold">{{ $plan->name }}</h3>
                         </div>
                         <div class="block-content bg-body-light">
                             <div class="py-3">
                                 <p class="display-4 fw-bold mb-0">{{ number_format($plan->price, 0, '.', ' ') }} ₽</p>
-                                <p class="text-muted">на {{ $plan->duration_days }} дней</p>
+                                <p class="text-muted fs-sm">на {{ $plan->duration_days }} дней</p>
                             </div>
                         </div>
                         <div class="block-content flex-grow-1">
-                            <div class="fs-sm py-2">
-                                <p>{{ $plan->description }}</p>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2">
-                                        <i class="fa fa-check text-success me-1"></i>
-                                        Виджетов: <strong>{{ $features['widgets_count'] == -1 ? 'Безлимитно' : $features['widgets_count'] }}</strong>
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="fa fa-check text-success me-1"></i>
-                                        Поддержка: <strong>{{ $features['support'] }}</strong>
-                                    </li>
-                                    @if(!($features['branding'] ?? true))
-                                        <li class="mb-2">
-                                            <i class="fa fa-check text-success me-1"></i> Без копирайта сервиса
+                            <div class="py-2">
+                                <p class="fs-sm text-muted mb-3">{{ $plan->description }}</p>
+
+                                <ul class="list-unstyled text-start d-inline-block">
+                                    {{-- Вывод человекопонятных описаний из БД --}}
+                                    @if($plan->features_description)
+                                        @foreach($plan->features_description as $label => $value)
+                                            <li class="mb-2 fs-sm">
+                                                <i class="fa fa-check text-success me-2"></i>
+                                                <strong>{{ $label }}:</strong> {{ $value }}
+                                            </li>
+                                        @endforeach
+                                    @endif
+
+                                    {{-- Логические метки (опционально) --}}
+                                    @if($plan->features['telegram_bot'] ?? false)
+                                        <li class="mb-2 fs-sm">
+                                            <i class="fa fa-robot text-primary me-2"></i> Telegram Бот включен
                                         </li>
                                     @endif
                                 </ul>
                             </div>
                         </div>
                         <div class="block-content block-content-full bg-body-light">
-                            <button type="button" class="btn btn-primary w-100"
-                                    onclick="selectPlan({{ $plan->id }}, '{{ $plan->name }}', {{ $plan->price }})">
-                                Выбрать
+                            <button type="button"
+                                    class="btn btn-primary w-100"
+                                    onclick="openBuyModal({{ $plan->id }}, '{{ $plan->name }}', {{ $plan->price }})">
+                                Выбрать тариф
                             </button>
                         </div>
                     </div>

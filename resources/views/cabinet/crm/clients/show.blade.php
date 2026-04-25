@@ -1,9 +1,7 @@
 @extends('cabinet.layouts.cabinet')
 
 @section('content')
-    @php
-        $isExceeded = app(App\Services\SubscriptionService::class)->isLeadsLimitExceeded($client->site);
-    @endphp
+
     <div class="content">
         <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center py-2 text-center text-md-start">
             <div class="flex-grow-1">

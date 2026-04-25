@@ -27,16 +27,37 @@ class SiteController extends BaseCabinetController
         return view('cabinet.sites.index', compact('sites', 'workspace'));
     }
 
-
     public function show(Site $site)
     {
         $this->authorizeAccess($site);
 
-        // Подгружаем данные подписки для детальной страницы
         $site->load(['activeSubscription.plan']);
-        $limits = (new SubscriptionService($site))->getLimitsSummary();
 
-        return view('cabinet.sites.show', compact('site', 'limits'));
+        $subService = new SubscriptionService($site);
+        $features = $subService->loadFeatures();
+
+        // Получаем статус лидов (используем метод сервиса или считаем здесь)
+        $leadsCount = $site->leads()->count();
+        $leadsLimit = $features['leads_limit'] ?? 0;
+        $isUnlimited = ($leadsLimit == -1);
+
+        $progressPercent = !$isUnlimited && $leadsLimit > 0
+            ? min(($leadsCount / $leadsLimit) * 100, 100)
+            : 0;
+        $activeSub = $site->activeSubscription;
+        $isExpiredSoon = $activeSub && $activeSub->expires_at->isFuture() && $activeSub->expires_at->diffInDays(now()) <= 3;
+
+        return view('cabinet.sites.show', compact(
+            'site',
+            'features',
+            'leadsCount',
+            'leadsLimit',
+            'isUnlimited',
+            'progressPercent',
+            'activeSub',
+            'isExpiredSoon'
+        ));
+
     }
 
     public function edit(Site $site)

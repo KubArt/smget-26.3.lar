@@ -6,39 +6,57 @@ namespace App\Http\Controllers\Widgets;
 use App\Http\Controllers\Cabinet\BaseCabinetController;
 use App\Http\Controllers\Widgets\Services\TargetTimeManager;
 use App\Models\Site;
+use App\Models\Widget;
 use App\Models\Widgets\WidgetStatistic;
+use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 
 
 class WidgetDeliveryController extends BaseCabinetController
 {
-
     public function getPayload(Request $request)
     {
-        $site = Site::where('api_key', $request->get('key'))->where('is_verified', true)->first();
+        // 1. Загружаем сайт с планом и фичами
+        $site = Site::where('api_key', $request->get('key'))
+            ->where('is_verified', true)
+            ->with('activeSubscription.plan')
+            ->first();
 
         if (!$site) return response()->json(['error' => 'Invalid key'], 403);
+
+        // 2. Получаем лимиты
+        $features = $site->plan_features ?? (new SubscriptionService($site))->loadFeatures();
+        $limit = $features['shows_limit'];
+
+        // Проверяем, исчерпан ли общий лимит показов
+        $isLimitReached = ($limit !== -1 && $site->total_widgets_show >= $limit);
 
         $currentPath = $request->get('path', '/');
         $currentUtm = array_filter($request->only(['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']));
 
         $activeWidgets = $site->widgets()
             ->where('is_active', true)
+            ->with('widgetType') // Загружаем тип, чтобы проверить категорию
             ->get()
-            ->filter(function ($widget) use ($currentPath, $currentUtm, $request) {
+            ->filter(function ($widget) use ($currentPath, $currentUtm, $request, $isLimitReached) {
+                // ПРОВЕРКА ЛИМИТА:
+                // Если лимит превышен И это НЕ lead_generation — скрываем виджет
+                if ($isLimitReached && $widget->widgetType->category !== 'lead_generation') {
+                    return false;
+                }
+
+                // Стандартные проверки (таргетинг по URL, UTM, времени и т.д.)
                 return $this->shouldShowWidget($widget, $currentPath, $currentUtm, $request);
             })
             ->map(function ($widget) use ($request, $currentPath, $currentUtm) {
-                //$this->logEvent($widget->id, 'view', $request, $currentPath, $currentUtm);
-
-                // Получаем настройки и выбранный скин
-                $settings = $widget->settings;
                 $slug = $widget->widgetType->slug;
+                $settings = $widget->settings;
                 $skin = $settings['template'] ?? 'default';
 
                 return [
                     'id'       => $widget->id,
                     'type'     => $slug,
+                    'category' => $widget->widgetType->category, // Полезно для фронтенда
                     'settings' => $settings ?? [],
                     'behavior' => $widget->behavior ?? [],
                     'assets'   => $this->getWidgetAssets($slug, $skin)
@@ -142,15 +160,39 @@ class WidgetDeliveryController extends BaseCabinetController
 
     public function track(Request $request)
     {
-        $data = json_decode($request->getContent(), true);
-        if (isset($data['widget_id']) && $data['event'] === 'click') {
-            $this->logEvent($data['widget_id'], 'click', $request, $data['url'] ?? '/');
+        try {
+            $data = json_decode($request->getContent(), true);
+            // $data = $request->json()->all();
+            $widgetId = $data['widget_id'] ?? null;
+
+            if (!$widgetId) {
+                return response()->json(['status' => 'error', 'message' => 'Missing widget_id'], 400);
+            }
+            $type = $data['event'] ?? 'view';
+            $path = $data['url'] ?? '/';
+            $utm = $data['utm'] ?? [];
+            // Вызываем логику проверки и записи
+            $result = $this->logEvent($widgetId, $type, $request, $path, $utm);
+            if (!$result) {
+                return response()->json(['status' => 'error', 'message' => 'Widget inactive or limit reached'], 403);
+            }
+            return response()->json(['status' => 'ok']);
+
+        } catch (\Exception $e) {
+            // Логируем системную ошибку для себя, но фронтенду отдаем лаконичный ответ
+            \Log::error("Widget Track Error: " . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'System error'], 500);
         }
-        return response()->json(['status' => 'ok']);
     }
 
     private function logEvent($widgetId, $type, Request $request, $path, $utm = [])
     {
+        $widget = Widget::with(['widgetType', 'site'])
+            ->where('is_active', true)
+            ->find($widgetId);
+        if (!$widget || !$widget->site || !$widget->site->is_active) {
+            return null;
+        }
         WidgetStatistic::create([
             'widget_id'    => $widgetId,
             'event_type'   => $type,
@@ -166,6 +208,10 @@ class WidgetDeliveryController extends BaseCabinetController
             'query'        => $request->getQueryString(),
             'session_id'   => $request->get('session_id') ?? session()->getId(),
         ]);
+        if ($type === 'view') {
+            $widget->site->increment('total_widgets_show');
+        }
+        return true;
     }
 
 }

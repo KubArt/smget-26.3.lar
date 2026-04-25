@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Plan extends Model
 {
-    protected $fillable = ['slug', 'name', 'description', 'price', 'duration_days', 'features', 'is_active'];
+    protected $fillable = ['slug', 'name', 'description', 'price', 'duration_days', 'features', 'features_description', 'is_active'];
     protected $casts =
         [
-            'features' => 'array'
+            'features' => 'array',
+            'features_description' => 'array'
         ];
 
     // Связь с подписками

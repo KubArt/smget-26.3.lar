@@ -11,9 +11,12 @@ class PlanController extends BaseCabinetController
 {
     public function index()
     {
+        // Получаем активные планы
         $plans = Plan::where('is_active', true)->orderBy('price', 'asc')->get();
-        // Подгружаем только те сайты, которые принадлежат юзеру
-        $sites = auth()->user()->sites;
+
+        // Получаем сайты пользователя текущего воркспейса с их планами
+        $workspace = auth()->user()->currentWorkspace();
+        $sites = $workspace->sites()->with('activeSubscription.plan')->get();
 
         return view('cabinet.billing.plans', compact('plans', 'sites'));
     }

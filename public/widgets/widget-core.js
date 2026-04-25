@@ -346,17 +346,16 @@ class SmWidget {
 (function() {
     const payload = window.SmGet;
     if (!payload) return;
-
     window.SmGet.trackEvent = function(id, event) {
-        try {
-            navigator.sendBeacon('http://smget-26.3.lar/api/v1/track', JSON.stringify({
-                widget_id: id,
-                event: event,
-                url: window.location.pathname
-            }));
-        } catch(e) {
-            console.error('Track error:', e);
-        }
+        const url = 'http://smget-26.3.lar/api/v1/track';
+        const data = JSON.stringify({
+            widget_id: id,
+            event: event,
+            url: window.location.pathname
+        });
+
+        const blob = new Blob([data], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
     };
 
     // Функция загрузки скрипта виджета - ИСПРАВЛЕНО
@@ -369,7 +368,6 @@ class SmWidget {
                     resolve();
                     return;
                 }
-
                 // Выполняем JS код виджета
                 const scriptFunction = new Function(widget.assets.js);
                 scriptFunction();

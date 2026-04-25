@@ -20,6 +20,7 @@ return new class extends Migration
             $table->integer('duration_days')->default(30);
             // json
             $table->text('features')->nullable(); // Храним лимиты: ['widgets_count' => 5, 'ads_disabled' => true]
+            $table->text('features_description')->nullable(); // Лимиты по русски
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
