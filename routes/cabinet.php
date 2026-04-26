@@ -116,8 +116,31 @@ Route::prefix('sites/{site}/metrics')->name('sites.metrics.')->group(function ()
         ->name('destroy');
     Route::post('{metricSlug}/test', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'test'])
         ->name('test');
-});
 
+    // 👇 НОВЫЕ OAuth маршруты
+
+
+    // Внутри группы Route::prefix('sites/{site}/metrics')->name('sites.metrics.')
+    Route::get('{metricSlug}/redirect', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'redirectToProvider'])->name('redirect');
+    // ВАЖНО: Колбэк должен быть ВНЕ группы с {site}, так как Яндекс не знает ID сайта в URL
+    // Мы достанем ID сайта из сессии
+    Route::get('/oauth/callback', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'handleProviderCallback'])->name('callback');
+    Route::get('{metricSlug}/select-counter', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'selectCounter'])->name('select-counter');
+    Route::post('{metricSlug}/save-counter', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'saveCounter'])->name('save-counter');
+    Route::post('{metricSlug}/final-sync', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'finalSync'])->name('final-sync');
+    //
+
+    /*
+    Route::get('{metricSlug}/redirect', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'redirectToProvider'])->name('redirect');
+    Route::get('{metricSlug}/callback', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'handleProviderCallback'])->name('callback');
+    // Выбор счетчика (если их несколько)
+    Route::get('{metricSlug}/select-counter', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'selectCounter'])
+        ->name('select-counter');
+    Route::post('{metricSlug}/save-counter', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'saveCounter'])
+        ->name('save-counter');
+    //*/
+
+});
 
 
 /* TODO:

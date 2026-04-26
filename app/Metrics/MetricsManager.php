@@ -95,24 +95,65 @@ class MetricsManager
         return null;
     }
 
-    protected function extractGoalsFromSite(Site $site): array
+    /**
+     * Получает список всех потенциальных целей для конкретной метрики
+     */
+    public function getPendingGoals(Site $site): array
     {
-        $goals = [];
+        $groupedGoals = [];
 
-        // Извлекаем цели из активных виджетов
-        foreach ($site->widgets()->where('is_active', true)->get() as $widget) {
-            if (isset($widget->settings['goals']) && is_array($widget->settings['goals'])) {
-                $goals = array_merge($goals, $widget->settings['goals']);
+        foreach ($site->widgets()->where('is_active', true)->with('widgetType')->get() as $widget) {
+            $widgetConfig = config("widgets.{$widget->widgetType->slug}");
+            $availableGoals = $widgetConfig['available_goals'] ?? [];
+
+            /***
+             * TODO: можно сделать уникализацию целей отдельно по каждому виджет или по типу добавив id
+             */
+
+            $widgetGoals = [];
+            foreach ($availableGoals as $goal) {
+                $widgetGoals[] = [
+                    'display_name' => $goal['name'],
+                    'synonym' => $goal['synonym'] ?? '',
+                    'event_key' => $goal['event'], // . "_" . $widget->id,
+                    'type_label' => $widget->widgetType->name // Например: "LidUp Popup"
+                ];
             }
 
-            // Стандартные цели для виджета
-            $goals[] = [
-                'name' => $widget->name,
-                'event' => "widget_{$widget->type}_submit",
-                'conditions' => ['widget_id' => $widget->id]
+            $groupedGoals[] = [
+                'widget_name' => $widget->name,
+                'widget_type' => $widget->widgetType->slug,
+                'goals' => $widgetGoals
             ];
         }
 
-        return $goals;
+        return $groupedGoals;
     }
+
+    /**
+     * Финальная синхронизация (вызывается после подтверждения пользователем)
+     */
+    public function syncAllWidgetsWithMetric(Site $site, SiteMetric $siteMetric): void
+    {
+        $driver = $this->resolveDriver($siteMetric);
+        if (!$driver) return;
+
+        $flatGoals = [];
+        $grouped = $this->getPendingGoals($site);
+
+        foreach ($grouped as $group) {
+            foreach ($group['goals'] as $goal) {
+                $flatGoals[] = [
+                    'name' => $group['widget_name'] . ": " . $goal['display_name'],
+                    'event' => $goal['event_key'],
+                    'type' => 'action' // Тип для Яндекс.Метрики
+                ];
+            }
+        }
+
+        if (method_exists($driver, 'syncGoals')) {
+            $driver->syncGoals($flatGoals);
+        }
+    }
+
 }

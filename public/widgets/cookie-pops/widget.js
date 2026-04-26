@@ -93,7 +93,7 @@ window.SmWidget_cookie_pops = class extends SmWidget {
             // Клик по кнопке "Принять" (используем matches для проверки множества классов)
             if (e.target.matches('.sp-glass-btn, [class*="-btn-accept"]')) {
                 e.preventDefault();
-                this.track('click');
+                this.track('cookie_accept');
                 localStorage.setItem(`sm_widget_${this.id}_accepted`, 'true');
                 this.container.remove();
             }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('widget_statistics', function (Blueprint $table) {
             $table->id();
             $table->foreignId('widget_id')->constrained()->onDelete('cascade');
-            $table->enum('event_type', ['view', 'click']);
+            $table->string('event_type')->nullable();
             $table->string('url')->nullable();
             $table->string('utm_source')->nullable();
             $table->string('utm_campaign')->nullable();

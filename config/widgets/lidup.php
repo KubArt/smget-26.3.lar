@@ -8,6 +8,25 @@ return [
     'description' => 'Всплывающее окно для сбора лидов с таймером, формой и анимациями',
     'version' => '1.0.0',
 
+    // Добавляем список возможных целей для этого типа виджета
+    'available_goals' => [
+        [
+            'name' => 'LidUp: Открытие окна',
+            'event' => 'lidup_open',
+            'type' => 'action'
+        ],
+        [
+            'name' => 'LidUp: Успешная отправка формы',
+            'event' => 'lidup_submit',
+            'type' => 'action'
+        ],
+        [
+            'name' => 'LidUp: Клик по кнопке закрытия',
+            'event' => 'lidup_close',
+            'type' => 'action'
+        ],
+    ],
+
     'default_values' => [
             'settings' => [
                 // Корень settings (согласно твоим x-model)

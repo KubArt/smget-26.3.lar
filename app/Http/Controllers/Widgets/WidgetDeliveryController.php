@@ -176,6 +176,10 @@ class WidgetDeliveryController extends BaseCabinetController
             if (!$result) {
                 return response()->json(['status' => 'error', 'message' => 'Widget inactive or limit reached'], 403);
             }
+
+            // 3. ОТПРАВКА В МЕТРИКУ (PHP-часть)
+
+
             return response()->json(['status' => 'ok']);
 
         } catch (\Exception $e) {

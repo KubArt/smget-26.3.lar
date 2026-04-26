@@ -346,7 +346,7 @@ class SmWidget {
 (function() {
     const payload = window.SmGet;
     if (!payload) return;
-    window.SmGet.trackEvent = function(id, event) {
+    window.SmGet.trackEvent = function(id, event){
         const url = 'http://smget-26.3.lar/api/v1/track';
         const data = JSON.stringify({
             widget_id: id,
@@ -357,7 +357,19 @@ class SmWidget {
         const blob = new Blob([data], { type: 'application/json' });
         navigator.sendBeacon(url, blob);
     };
-
+    /*
+    function sendJsGoal(targetName) {
+        // Пытаемся найти функцию ym (Яндекс)
+        if (typeof ym !== 'undefined') {
+            // Нам нужно знать ID счетчика. Его можно либо выцепить из глобальных объектов,
+            // либо передать из PHP при загрузке виджета (что правильнее).
+            const counterId = window.SmGet.metrics?.yandex_id;
+            if (counterId) {
+                ym(counterId, 'reachGoal', targetName);
+            }
+        }
+    }
+    //*/
     // Функция загрузки скрипта виджета - ИСПРАВЛЕНО
     function loadWidgetScript(widget) {
         return new Promise((resolve, reject) => {

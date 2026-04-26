@@ -4,6 +4,11 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 
+Route::get('/oauth/yandex/callback', [\App\Http\Controllers\Cabinet\SiteMetricController::class, 'handleProviderCallback'])
+    ->name('oauth.callback');
+//Route::get('/oauth/yandex/callback', [App\Http\Controllers\OAuth\YandexController::class, 'callback'])
+//    ->name('oauth.yandex.callback');
+
 /*
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -21,3 +26,4 @@ require __DIR__.'/auth.php';
 Route::get('/', function () {
     return view('welcome');
 });
+

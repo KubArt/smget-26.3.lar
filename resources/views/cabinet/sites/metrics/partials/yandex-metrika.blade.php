@@ -13,7 +13,7 @@
            value="{{ $settings['token'] ?? '' }}"
            placeholder="OAuth-токен">
     <div class="form-text">
-        <a href="https://oauth.yandex.ru/authorize?response_type=token&client_id=..." target="_blank">
+        <a href="https://oauth.yandex.ru/authorize?response_type=token&client_id=ceed5283384b4546990f429e74bd6bb5" target="_blank">
             Получить токен
         </a>
     </div>

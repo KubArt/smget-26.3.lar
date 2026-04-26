@@ -8,6 +8,13 @@ return [
     'category' => 'informational',
     'version' => '2.1.0',
 
+    'available_goals' => [
+        [
+            'name' => 'Cookie: Принятие условий',
+            'event' => 'cookie_accept',
+            'type' => 'action'
+        ],
+    ],
     // Эталонный объект для сохранения в БД (SiteWidget -> settings / behavior)
     'default_values' => [
         'settings' => [
